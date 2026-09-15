@@ -1,0 +1,200 @@
+/* =========================================== */
+/* 1. DESKTOP & LARGE DEVICES (min-width: 992px) */
+/* =========================================== */
+@media (min-width: 992px) {
+    /* Dropdown Hover Effects */
+    .top-bar .dropdown:hover .dropdown-menu {
+        display: block;
+        margin-top: 0;
+    }
+
+    .top-bar .dropdown-menu {
+        animation: fadeIn 0.3s ease;
+    }
+
+    .navbar .nav-item.dropdown:hover .dropdown-menu {
+        display: block;
+        margin-top: 0;
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
+        transition: all 0.3s ease;
+    }
+
+    .navbar .dropdown-menu {
+        display: block;
+        opacity: 0;
+        visibility: hidden;
+        transform: translateY(10px);
+        transition: all 0.3s ease;
+        border-radius: 4px;
+        padding: 15px 0;
+    }
+
+    /* Content Alignment */
+    .flex-lg-row-reverse .content {
+        text-align: right;
+    }
+
+    .active-orange {
+        color: var(--primary-color) !important;
+    }
+}
+
+/* =========================================== */
+/* 2. TABLET & MEDIUM DEVICES (max-width: 991px) */
+/* =========================================== */
+@media (max-width: 991px) {
+    .home-navigation{
+        top: 0;
+    }
+    .main-navigation {
+        top: 0;
+        background-color: var(--nav-primary) !important;
+        padding: 20px 0;
+    }
+
+    .main-navigation .navbar-brand img {
+        height: 55px;
+    }
+
+    #navbarNav {
+        display: none !important;
+    }
+
+    /* Typography & Spacing */
+    .hero-slider-title {
+        font-size: 48px;
+    }
+
+    .hero-slide-item {
+        min-height: 500px;
+        height: auto;
+        padding: 100px 0;
+    }
+
+    .main-title {
+        font-size: 30px;
+        line-height: 42px;
+    }
+
+    .pt--200 {
+        padding-top: 150px !important;
+    }
+
+    .breadcrumb-content-main {
+        padding-top: 4rem;
+    }
+
+    /* Components */
+    .hero-slider.owl-carousel .owl-dots {
+        display: none !important;
+    }
+
+    .contact-map iframe {
+        height: 350px;
+    }
+
+    .footer-cta-area {
+        text-align: center;
+    }
+}
+
+/* =========================================== */
+/* 3. MOBILE LANDSCAPE (max-width: 768px/767px)  */
+/* =========================================== */
+@media (max-width: 768px) {
+    .tmp-breadcrumb-area {
+        padding: 80px 0;
+    }
+
+    .tmp-breadcrumb-area .title {
+        font-size: 2.5rem;
+    }
+
+    .slider-container-relative {
+        padding: 0 15px;
+    }
+
+    .testimonial-slider-3.owl-carousel .owl-nav {
+        display: none;
+    }
+
+    .service-details-section .right-content-area .image-section {
+        height: 300px;
+        margin: 0 10px;
+    }
+
+    .team-card-v2 {
+        width: 100%;
+    }
+}
+
+@media (max-width: 767px) {
+    .hero-slider-title {
+        font-size: 36px;
+        line-height: 1.1;
+    }
+
+    .hero-slider-subtitle,
+    .hero-slide-paragraph {
+        font-size: 14px;
+    }
+
+    .hero-slide-paragraph {
+        line-height: 1.6;
+        margin-bottom: 25px;
+    }
+
+    /* Owl Carousel Dots Customization */
+    .hero-slider.owl-carousel .owl-dots {
+        right: 15px !important;
+        gap: 10px !important;
+        display: flex !important; /* Overriding previous display:none if needed */
+    }
+
+    .hero-slider.owl-carousel .owl-dot {
+        width: 35px !important;
+        height: 35px !important;
+    }
+
+    .hero-slider.owl-carousel .owl-dot::before {
+        font-size: 14px;
+    }
+
+    .banner-five-main-wrapper {
+        height: auto;
+        min-height: 550px;
+    }
+}
+
+/* =========================================== */
+/* 4. SMALL MOBILE (max-width: 480px)           */
+/* =========================================== */
+@media (max-width: 480px) {
+    .hero-slider-title {
+        font-size: 28px;
+    }
+
+    .primary-btns .btn-text {
+        font-size: 14px;
+    }
+}
+
+/* =========================================== */
+/* 5. GLOBAL CLASSES & ANIMATIONS              */
+/* =========================================== */
+.main-navigation.sticky-nav {
+    top: 0 !important;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

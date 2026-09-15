@@ -1,0 +1,642 @@
+<?php
+
+namespace App\Http\Controllers\Front;
+
+use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Auth;
+use App\Mail\Websitemail;
+use App\Models\User;
+use App\Models\Admin;
+use App\Models\Slider;
+use App\Models\Photo;
+use App\Models\Faq;
+use App\Models\AboutItem;
+use App\Models\Event;
+use App\Models\EventFaq;
+use App\Models\Member;
+use App\Models\MemberAward;
+use App\Models\Post;
+use App\Models\PostCategory;
+use App\Models\Comment;
+use App\Models\Reply;
+use App\Models\PageHomeItem;
+use App\Models\PageAboutItem;
+use App\Models\PageEventItem;
+use App\Models\PageBlogItem;
+use App\Models\PageTeamItem;
+use App\Models\PageGalleryItem;
+use App\Models\PageFaqItem;
+use App\Models\PageLoginItem;
+use App\Models\PageTermsItem;
+use App\Models\PagePrivacyItem;
+use App\Models\PageContactItem;
+use App\Models\PageDonateItem;
+use App\Models\Donation;
+use App\Models\Setting;
+use App\Models\Subscriber;
+use App\Models\CustomPage;
+use App\Models\Publication;
+use App\Models\PublicationCategory;
+use Illuminate\Support\Facades\Validator;
+use Srmklive\PayPal\Services\PayPal as PayPalClient;
+
+class FrontController extends Controller
+{
+    public function switch_lang($locale)
+    {
+        if (in_array($locale, ['en', 'fa'])) {
+            session()->put('site_lang', $locale);
+        }
+        return redirect()->back();
+    }
+
+    public function home()
+    {
+        $sliders = Slider::orderBy('id','asc')->get();
+        $about_item = AboutItem::where('id',1)->first();
+        $events = Event::where('show_on_home','Yes')->orderBy('event_date','asc')->get();
+        $members = Member::where('show_on_home','Yes')->get();
+        $posts = Post::where('show_on_home','Yes')->orderBy('id','desc')->take(3)->get();
+        $photos = Photo::orderBy('id','desc')->take(4)->get();
+        $publications = Publication::where('status','Show')->orderBy('published_date','desc')->take(3)->get();
+        $page_data = PageHomeItem::where('id',1)->first();
+        return view('front.home', compact('sliders', 'about_item', 'events', 'members', 'posts', 'photos', 'publications', 'page_data'));
+    }
+
+    public function publications(Request $request)
+    {
+        $publication_categories = PublicationCategory::orderBy('name','asc')->get();
+
+        $query = Publication::where('status','Show')->orderBy('published_date','desc');
+        if ($request->category) {
+            $category = PublicationCategory::where('slug', $request->category)->first();
+            if ($category) {
+                $query->where('publication_category_id', $category->id);
+            }
+        }
+        $publications = $query->paginate(8)->withQueryString();
+
+        return view('front.publications', compact('publications', 'publication_categories'));
+    }
+
+    public function about()
+    {
+        $about_item = AboutItem::where('id',1)->first();
+        $page_data = PageAboutItem::where('id',1)->first();
+        return view('front.about', compact('about_item', 'page_data'));
+    }
+
+    public function login()
+    {
+        if(Auth::guard('web')->check()) {
+            return redirect()->route('dashboard');
+        }
+        $page_data = PageLoginItem::where('id',1)->first();
+        return view('front.login', compact('page_data'));
+    }
+
+    public function login_submit(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email',
+            'password' => 'required',
+        ]);
+
+        // Check if email and password are correct
+        $user = User::where('email',$request->email)->where('email_verified_at','!=',null)->first();
+        if(!$user) {
+            return redirect()->route('login')->with('error','The information you entered is incorrect! Please try again!');
+        }
+
+        $check = $request->all();
+        $data = [
+            'email' => $check['email'],
+            'password' => $check['password'],
+        ];
+
+        if(Auth::guard('web')->attempt($data)) {
+            return redirect()->route('dashboard')->with('success','You are logged in successfully!');
+        } else {
+            return redirect()->route('login')->with('error','The information you entered is incorrect! Please try again!');
+        }
+    }
+
+    public function register()
+    {
+        if(Auth::guard('web')->check()) {
+            return redirect()->route('dashboard');
+        }
+        $page_data = PageLoginItem::where('id',1)->first();
+        return view('front.register', compact('page_data'));
+    }
+
+    public function register_submit(Request $request)
+    {
+        $request->validate([
+            'name' => 'required',
+            'email' => 'required|email|unique:users',
+            'password' => 'required',
+            'confirm_password' => 'required|same:password',
+        ]);
+
+        $user = new User();
+        $user->name = $request->name;
+        $user->email = $request->email;
+        $user->password = Hash::make($request->password);
+        $token = hash('sha256',time());
+        $user->remember_token = $token;
+        $user->save();
+
+        $verification_link = url('register_verify/'.$token.'/'.$request->email);
+        $subject = "Registration Verification";
+        $message = "To complete registration, please click on the link below:<br>";
+        $message .= "<a href='".$verification_link."'>".$verification_link."</a>";
+
+        \Mail::to($request->email)->send(new Websitemail($subject,$message));
+
+        return redirect()->back()->with('success','Your registration is completed. Please check your email for verification. If you do not find the email in your inbox, please check your spam folder.');
+    }
+
+    public function register_verify($token,$email)
+    {
+        $user = User::where('remember_token',$token)->where('email',$email)->first();
+        if(!$user) {
+            return redirect()->route('login');
+        }
+        $user->email_verified_at = now();
+        $user->remember_token = '';
+        $user->save();
+
+        return redirect()->route('login')->with('success', 'Your email is verified. You can login now.');
+    }
+
+    public function forget_password()
+    {
+        if(Auth::guard('web')->check()) {
+            return redirect()->route('dashboard');
+        }
+        $page_data = PageLoginItem::where('id',1)->first();
+        return view('front.forget-password', compact('page_data'));
+    }
+
+    public function forget_password_submit(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email',
+        ]);
+
+        $user = User::where('email',$request->email)->first();
+        if(!$user) {
+            return redirect()->back()->with('error','Email is not found');
+        }
+
+        $token = hash('sha256',time());
+        $user->remember_token = $token;
+        $user->update();
+
+        $reset_link = url('reset-password/'.$token.'/'.$request->email);
+        $subject = "Password Reset";
+        $message = "To reset password, please click on the link below:<br>";
+        $message .= "<a href='".$reset_link."'>".$reset_link."</a>";
+
+        \Mail::to($request->email)->send(new Websitemail($subject,$message));
+
+        return redirect()->back()->with('success','We have sent a password reset link to your email. Please check your email. If you do not find the email in your inbox, please check your spam folder.');
+    }
+
+    public function reset_password($token,$email)
+    {
+        $user = User::where('email',$email)->where('remember_token',$token)->first();
+        if(!$user) {
+            return redirect()->route('login')->with('error','Token or email is not correct');
+        }
+        $page_data = PageLoginItem::where('id',1)->first();
+        return view('front.reset-password', compact('token','email','page_data'));
+    }
+
+    public function reset_password_submit(Request $request, $token, $email)
+    {
+        $request->validate([
+            'password' => 'required',
+            'confirm_password' => 'required|same:password',
+        ]);
+
+        $user = User::where('email',$request->email)->where('remember_token',$request->token)->first();
+        $user->password = Hash::make($request->password);
+        $user->remember_token = "";
+        $user->update();
+
+        return redirect()->route('login')->with('success','Password reset is successful. You can login now.');
+    }
+
+    public function gallery()
+    {
+        $photos = Photo::orderBy('id','asc')->paginate(8);
+        $page_data = PageGalleryItem::where('id',1)->first();
+        return view('front.gallery', compact('photos', 'page_data'));
+    }
+
+    public function faq()
+    {
+        $faqs = Faq::orderBy('id','asc')->paginate(8);
+        $page_data = PageFaqItem::where('id',1)->first();
+        return view('front.faq', compact('faqs', 'page_data'));
+    }
+
+    public function events()
+    {
+        $events = Event::orderBy('id','asc')->paginate(6);
+        $page_data = PageEventItem::where('id',1)->first();
+        return view('front.events', compact('events', 'page_data'));
+    }
+
+    public function event($slug)
+    {
+        $event = Event::where('slug',$slug)->first();
+        if(!$event) {
+            return redirect()->route('events');
+        }
+        $all_faqs = EventFaq::where('event_id',$event->id)->orderBy('id','asc')->get();
+        $page_data = PageEventItem::where('id',1)->first();
+        return view('front.event', compact('event', 'all_faqs', 'page_data'));
+    }
+
+    public function members()
+    {
+        $members = Member::orderBy('id','asc')->paginate(12);
+        $page_data = PageTeamItem::where('id',1)->first();
+        return view('front.members', compact('members', 'page_data'));
+    }
+
+    public function member($slug)
+    {
+        $member = Member::where('slug',$slug)->first();
+        if(!$member) {
+            return redirect()->route('members');
+        }
+        $all_awards = MemberAward::where('member_id',$member->id)->orderBy('id','asc')->get();
+        $page_data = PageTeamItem::where('id',1)->first();
+        return view('front.member', compact('member', 'all_awards', 'page_data'));
+    }
+
+    public function blog()
+    {
+        $posts = Post::orderBy('id', 'desc')->paginate(6);
+        $page_data = PageBlogItem::where('id',1)->first();
+        return view('front.blog', compact('posts', 'page_data'));
+    }
+
+    public function post($slug)
+    {
+        $post = Post::where('slug',$slug)->first();
+        if(!$post) {
+            return redirect()->route('blog');
+        }
+        $recent_posts = Post::orderBy('id', 'desc')->take(3)->get();
+        $post_categopries = PostCategory::withCount('posts')->orderBy('name', 'asc')->get();
+        $total_approved_comments = Comment::where('post_id', $post->id)->where('status', 'Approved')->count();
+        $comments = Comment::where('post_id', $post->id)->where('status', 'Approved')->orderBy('id', 'desc')->get();
+        $page_data = PageBlogItem::where('id',1)->first();
+        return view('front.post', compact('post', 'recent_posts', 'post_categopries', 'total_approved_comments', 'comments', 'page_data'));
+    }
+
+    public function category($slug)
+    {
+        $category = PostCategory::where('slug', $slug)->first();
+        if(!$category) {
+            return redirect()->route('blog');
+        }
+        $posts = Post::where('post_category_id', $category->id)->orderBy('id', 'desc')->paginate(6);
+        return view('front.category', compact('category', 'posts'));
+    }
+
+    public function archive($month)
+    {
+        $posts = Post::whereMonth('created_at', date('m', strtotime($month)))->orderBy('id', 'desc')->paginate(6);
+        return view('front.archive', compact('month', 'posts'));
+    }
+
+    public function tag($tag)
+    {
+        $posts = Post::where('tags', 'LIKE', '%'.$tag.'%')->orderBy('id', 'desc')->paginate(6);
+        return view('front.tag', compact('tag', 'posts'));
+    }
+
+    public function search(Request $request)
+    {
+        $search_text = $request->search_text;
+        $posts = Post::where('title', 'LIKE', '%' . $search_text . '%')
+                        ->orWhere('description', 'LIKE', '%' . $search_text . '%')
+                        ->orderBy('id','desc')
+                        ->paginate(6);
+        return view('front.search', compact('posts', 'search_text'));
+    }
+
+    public function comment_store(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => 'required',
+            'email' => 'required|email',
+            'comment' => 'required',
+        ]);
+
+        $obj = new Comment();
+        $obj->post_id = $request->post_id;
+        $obj->name = $request->name;
+        $obj->email = $request->email;
+        $obj->comment = $request->comment;
+        $obj->status = 'Pending';
+        $obj->save();
+
+        // Send email to admin as notification
+        $admin_data = Admin::where('id',1)->first();
+        $admin_email = $admin_data->email;
+
+        $post_title = Post::where('id', $request->post_id)->first()->title;
+
+        $subject = "New Comment Submitted";
+        $message = "<b>Post Title:</b><br>".$post_title."<br><br>";
+        $message .= "<b>Name:</b><br>".$request->name."<br><br>";
+        $message .= "<b>Email:</b><br>".$request->email."<br><br>";
+        $message .= "<b>Comment:</b><br>".nl2br($request->comment)."<br><br>";
+
+        \Mail::to($admin_email)->send(new Websitemail($subject,$message));
+
+        return redirect()->back()->with('success', 'Comment submitted successfully and is pending for the admin approval.');
+    }
+
+    public function reply_store(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => 'required',
+            'email' => 'required|email',
+            'reply' => 'required',
+        ]);
+
+        $obj = new Reply();
+        $obj->post_id = $request->post_id;
+        $obj->comment_id = $request->comment_id;
+        $obj->name = $request->name;
+        $obj->email = $request->email;
+        $obj->reply = $request->reply;
+        $obj->reply_by = 'User';
+        $obj->status = 'Pending';
+        $obj->save();
+
+        // Send email to admin as notification
+        $admin_data = Admin::where('id',1)->first();
+        $admin_email = $admin_data->email;
+
+        $post_title = Post::where('id', $request->post_id)->first()->title;
+
+        $subject = "New Reply Submitted";
+        $message = "<b>Post Title:</b><br>".$post_title."<br><br>";
+        $message .= "<b>Name:</b><br>".$request->name."<br><br>";
+        $message .= "<b>Email:</b><br>".$request->email."<br><br>";
+        $message .= "<b>Reply:</b><br>".nl2br($request->reply)."<br><br>";
+
+        \Mail::to($admin_email)->send(new Websitemail($subject,$message));
+
+        return redirect()->back()->with('success', 'Reply submitted successfully and is pending for the admin approval.');
+    }
+
+    public function terms()
+    {
+        $page_data = PageTermsItem::where('id',1)->first();
+        return view('front.terms', compact('page_data'));
+    }
+    public function privacy()
+    {
+        $page_data = PagePrivacyItem::where('id',1)->first();
+        return view('front.privacy', compact('page_data'));
+    }
+    public function contact()
+    {
+        $page_data = PageContactItem::where('id',1)->first();
+        return view('front.contact', compact('page_data'));
+    }
+
+    public function contact_submit(Request $request)
+    {
+        $request->validate([
+            'name' => 'required',
+            'email' => 'required|email',
+            'message' => 'required',
+        ]);
+
+        $subject = "New Contact Message";
+        $message = "<b>Name:</b><br>".$request->name."<br><br>";
+        $message .= "<b>Email:</b><br>".$request->email."<br><br>";
+        $message .= "<b>Message:</b><br>".$request->message."<br><br>";
+
+        $admin_data = Admin::where('id',1)->first();
+        $admin_email = $admin_data->email;
+
+        \Mail::to($admin_email)->send(new Websitemail($subject,$message));
+
+        return redirect()->back()->with('success','Your message is sent successfully. We will contact you soon.');
+    }
+
+    public function donate()
+    {
+        $page_data = PageDonateItem::where('id',1)->first();
+        $raised = Donation::where('status','Completed')->sum('amount');
+        return view('front.donate', compact('page_data','raised'));
+    }
+
+    public function donate_submit(Request $request)
+    {
+        $request->validate([
+            'name' => 'required',
+            'email' => 'required|email',
+            'amount' => 'required|numeric|min:1',
+        ]);
+
+        $setting = Setting::where('id',1)->first();
+        $currency = $setting->paypal_currency ?: 'USD';
+
+        if(!$setting->paypal_client_id || !$setting->paypal_client_secret) {
+            return redirect()->back()->with('error','Online donation is not available right now. Please try again later.');
+        }
+
+        $this->configure_paypal($setting);
+
+        try {
+            $provider = new PayPalClient;
+            $provider->setApiCredentials(config('paypal'));
+            $provider->getAccessToken();
+
+            $response = $provider->createOrder([
+                "intent" => "CAPTURE",
+                "application_context" => [
+                    "brand_name" => config('app.name'),
+                    "return_url" => route('donate_success'),
+                    "cancel_url" => route('donate_cancel'),
+                ],
+                "purchase_units" => [
+                    [
+                        "description" => "Donation for social activities",
+                        "amount" => [
+                            "currency_code" => $currency,
+                            "value" => number_format((float) $request->amount, 2, '.', ''),
+                        ],
+                    ],
+                ],
+            ]);
+        } catch (\Throwable $e) {
+            return redirect()->back()->with('error','We could not reach PayPal. Please try again later.');
+        }
+
+        if(isset($response['id']) && $response['id'] != null) {
+            foreach($response['links'] as $link) {
+                if($link['rel'] == 'approve') {
+                    session()->put('donate_name', $request->name);
+                    session()->put('donate_email', $request->email);
+                    session()->put('donate_message', $request->message);
+                    return redirect()->away($link['href']);
+                }
+            }
+        }
+
+        return redirect()->route('donate_cancel');
+    }
+
+    public function donate_success(Request $request)
+    {
+        if(!$request->has('token')) {
+            return redirect()->route('donate_cancel');
+        }
+
+        $setting = Setting::where('id',1)->first();
+        $this->configure_paypal($setting);
+
+        try {
+            $provider = new PayPalClient;
+            $provider->setApiCredentials(config('paypal'));
+            $provider->getAccessToken();
+            $response = $provider->capturePaymentOrder($request->token);
+        } catch (\Throwable $e) {
+            return redirect()->route('donate_cancel');
+        }
+
+        if(isset($response['status']) && $response['status'] == 'COMPLETED') {
+
+            $capture = $response['purchase_units'][0]['payments']['captures'][0] ?? [];
+
+            $donation = new Donation();
+            $donation->donor_name = session()->get('donate_name');
+            $donation->donor_email = session()->get('donate_email');
+            $donation->message = session()->get('donate_message');
+            $donation->amount = $capture['amount']['value'] ?? 0;
+            $donation->currency = $capture['amount']['currency_code'] ?? ($setting->paypal_currency ?: 'USD');
+            $donation->payment_method = 'PayPal';
+            $donation->transaction_id = $capture['id'] ?? ($response['id'] ?? null);
+            $donation->status = 'Completed';
+            $donation->save();
+
+            // Notify the admin
+            $admin = Admin::where('id',1)->first();
+            if($admin) {
+                $subject = "New Donation Received";
+                $body = "<b>Donor:</b><br>".$donation->donor_name."<br><br>";
+                $body .= "<b>Email:</b><br>".$donation->donor_email."<br><br>";
+                $body .= "<b>Amount:</b><br>".$donation->currency." ".$donation->amount."<br><br>";
+                $body .= "<b>Message:</b><br>".nl2br(e($donation->message))."<br><br>";
+                \Mail::to($admin->email)->send(new Websitemail($subject,$body));
+            }
+
+            session()->forget(['donate_name','donate_email','donate_message']);
+
+            return redirect()->route('donate')->with('success','Thank you! Your donation was received successfully.');
+        }
+
+        return redirect()->route('donate_cancel');
+    }
+
+    public function donate_cancel()
+    {
+        session()->forget(['donate_name','donate_email','donate_message']);
+        return redirect()->route('donate')->with('error','Your donation was not completed.');
+    }
+
+    private function configure_paypal($setting)
+    {
+        $mode = in_array($setting->paypal_mode, ['sandbox','live']) ? $setting->paypal_mode : 'sandbox';
+
+        config([
+            'paypal.mode' => $mode,
+            'paypal.'.$mode.'.client_id' => $setting->paypal_client_id,
+            'paypal.'.$mode.'.client_secret' => $setting->paypal_client_secret,
+            'paypal.currency' => $setting->paypal_currency ?: 'USD',
+        ]);
+    }
+
+    public function subscriber_send_email(Request $request)
+    {
+        $validator = Validator::make($request->all(),[
+            'email' => 'required|email|unique:subscribers,email'
+        ]);
+
+        if(!$validator->passes()) {
+            return response()->json(['code'=>0,'error_message'=>$validator->errors()->toArray()]);
+        } else {
+
+            $token = hash('sha256', time());
+
+            $obj = new Subscriber();
+            $obj->email = $request->email;
+            $obj->token = $token;
+            $obj->status = 0;
+            $obj->save();
+
+            $verification_link = url('subscriber/verify/'.$request->email.'/'.$token);
+
+            // Send email
+            $subject = 'Subscriber Verification';
+            $message = 'Please click on the link below to confirm subscription:<br>';
+            $message .= '<a href="'.$verification_link.'">';
+            $message .= $verification_link;
+            $message .= '</a>';
+
+            \Mail::to($request->email)->send(new Websitemail($subject,$message));
+
+            return response()->json(['code'=>1,'success_message'=>'Please check your email to confirm subscription']);
+        }
+    }
+
+    public function subscriber_verify($email,$token)
+    {
+        $subscriber_data = Subscriber::where('email',$email)->where('token',$token)->first();
+
+        if($subscriber_data) {
+
+            $subscriber_data->token = '';
+            $subscriber_data->status = 1;
+            $subscriber_data->update();
+
+            return redirect()->route('home')->with('success', __('Your subscription is verified successfully!'));
+
+        } else {
+            return redirect()->route('home');
+        }
+    }
+
+    public function custom_page($slug)
+    {
+        $page = CustomPage::where('slug', $slug)->first();
+        if(!$page) {
+            return redirect()->route('home');
+        }
+
+        $menu_item = \App\Models\MenuItem::where('link_type', 'custom_page')
+            ->where('custom_page_id', $page->id)
+            ->first();
+        $menu_parent = $menu_item && $menu_item->parent_id ? $menu_item->parent : null;
+        $sibling_pages = $menu_parent ? $menu_parent->visibleChildren()->get() : collect();
+
+        return view('front.custom-page', compact('page', 'menu_parent', 'sibling_pages'));
+    }
+
+}
