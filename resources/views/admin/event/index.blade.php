@@ -47,6 +47,10 @@
                         <input type="text" class="form-control-custom" name="slug">
                     </div>
                     <div class="mb-3">
+                        <label class="label-custom">Slug (Dari) <small>- optional, auto-generated from the Dari title</small></label>
+                        <input type="text" class="form-control-custom" name="slug_sv" dir="rtl">
+                    </div>
+                    <div class="mb-3">
                         <label class="label-custom">Description *</label>
                         <textarea id="editor1" class="form-control-custom tinymce-editor" name="description" rows="4"></textarea>
                     </div>
@@ -203,6 +207,10 @@
                                 <div class="mb-3">
                                     <label class="label-custom">Slug *</label>
                                     <input type="text" class="form-control-custom" name="slug" value="{{ $event->slug }}">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="label-custom">Slug (Dari) <small>- optional, auto-generated from the Dari title</small></label>
+                                    <input type="text" class="form-control-custom" name="slug_sv" dir="rtl" value="{{ $event->slug_sv }}">
                                 </div>
                                 <div class="mb-3">
                                     <label class="label-custom">Description *</label>

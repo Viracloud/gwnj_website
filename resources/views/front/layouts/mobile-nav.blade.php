@@ -7,12 +7,18 @@
         <ul class="nav flex-column">
             @foreach($global_nav as $item)
                 @if($item->children->count())
+                @php $item_url = $item->resolvedUrl(); @endphp
                 <li class="mobile-nav-item nav-item">
-                    <a class="nav-link text-white d-flex justify-content-between align-items-center cursor-pointer"
-                        data-bs-toggle="collapse" data-bs-target="#mobileSub{{ $item->id }}" role="button" aria-expanded="false">
-                        {{ $item->label() }}
-                        <i class="fa-solid fa-angle-down small transition-icon"></i>
-                    </a>
+                    <div class="d-flex justify-content-between align-items-center">
+                        @if($item_url !== '#')
+                        <a class="nav-link text-white flex-grow-1 {{ $item->isActive() ? 'active' : '' }}" href="{{ $item_url }}">{{ $item->label() }}</a>
+                        @else
+                        <span class="nav-link text-white flex-grow-1">{{ $item->label() }}</span>
+                        @endif
+                        <button type="button" class="mobile-caret-btn text-white" data-bs-toggle="collapse" data-bs-target="#mobileSub{{ $item->id }}" aria-expanded="false" aria-label="{{ is_rtl() ? 'باز کردن زیرمنو' : 'Open submenu' }}">
+                            <i class="fa-solid fa-angle-down small transition-icon"></i>
+                        </button>
+                    </div>
                     <div class="collapse" id="mobileSub{{ $item->id }}">
                         <ul class="list-unstyled mb-0 ms-3 ps-3">
                             @foreach($item->children as $child)
@@ -26,13 +32,6 @@
                 @endif
             @endforeach
 
-            @if($global_menu->menu_login_status == 'Show')
-                @if(Auth::guard('web')->check())
-                <li class="nav-item"><a class="nav-link text-white" href="{{ route('dashboard') }}">{{ is_rtl() ? 'داشبورد' : 'Dashboard' }}</a></li>
-                @else
-                <li class="nav-item"><a class="nav-link text-white" href="{{ route('login') }}">{{ is_rtl() ? $global_menu->menu_login_name_sv : $global_menu->menu_login_name }}</a></li>
-                @endif
-            @endif
         </ul>
     </div>
 </div>

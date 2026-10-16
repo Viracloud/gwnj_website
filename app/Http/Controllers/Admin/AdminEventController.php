@@ -22,7 +22,7 @@ class AdminEventController extends Controller
         $request->validate([
             'image' => 'required|mimes:jpeg,png,jpg,gif,svg|max:2048',
             'title' => 'required|string|max:255',
-            'slug' => 'required|alpha_dash|unique:events,slug',
+            'slug' => 'nullable|alpha_dash|max:255',
             'description' => 'required|string',
             'event_location' => 'required|string',
             'event_location_detail' => 'required|string',
@@ -39,7 +39,8 @@ class AdminEventController extends Controller
         $obj->event_category_id = $request->event_category_id;
         $obj->title = $request->title;
         $obj->title_sv = $request->title_sv;
-        $obj->slug = $request->slug;
+        $obj->slug = resolve_slug('events', $request->slug, $request->title, $obj->id);
+        $obj->slug_sv = resolve_slug_sv('events', $request->slug_sv, $request->title_sv, $obj->id);
         $obj->description = $request->description;
         $obj->description_sv = $request->description_sv;
         $obj->show_on_home = $request->show_on_home;
@@ -63,7 +64,7 @@ class AdminEventController extends Controller
     {
         $request->validate([
             'title' => 'required|string|max:255',
-            'slug' => 'required|alpha_dash|unique:events,slug,'.$id,
+            'slug' => 'nullable|alpha_dash|max:255',
             'description' => 'required|string',
             'event_location' => 'required|string',
             'event_location_detail' => 'required|string',
@@ -86,7 +87,8 @@ class AdminEventController extends Controller
         $obj->event_category_id = $request->event_category_id;
         $obj->title = $request->title;
         $obj->title_sv = $request->title_sv;
-        $obj->slug = $request->slug;
+        $obj->slug = resolve_slug('events', $request->slug, $request->title, $obj->id);
+        $obj->slug_sv = resolve_slug_sv('events', $request->slug_sv, $request->title_sv, $obj->id);
         $obj->description = $request->description;
         $obj->description_sv = $request->description_sv;
         $obj->show_on_home = $request->show_on_home;

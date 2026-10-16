@@ -27,10 +27,14 @@
 
         <div class="doc-meta">
             @if($post->author_name)<span>{{ is_rtl() ? 'نویسنده:' : 'By' }} <b>{{ $post->author_name }}</b></span>@endif
-            <span>{{ optional($post->published_at ?? $post->created_at)->format('j F Y') }}</span>
+            <span>{{ fdate($post->published_at ?? $post->created_at, 'j F Y') }}</span>
             @if($post_cat)
-            <span><a href="{{ route('category', $post_cat->slug) }}" style="color:inherit;text-decoration:none">{{ tf($post_cat,'name') }}</a></span>
+            <span><a href="{{ route('category', slug_for($post_cat)) }}" style="color:inherit;text-decoration:none">{{ tf($post_cat,'name') }}</a></span>
             @endif
+        </div>
+
+        <div style="margin-bottom:var(--s6)">
+            @include('front.partials.share', ['share_url' => url()->current(), 'share_title' => tf($post,'title')])
         </div>
 
         <div class="rich-content">
@@ -52,7 +56,7 @@
             @forelse($comments as $comment)
             <div class="comment-block">
                 <div class="who">{{ $comment->name }}</div>
-                <div class="when">{{ $comment->created_at->format('j F Y') }}</div>
+                <div class="when">{{ fdate($comment->created_at, 'j F Y') }}</div>
                 <p>{!! nl2br(e($comment->comment)) !!}</p>
                 <a class="reply-link" href="javascript:void(0)" onclick="document.getElementById('reply-form-{{ $comment->id }}').classList.toggle('d-none')">{{ is_rtl() ? 'پاسخ' : 'Reply' }}</a>
 
@@ -62,7 +66,7 @@
                 @foreach($replies as $reply)
                 <div class="comment-block" style="margin-top:var(--s3);margin-bottom:0;border-inline-start:3px solid var(--v200)">
                     <div class="who">{{ $reply->name }} @if($reply->reply_by == 'Admin')<span class="chip plain" style="margin-inline-start:.4rem">{{ is_rtl() ? 'ادمین' : 'Admin' }}</span>@endif</div>
-                    <div class="when">{{ $reply->created_at->format('j F Y') }}</div>
+                    <div class="when">{{ fdate($reply->created_at, 'j F Y') }}</div>
                     <p>{!! nl2br(e($reply->reply)) !!}</p>
                 </div>
                 @endforeach
@@ -133,17 +137,17 @@
             <h3>{{ is_rtl() ? 'اخبار اخیر' : 'Recent posts' }}</h3>
             <ul class="linklist">
                 @foreach($recent_posts as $recent_post)
-                <li><a href="{{ route('post', $recent_post->slug) }}">{{ tf($recent_post,'title') }}</a>
-                    <span>{{ optional($recent_post->published_at ?? $recent_post->created_at)->format('j F Y') }}</span></li>
+                <li><a href="{{ route('post', slug_for($recent_post)) }}">{{ tf($recent_post,'title') }}</a>
+                    <span>{{ fdate($recent_post->published_at ?? $recent_post->created_at, 'j F Y') }}</span></li>
                 @endforeach
             </ul>
         </div>
 
         <div class="aside-box">
             <h3>{{ is_rtl() ? 'دسته‌بندی‌ها' : 'Categories' }}</h3>
-            <ul class="linklist">
+            <ul class="linklist count">
                 @foreach($post_categopries as $post_category)
-                <li><a href="{{ route('category', $post_category->slug) }}">{{ tf($post_category,'name') }}</a>
+                <li><a href="{{ route('category', slug_for($post_category)) }}">{{ tf($post_category,'name') }}</a>
                     <span>{{ $post_category->posts_count }} {{ is_rtl() ? 'خبر' : 'posts' }}</span></li>
                 @endforeach
             </ul>
@@ -158,9 +162,9 @@
         @if($all_months->count())
         <div class="aside-box">
             <h3>{{ is_rtl() ? 'بایگانی' : 'Archives' }}</h3>
-            <ul class="linklist">
+            <ul class="linklist count">
                 @foreach($all_months as $m)
-                <li><a href="{{ route('archive', ['month' => $m->month]) }}">{{ $m->month }}</a>
+                <li><a href="{{ route('archive', ['month' => $m->month]) }}">{{ fdate($m->month, 'F Y') }}</a>
                     <span>{{ $m->post_count }} {{ is_rtl() ? 'خبر' : 'posts' }}</span></li>
                 @endforeach
             </ul>

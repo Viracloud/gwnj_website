@@ -10,6 +10,7 @@
 </div></div>
 
 <section class="shell">
+    @if($photos->count())
     <div class="gallery">
         @foreach($photos as $photo)
         <a class="photo glightbox" href="{{ asset('uploads/'.$photo->image) }}" data-glightbox data-gallery="gallery1">
@@ -20,5 +21,8 @@
     </div>
 
     {{ $photos->links() }}
+    @else
+    <p style="color:var(--muted)">{{ is_rtl() ? 'هنوز عکسی اضافه نشده است.' : 'No photos have been added yet.' }}</p>
+    @endif
 </section>
 @endsection

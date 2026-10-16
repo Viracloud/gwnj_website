@@ -17,7 +17,7 @@
 </div></div>
 
 <section class="shell">
-    <div class="{{ $goal > 0 ? 'doc' : '' }}">
+    <div class="{{ $goal > 0 ? 'doc' : 'donate-solo' }}">
         <div class="doc-main">
             @if(tf($page_data,'heading'))<h2 style="margin-top:0">{{ tf($page_data,'heading') }}</h2>@endif
             <p>{{ tf($page_data,'description') }}</p>
@@ -28,14 +28,16 @@
                 <form action="{{ route('donate_submit') }}" method="post" id="donateForm">
                     @csrf
 
-                    <div class="mb-3">
-                        <label class="form-label">{{ is_rtl() ? 'نام کامل' : 'Full name' }} *</label>
-                        <input type="text" class="form-control" name="name" value="{{ old('name') }}" placeholder="{{ is_rtl() ? 'نام کامل شما' : 'Your full name' }}" required>
-                    </div>
+                    <div class="field-row">
+                        <div class="mb-3">
+                            <label class="form-label">{{ is_rtl() ? 'نام کامل' : 'Full name' }} *</label>
+                            <input type="text" class="form-control" name="name" value="{{ old('name') }}" placeholder="{{ is_rtl() ? 'نام کامل شما' : 'Your full name' }}" required>
+                        </div>
 
-                    <div class="mb-3">
-                        <label class="form-label">{{ is_rtl() ? 'ایمیل' : 'Email address' }} *</label>
-                        <input type="email" class="form-control" name="email" value="{{ old('email') }}" placeholder="{{ is_rtl() ? 'ایمیل شما' : 'Your email address' }}" required>
+                        <div class="mb-3">
+                            <label class="form-label">{{ is_rtl() ? 'ایمیل' : 'Email address' }} *</label>
+                            <input type="email" class="form-control" name="email" value="{{ old('email') }}" placeholder="{{ is_rtl() ? 'ایمیل شما' : 'Your email address' }}" required>
+                        </div>
                     </div>
 
                     <div class="mb-3">

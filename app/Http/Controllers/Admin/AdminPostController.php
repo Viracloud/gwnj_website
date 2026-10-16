@@ -25,7 +25,7 @@ class AdminPostController extends Controller
         $request->validate([
             'image' => 'required|mimes:jpeg,png,jpg,gif,svg|max:2048',
             'title' => 'required|string|max:255',
-            'slug' => 'required|alpha_dash|unique:posts,slug',
+            'slug' => 'nullable|alpha_dash|max:255',
             'description' => 'required|string',
         ]);
 
@@ -39,7 +39,8 @@ class AdminPostController extends Controller
         $obj->post_category_id = $request->post_category_id;
         $obj->title = $request->title;
         $obj->title_sv = $request->title_sv;
-        $obj->slug = $request->slug;
+        $obj->slug = resolve_slug('posts', $request->slug, $request->title, $obj->id);
+        $obj->slug_sv = resolve_slug_sv('posts', $request->slug_sv, $request->title_sv, $obj->id);
         $obj->excerpt = $request->excerpt;
         $obj->excerpt_sv = $request->excerpt_sv;
         $obj->description = $request->description;
@@ -66,7 +67,7 @@ class AdminPostController extends Controller
     {
         $request->validate([
             'title' => 'required|string|max:255',
-            'slug' => 'required|alpha_dash|unique:posts,slug,'.$id,
+            'slug' => 'nullable|alpha_dash|max:255',
             'description' => 'required|string',
         ]);
 
@@ -85,7 +86,8 @@ class AdminPostController extends Controller
         $obj->post_category_id = $request->post_category_id;
         $obj->title = $request->title;
         $obj->title_sv = $request->title_sv;
-        $obj->slug = $request->slug;
+        $obj->slug = resolve_slug('posts', $request->slug, $request->title, $obj->id);
+        $obj->slug_sv = resolve_slug_sv('posts', $request->slug_sv, $request->title_sv, $obj->id);
         $obj->excerpt = $request->excerpt;
         $obj->excerpt_sv = $request->excerpt_sv;
         $obj->description = $request->description;
@@ -139,7 +141,7 @@ class AdminPostController extends Controller
         $message .= "Post Title: ".$comment->post->title."<br>";
         $message .= "<a href='".route('post', $comment->post->slug)."'>See Post</a><br>";
 
-        \Mail::to($comment->email)->send(new Websitemail($subject,$message));
+        \safe_mail($comment->email, $subject, $message);
 
         return back()->with('success', 'Comment status changed successfully.');
     }
@@ -171,7 +173,7 @@ class AdminPostController extends Controller
         $message .= "Post Title: ".$reply->post->title."<br>";
         $message .= "<a href='".route('post', $reply->post->slug)."'>See Post</a><br>";
 
-        \Mail::to($reply->email)->send(new Websitemail($subject,$message));
+        \safe_mail($reply->email, $subject, $message);
 
         return back()->with('success', 'Reply status changed successfully.');
     }

@@ -15,6 +15,13 @@
                 <li><a class="dropdown-item {{ is_rtl() ? 'active' : '' }}" href="{{ route('switch_lang', 'fa') }}">دری</a></li>
             </ul>
         </div>
+        @if($global_menu->menu_login_status == 'Show')
+            @if(Auth::guard('web')->check())
+            <a href="{{ route('dashboard') }}">{{ is_rtl() ? 'داشبورد' : 'Dashboard' }}</a>
+            @else
+            <a href="{{ route('login') }}">{{ is_rtl() ? $global_menu->menu_login_name_sv : $global_menu->menu_login_name }}</a>
+            @endif
+        @endif
         <button type="button" class="exit" onclick="window.location.replace('https://www.google.com')">{{ is_rtl() ? 'خروج سریع' : 'Quick exit' }}</button>
     </div>
 </div>

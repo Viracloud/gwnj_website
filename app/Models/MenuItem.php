@@ -59,7 +59,7 @@ class MenuItem extends Model
     public function resolvedUrl(): string
     {
         if ($this->link_type === 'custom_page' && $this->customPage) {
-            return route('custom_page', $this->customPage->slug);
+            return route('custom_page', slug_for($this->customPage));
         }
 
         if ($this->link_type === 'route' && $this->route_name && \Illuminate\Support\Facades\Route::has($this->route_name)) {
@@ -80,7 +80,8 @@ class MenuItem extends Model
         }
 
         if ($this->link_type === 'custom_page' && $this->customPage) {
-            return request()->is('page/' . $this->customPage->slug);
+            return request()->is('page/' . $this->customPage->slug)
+                || ($this->customPage->slug_sv && request()->is('page/' . $this->customPage->slug_sv));
         }
 
         return false;

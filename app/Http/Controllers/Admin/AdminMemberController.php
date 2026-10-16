@@ -6,13 +6,15 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Member;
 use App\Models\MemberAward;
+use App\Models\MemberCategory;
 
 class AdminMemberController extends Controller
 {
     public function index()
     {
-        $members = Member::orderBy('id','asc')->get();
-        return view('admin.member.index',compact('members'));
+        $members = Member::with('category')->orderBy('member_category_id')->orderBy('sort_order')->orderBy('id')->get();
+        $member_categories = MemberCategory::orderBy('sort_order')->orderBy('id')->get();
+        return view('admin.member.index',compact('members', 'member_categories'));
     }
 
     public function store(Request $request)
@@ -20,10 +22,12 @@ class AdminMemberController extends Controller
         $request->validate([
             'image' => 'required|mimes:jpeg,png,jpg,gif,svg|max:2048',
             'name' => 'required|string|max:255',
-            'slug' => 'required|alpha_dash|unique:members,slug',
+            'member_category_id' => 'required|exists:member_categories,id',
+            'sort_order' => 'nullable|integer|min:0',
+            'slug' => 'nullable|alpha_dash|max:255',
             'designation' => 'required|string',
             'short_description' => 'required|string',
-            'description' => 'required|string',
+            'description' => 'nullable|string',
         ]);
 
         $obj = new Member();
@@ -33,7 +37,12 @@ class AdminMemberController extends Controller
             $obj->image = $final_name;
         }
         $obj->name = $request->name;
-        $obj->slug = $request->slug;
+        $obj->slug = resolve_slug('members', $request->slug, $request->name, $obj->id);
+        $obj->slug_sv = resolve_slug_sv('members', $request->slug_sv, $request->name_sv, $obj->id);
+        $obj->name_sv = $request->name_sv;
+        $obj->member_category_id = $request->member_category_id;
+        $obj->sort_order = (int) $request->sort_order;
+        $obj->show_contact = $request->boolean('show_contact');
         $obj->designation = $request->designation;
         $obj->designation_sv = $request->designation_sv;
         $obj->short_description = $request->short_description;
@@ -57,10 +66,12 @@ class AdminMemberController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'slug' => 'required|alpha_dash|unique:members,slug,'.$id,
+            'member_category_id' => 'required|exists:member_categories,id',
+            'sort_order' => 'nullable|integer|min:0',
+            'slug' => 'nullable|alpha_dash|max:255',
             'designation' => 'required|string',
             'short_description' => 'required|string',
-            'description' => 'required|string',
+            'description' => 'nullable|string',
         ]);
 
         $obj = Member::where('id', $id)->first();
@@ -76,7 +87,12 @@ class AdminMemberController extends Controller
             $obj->image = $final_name;
         }
         $obj->name = $request->name;
-        $obj->slug = $request->slug;
+        $obj->slug = resolve_slug('members', $request->slug, $request->name, $obj->id);
+        $obj->slug_sv = resolve_slug_sv('members', $request->slug_sv, $request->name_sv, $obj->id);
+        $obj->name_sv = $request->name_sv;
+        $obj->member_category_id = $request->member_category_id;
+        $obj->sort_order = (int) $request->sort_order;
+        $obj->show_contact = $request->boolean('show_contact');
         $obj->designation = $request->designation;
         $obj->designation_sv = $request->designation_sv;
         $obj->short_description = $request->short_description;

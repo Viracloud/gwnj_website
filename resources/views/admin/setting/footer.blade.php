@@ -39,6 +39,10 @@
                     <label class="label-custom">Email</label>
                     <input type="text" name="footer_email" value="{{ $setting->footer_email }}" class="form-control-custom">
                 </div>
+                <div class="mb-3">
+                    <label class="label-custom">Website <small>- shown in the site footer and printed on membership cards</small></label>
+                    <input type="text" name="footer_website" value="{{ $setting->footer_website }}" class="form-control-custom" placeholder="gwjn.org">
+                </div>
             </div>
 
             <h6 class="cus-heading">About Text</h6>

@@ -8,7 +8,7 @@
 <script src="{{ asset('dist-admin/js/jscolor.min.js') }}"></script>
 <script src="{{ asset('dist-admin/js/iziToast.min.js') }}"></script>
 <script src="{{ asset('dist-admin/js/app.js') }}"></script>
-<script src="{{ asset('dist-admin/js/custom.js') }}"></script>
+<script src="{{ asset('dist-admin/js/custom.js') }}?v={{ filemtime(public_path('dist-admin/js/custom.js')) }}"></script>
 
 @if($errors->any())
     <script>

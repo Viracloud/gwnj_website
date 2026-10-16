@@ -14,12 +14,25 @@
         <div class="doc-main">
             <div class="form-card">
                 <h2 style="margin-top:0">{{ is_rtl() ? 'ویرایش پروفایل' : 'Edit profile' }}</h2>
-                <form action="{{ route('profile_update') }}" method="post">
+                <form action="{{ route('profile_update') }}" method="post" enctype="multipart/form-data">
                     @csrf
                     <div class="row">
+                        <div class="col-12 mb-4">
+                            <label class="form-label">{{ is_rtl() ? 'عکس (برای کارت عضویت)' : 'Photo (used on your membership card)' }} *</label>
+                            <div class="d-flex align-items-center gap-3">
+                                @if(Auth::guard('web')->user()->photo)
+                                <img src="{{ asset('uploads/'.Auth::guard('web')->user()->photo) }}" alt="" style="width:64px;height:64px;border-radius:50%;object-fit:cover;border:1px solid var(--rule)">
+                                @endif
+                                <input type="file" name="photo" class="form-control" accept="image/*" style="max-width:320px">
+                            </div>
+                        </div>
                         <div class="col-lg-6 mb-4">
-                            <label class="form-label">{{ is_rtl() ? 'نام' : 'Name' }} *</label>
+                            <label class="form-label">{{ is_rtl() ? 'نام' : 'First name' }} *</label>
                             <input type="text" name="name" class="form-control" value="{{ Auth::guard('web')->user()->name }}">
+                        </div>
+                        <div class="col-lg-6 mb-4">
+                            <label class="form-label">{{ is_rtl() ? 'تخلص' : 'Surname' }} *</label>
+                            <input type="text" name="surname" class="form-control" value="{{ Auth::guard('web')->user()->surname }}">
                         </div>
                         <div class="col-lg-6 mb-4">
                             <label class="form-label">{{ is_rtl() ? 'ایمیل' : 'Email' }} *</label>

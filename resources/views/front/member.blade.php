@@ -5,15 +5,15 @@
 
 @section('content')
 <div class="pagehead"><div class="shell">
-    <span class="kicker">{{ is_rtl() ? 'تیم' : 'Team' }}</span>
-    <h1>{{ $member->name }}</h1>
+    <span class="kicker">{{ $member->category ? tf($member->category,'name') : (is_rtl() ? 'تیم' : 'Team') }}</span>
+    <h1>{{ tf($member,'name') }}</h1>
 </div></div>
 
 <section class="shell" style="padding-block:var(--s8)">
     <div class="doc">
         <div class="doc-main">
             <div class="photo" style="max-width:380px;margin-bottom:var(--s5)">
-                <img src="{{ asset('uploads/'.$member->image) }}" alt="{{ $member->name }}">
+                <img src="{{ asset('uploads/'.$member->image) }}" alt="{{ tf($member,'name') }}">
             </div>
             @if(tf($member,'designation'))
             <span class="kicker">{{ tf($member,'designation') }}</span>
@@ -34,16 +34,17 @@
         </div>
 
         <div>
-            @if($member->phone != '' || $member->email != '' || $member->experience != '' || $member->facebook != '' || $member->twitter != '' || $member->linkedin != '' || $member->instagram != '')
+            @php $show_pe = $member->show_contact; @endphp
+            @if(($show_pe && ($member->phone != '' || $member->email != '')) || $member->experience != '' || $member->facebook != '' || $member->twitter != '' || $member->linkedin != '' || $member->instagram != '')
             <div class="aside-box">
                 <h3>{{ is_rtl() ? 'تماس' : 'Contact' }}</h3>
                 <div class="in">
-                    @if($member->phone != '' || $member->email != '' || $member->experience != '')
+                    @if(($show_pe && ($member->phone != '' || $member->email != '')) || $member->experience != '')
                     <ul class="linklist">
-                        @if($member->phone != '')
+                        @if($show_pe && $member->phone != '')
                         <li><a href="tel:{{ $member->phone }}" dir="ltr" style="unicode-bidi:isolate">{{ $member->phone }}</a><span>{{ is_rtl() ? 'تلفن' : 'Phone' }}</span></li>
                         @endif
-                        @if($member->email != '')
+                        @if($show_pe && $member->email != '')
                         <li><a href="mailto:{{ $member->email }}" dir="ltr" style="unicode-bidi:isolate">{{ $member->email }}</a><span>{{ is_rtl() ? 'ایمیل' : 'Email' }}</span></li>
                         @endif
                         @if($member->experience != '')

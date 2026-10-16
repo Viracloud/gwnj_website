@@ -19,13 +19,14 @@ class AdminPostCategoryController extends Controller
     {
         $request->validate([
             'name' => 'required|unique:post_categories,name',
-            'slug' => 'required|alpha_dash|unique:post_categories,slug',
+            'slug' => 'nullable|alpha_dash|max:255',
         ]);
 
         $obj = new PostCategory();
         $obj->name = $request->name;
         $obj->name_sv = $request->name_sv;
-        $obj->slug = $request->slug;
+        $obj->slug = resolve_slug('post_categories', $request->slug, $request->name, $obj->id);
+        $obj->slug_sv = resolve_slug_sv('post_categories', $request->slug_sv, $request->name_sv, $obj->id);
         $obj->menu_label = $request->menu_label;
         $obj->menu_label_sv = $request->menu_label_sv;
         $obj->save();
@@ -37,13 +38,14 @@ class AdminPostCategoryController extends Controller
     {
         $request->validate([
             'name' => 'required|unique:post_categories,name,'.$id,
-            'slug' => 'required|alpha_dash|unique:post_categories,slug,'.$id,
+            'slug' => 'nullable|alpha_dash|max:255',
         ]);
 
         $obj = PostCategory::where('id', $id)->first();
         $obj->name = $request->name;
         $obj->name_sv = $request->name_sv;
-        $obj->slug = $request->slug;
+        $obj->slug = resolve_slug('post_categories', $request->slug, $request->name, $obj->id);
+        $obj->slug_sv = resolve_slug_sv('post_categories', $request->slug_sv, $request->name_sv, $obj->id);
         $obj->menu_label = $request->menu_label;
         $obj->menu_label_sv = $request->menu_label_sv;
         $obj->save();

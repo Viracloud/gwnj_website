@@ -24,3 +24,8 @@ Homestead.yaml
 Thumbs.db
 DB/
 /help/
+
+# Local-only files: Claude settings, backups, temp pages
+/.claude
+/public.zip
+/public/temp_w.html

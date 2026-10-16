@@ -37,6 +37,7 @@ class UserController extends Controller
     {
         $request->validate([
             'name' => 'required',
+            'surname' => 'required',
             'email' => 'required|email',
             'phone' => 'required',
             'address' => 'required',
@@ -56,7 +57,18 @@ class UserController extends Controller
             $user->password = Hash::make($request->password);
         }
 
+        if ($request->hasFile('photo')) {
+            $request->validate(['photo' => 'mimes:jpeg,png,jpg,webp|max:2048']);
+            if ($user->photo && file_exists(public_path('uploads/'.$user->photo))) {
+                unlink(public_path('uploads/'.$user->photo));
+            }
+            $final_name = 'member_photo_'.time().'.'.$request->photo->extension();
+            $request->photo->move(public_path('uploads'), $final_name);
+            $user->photo = $final_name;
+        }
+
         $user->name = $request->name;
+        $user->surname = $request->surname;
         $user->email = $request->email;
         $user->phone = $request->phone;
         $user->address = $request->address;

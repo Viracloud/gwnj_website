@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class Post extends Model
 {
+    protected $casts = ['published_at' => 'datetime'];
+
     public function post_category()
     {
         return $this->belongsTo(PostCategory::class, 'post_category_id');

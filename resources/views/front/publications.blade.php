@@ -23,17 +23,17 @@
         @foreach($publications as $pub)
         <li class="record">
             <div class="meta">
-                <b>{{ $pub->published_date ? \Carbon\Carbon::parse($pub->published_date)->format('Y') : '' }}</b>
+                <b>{{ $pub->published_date ? fdate($pub->published_date, 'Y') : '' }}</b>
                 <span>{{ $pub->category ? tf($pub->category,'name') : '' }}</span>
             </div>
             <div>
                 <h3>{{ tf($pub, 'title') }}</h3>
                 @if(tf($pub, 'description'))
-                <p>{{ \Illuminate\Support\Str::limit(strip_tags(tf($pub, 'description')), 160) }}</p>
+                <p>{{ plain_excerpt(tf($pub, 'description'), 160) }}</p>
                 @endif
             </div>
             @if($pub->file)
-            <a class="go" href="{{ asset('uploads/'.$pub->file) }}" target="_blank" rel="noopener">{{ is_rtl() ? 'دانلود PDF' : 'Download PDF' }}</a>
+            <a class="go" href="{{ asset('uploads/'.$pub->file) }}" target="_blank" rel="noopener">{{ hc('pubs_download') }}</a>
             @endif
         </li>
         @endforeach

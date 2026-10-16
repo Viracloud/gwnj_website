@@ -6,73 +6,119 @@
 @section('content')
 @php
     $slide = $sliders->first();
+    // Hero side collage: other slider images first, then gallery, post and event photos (max 3, no repeats).
+    $hero_collage = $sliders->skip(1)->pluck('image')
+        ->merge($photos->pluck('image'))
+        ->merge($posts->pluck('image'))
+        ->merge($events->pluck('image'))
+        ->filter()->reject(fn($img) => $slide && $img === $slide->image)
+        ->unique()->take(3)->values();
+    $hero_event = $events->first(fn($e) => $e->event_date && \Carbon\Carbon::parse($e->event_date)->endOfDay()->isFuture());
+    $hero_side = $hero_collage->count() || $hero_event;
 @endphp
 
-<div class="hero">
+<div class="hero{{ $hero_side ? ' has-side' : '' }}">
     @if($slide && $slide->image)
     <div class="hero-photo"><img src="{{ asset('uploads/'.$slide->image) }}" alt=""></div>
     @endif
-    <img class="hero-emblem" src="{{ asset('uploads/'.$global_setting->logo_1) }}" alt="">
-    <div class="shell"><div class="inner">
-        <span class="org">{{ is_rtl() ? 'شبکه جهانی عدالت برای زنان · تأسیس ۲۰۲۱' : "GLOBAL WOMEN'S JUSTICE NETWORK · EST. 2021" }}</span>
-        <h1>{{ $slide ? tf($slide, 'heading') : (is_rtl() ? 'دفاع از عدالت، برابری، آزادی و حقوق زنان.' : "Advocating for justice, equality, freedom and the rights of women.") }}</h1>
-        <p class="lede">{{ $slide ? tf($slide, 'text') : (is_rtl() ? 'شبکه‌ای بین‌المللی از مدافعان حقوق بشر زنان که در چهارده کشور کمپاین، اقدام عمومی و پیگیری حقوقی سازمان‌دهی می‌کند.' : 'An international network of women human rights defenders, organising campaigns, public actions and legal advocacy across fourteen countries.') }}</p>
+    <div class="shell"><div class="hero-grid">
+    <div class="inner">
+        <span class="org">{{ hc('hero_org') }}</span>
+        <h1>{{ $slide ? tf($slide, 'heading') : (hc('hero_heading')) }}</h1>
+        <p class="lede">{{ $slide ? tf($slide, 'text') : (hc('hero_text')) }}</p>
         <div class="hero-actions">
             @if($slide && $slide->button_text && $slide->button_link)
             <a class="btn btn-signal btn-lg" href="{{ $slide->button_link }}">{{ tf($slide, 'button_text') }}</a>
             @else
-            <a class="btn btn-signal btn-lg" href="{{ route('donate') }}">{{ is_rtl() ? 'عضویت در شبکه' : 'Join us' }}</a>
+            <a class="btn btn-signal btn-lg" href="{{ route('donate') }}">{{ hc('hero_btn1') }}</a>
             @endif
             @if($global_menu->menu_event_status == 'Show')
-            <a class="btn btn-ghost btn-lg" href="{{ route('events') }}">{{ is_rtl() ? 'رویدادهای پیش رو' : 'Upcoming events' }}</a>
+            <a class="btn btn-ghost btn-lg" href="{{ route('events') }}">{{ hc('hero_btn2') }}</a>
             @endif
             @if($global_menu->menu_about_status == 'Show')
-            <a class="btn btn-ghost btn-lg" href="{{ route('about') }}">{{ is_rtl() ? 'درباره ما' : 'About us' }}</a>
+            <a class="btn btn-ghost btn-lg" href="{{ route('about') }}">{{ hc('hero_btn3') }}</a>
             @endif
         </div>
+    </div>
+    @if($hero_side)
+    <div class="hero-side{{ $hero_collage->count() ? '' : ' no-photos' }}">
+        @if($hero_collage->count())
+        <div class="hc-stack">
+            @foreach($hero_collage as $i => $img)
+            <figure class="hc-ph hc-{{ $i + 1 }}"><img src="{{ asset('uploads/'.$img) }}" alt="" loading="lazy"></figure>
+            @endforeach
+        </div>
+        @if(hc_on('show_stats') && hc('stats_1_num'))
+        <div class="hc-badge"><b>{{ hc('stats_1_num') }}</b><span>{{ hc('stats_1_label') }}</span></div>
+        @endif
+        @endif
+        @if($hero_event)
+        <a class="hc-event" href="{{ route('event', slug_for($hero_event)) }}">
+            <span class="hc-date">
+                <b>{{ fdate($hero_event->event_date, 'd') }}</b>
+                <small>{{ fdate($hero_event->event_date, 'M') }}</small>
+            </span>
+            <span class="hc-info">
+                <span class="hc-kicker">{{ hc('next_chip') }}</span>
+                <strong>{{ tf($hero_event,'title') }}</strong>
+                @if(tf($hero_event,'event_location'))<small>{{ tf($hero_event,'event_location') }}</small>@endif
+            </span>
+        </a>
+        @endif
+    </div>
+    @endif
     </div></div>
 </div>
 
+@if(hc_on('show_stats'))
 <div class="statbar"><div class="shell"><div class="statbar-grid">
     <div class="stat">
         <div class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.6 3 2.6 15 0 18M12 3c-2.6 3-2.6 15 0 18"/></svg></div>
-        <b data-count="14">14</b>
-        <span class="lb">{{ is_rtl() ? 'کشور' : 'Countries' }}</span>
-        <span class="cp">{{ is_rtl() ? 'در چهار قاره' : 'Across four continents' }}</span>
+        <b>{{ hc('stats_1_num') }}</b>        <span class="lb">{{ hc('stats_1_label') }}</span>
+        <span class="cp">{{ hc('stats_1_caption') }}</span>
     </div>
     <div class="stat">
         <div class="ic"><svg viewBox="0 0 24 24"><path d="M12 21s-7-4.4-7-10a7 7 0 0114 0c0 5.6-7 10-7 10z"/><circle cx="12" cy="11" r="2.5"/></svg></div>
-        <b data-count="26">26</b>
-        <span class="lb">{{ is_rtl() ? 'شهر' : 'Cities' }}</span>
-        <span class="cp">{{ is_rtl() ? 'با اعضای فعال' : 'With active members' }}</span>
+        <b>{{ hc('stats_2_num') }}</b>
+        <span class="lb">{{ hc('stats_2_label') }}</span>
+        <span class="cp">{{ hc('stats_2_caption') }}</span>
     </div>
     <div class="stat">
         <div class="ic"><svg viewBox="0 0 24 24"><path d="M3 11v3l11 5V6L3 11z"/><path d="M14 8.5a3.5 3.5 0 010 8"/><path d="M6 15v4h3"/></svg></div>
-        <b data-count="38">38</b>
-        <span class="lb">{{ is_rtl() ? 'اقدام عمومی' : 'Public actions' }}</span>
-        <span class="cp">{{ is_rtl() ? 'از سال ۲۰۲۱' : 'Held since 2021' }}</span>
+        <b>{{ hc('stats_3_num') }}</b>
+        <span class="lb">{{ hc('stats_3_label') }}</span>
+        <span class="cp">{{ hc('stats_3_caption') }}</span>
     </div>
     <div class="stat">
         <div class="ic"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><circle cx="17" cy="10" r="2.3"/><path d="M3 20c0-3.3 2.7-5 6-5s6 1.7 6 5M15.5 20c0-2.3 1.4-3.6 3.5-3.6s2.5 1 2.5 3.6"/></svg></div>
-        <b data-count="61">61</b>
-        <span class="lb">{{ is_rtl() ? 'سازمان شریک' : 'Partner organisations' }}</span>
-        <span class="cp">{{ is_rtl() ? 'امضاکنندهٔ اعلامیهٔ ما' : 'Signed our declaration' }}</span>
+        <b>{{ hc('stats_4_num') }}</b>
+        <span class="lb">{{ hc('stats_4_label') }}</span>
+        <span class="cp">{{ hc('stats_4_caption') }}</span>
     </div>
 </div></div></div>
-
+@endif
 @if($page_data->about_status == 'Show' && $about_item)
 <section class="shell"><div class="feature">
-    <div class="photo"><img src="{{ asset('uploads/'.$about_item->image) }}" alt=""></div>
-    <div>
+    <div class="feature-media">
+        <div class="photo"><img src="{{ asset('uploads/'.$about_item->image) }}" alt=""></div>
+        <div class="feature-badge"><b>{{ hc('about_badge_num') }}</b><span>{{ hc('about_badge_label') }}</span></div>
+    </div>
+    <div class="feature-body">
         @if(tf($about_item,'subheading'))<span class="kicker">{{ tf($about_item,'subheading') }}</span>@endif
         <h2>{{ tf($about_item,'heading') }}</h2>
-        <p>{{ tf($about_item,'text') }}</p>
-        <div class="row">
-            @if($about_item->button_text && $about_item->button_link)
-            <a class="btn btn-signal" href="{{ $about_item->button_link }}">{{ tf($about_item,'button_text') }}</a>
+        <p class="lead">{{ tf($about_item,'text') }}</p>
+        @php
+            $about_btn_link = $about_item->button_link;
+            $about_btn_dup = $about_btn_link && \Illuminate\Support\Str::endsWith(rtrim($about_btn_link, '/'), '/about');
+        @endphp
+        <div class="feature-actions">
+            @if($about_item->button_text && $about_btn_link)
+            <a class="btn btn-brand" href="{{ $about_btn_link }}">{{ tf($about_item,'button_text') }}</a>
+            @elseif($global_menu->menu_about_status == 'Show')
+            <a class="btn btn-brand" href="{{ route('about') }}">{{ hc('about_more') }}</a>
             @endif
-            @if($global_menu->menu_about_status == 'Show')
-            <a class="more" href="{{ route('about') }}">{{ is_rtl() ? 'مطالعهٔ کامل' : 'Read more about us' }}</a>
+            @if($global_menu->menu_about_status == 'Show' && $about_item->button_text && $about_btn_link && !$about_btn_dup)
+            <a class="more" href="{{ route('about') }}">{{ hc('about_more') }}</a>
             @endif
         </div>
     </div>
@@ -80,40 +126,46 @@
 @endif
 
 @php
-    $campaigns_item = \App\Models\MenuItem::where('label', 'Campaigns')->where('link_type', 'custom_page')->first();
+    $featured_campaign = \App\Models\Campaign::where('show_on_home', true)->orderBy('sort_order')->first()
+        ?? \App\Models\Campaign::where('status', 'active')->orderBy('sort_order')->orderBy('id', 'desc')->first();
 @endphp
-@if($campaigns_item && $campaigns_item->customPage)
+@if($featured_campaign && hc_on('show_campaign'))
 <section class="shell">
-    <div class="st-feature">
+    <div class="st-feature{{ $featured_campaign->image ? ' has-bg' : '' }}">
+        @if($featured_campaign->image)
+        <img class="st-bg" src="{{ asset('uploads/'.$featured_campaign->image) }}" alt="">
+        @endif
         <div>
-            <span class="ref">{{ is_rtl() ? 'کمپاین فعلی' : 'Current campaign' }}</span>
-            <h3>{{ tf($campaigns_item->customPage, 'title') }}</h3>
-            <p>{{ \Illuminate\Support\Str::limit(strip_tags(tf($campaigns_item->customPage, 'content')), 220) }}</p>
-            <a class="btn btn-ghost" href="{{ $campaigns_item->resolvedUrl() }}">{{ is_rtl() ? 'مطالعهٔ کامل کمپاین' : 'Read the full campaign' }}</a>
+            <span class="ref">{{ hc('campaign_kicker') }}</span>
+            <h3>{{ tf($featured_campaign,'title') }}</h3>
+            <p>{{ tf($featured_campaign,'excerpt') ?: plain_excerpt(tf($featured_campaign,'content'), 220) }}</p>
+            <a class="btn btn-ghost" href="{{ route('campaign', slug_for($featured_campaign)) }}">{{ hc('campaign_button') }}</a>
         </div>
+        @if($featured_campaign->stat_number)
         <div class="sig-count">
-            <b data-count="14">14</b>
-            <span>{{ is_rtl() ? 'کشور در حال فعالیت' : 'countries active' }}</span>
+            <b>{{ $featured_campaign->stat_number }}</b>
+            <span>{{ tf($featured_campaign,'stat_label') }}</span>
         </div>
+        @endif
     </div>
 </section>
 @endif
 
-@if($events->count())
+@if($events->count() && hc_on('show_next'))
 @php
     $next = $events->first();
 @endphp
 <div class="band-action"><div class="shell">
     <div class="dateblock">
-        <span class="d">{{ \Carbon\Carbon::parse($next->event_date)->format('d') }}</span>
-        <span class="m">{{ strtoupper(\Carbon\Carbon::parse($next->event_date)->format('M')) }}</span>
+        <span class="d">{{ fdate($next->event_date, 'd') }}</span>
+        <span class="m">{{ strtoupper(fdate($next->event_date, 'M')) }}</span>
     </div>
     <div>
-        <span class="chip urgent">{{ is_rtl() ? 'نزدیک‌ترین اقدام عمومی' : 'Next public action' }}</span>
+        <span class="chip urgent">{{ hc('next_chip') }}</span>
         <h3>{{ tf($next,'title') }}</h3>
         <div class="loc">{{ tf($next,'event_location') }}@if($next->event_time) &middot; {{ $next->event_time }}@endif</div>
     </div>
-    <a class="btn btn-signal btn-lg" href="{{ route('event', $next->slug) }}">{{ $next->button_text ? tf($next,'button_text') : (is_rtl() ? 'پیوستن' : 'Join') }}</a>
+    <a class="btn btn-signal btn-lg" href="{{ route('event', slug_for($next)) }}">{{ $next->button_text ? tf($next,'button_text') : (hc('next_btn')) }}</a>
 </div></div>
 @endif
 
@@ -132,16 +184,23 @@
     if ($our_work_group) $work_areas = $work_areas->merge($our_work_group->visibleChildren()->get());
     if ($news_media_group) $work_areas = $work_areas->merge($news_media_group->visibleChildren()->get());
     $work_areas = $work_areas->reject(fn($i) => $i->children()->count() > 0)->values();
+    $work_fallback_desc = [
+        'campaigns' => is_rtl() ? 'بسیج عمومی، پیگیری حقوقی و فشار هماهنگ.' : 'Public mobilisation, legal advocacy and coordinated pressure.',
+        'events' => is_rtl() ? 'اعتراضات، کنفرانس‌ها و نشست‌های پیش رو.' : 'Upcoming protests, conferences and meetings.',
+        'blog' => is_rtl() ? 'بیانیه‌ها و به‌روزرسانی‌های اخیر شبکه.' : 'Recent statements and updates from the network.',
+        'gallery' => is_rtl() ? 'عکس‌ها و ویدیوهای فعالیت‌های ما.' : 'Photos and videos from our activities.',
+        'publications' => is_rtl() ? 'گزارش‌های سالانه، خلاصه‌های سیاستی و اسناد شواهد.' : 'Annual reports, policy briefs and evidence documents.',
+    ];
 @endphp
-@if($work_areas->count())
+@if($work_areas->count() && hc_on('show_work'))
 <section class="shell">
     <div class="sec-head">
         <div class="txt">
-            <span class="kicker">{{ is_rtl() ? 'کار ما' : 'What we do' }}</span>
-            <h2>{{ is_rtl() ? 'حوزه‌های کاری ما' : 'Areas of work' }}</h2>
-            <p>{{ is_rtl() ? 'هر حوزه، مستندسازی، بسیج عمومی و پیگیری در نهادهای بین‌المللی را در کنار هم دارد.' : 'Each area combines documentation, public mobilisation and advocacy before international bodies.' }}</p>
+            <span class="kicker">{{ hc('work_kicker') }}</span>
+            <h2>{{ hc('work_heading') }}</h2>
+            <p>{{ hc('work_desc') }}</p>
         </div>
-        @if($our_work_group)<a class="more" href="{{ route('about') }}">{{ is_rtl() ? 'همهٔ فعالیت‌ها' : 'All our work' }}</a>@endif
+        @if($our_work_group)<a class="more" href="{{ route('about') }}">{{ hc('work_more') }}</a>@endif
     </div>
     <div class="areas">
         @foreach($work_areas as $i => $area)
@@ -149,10 +208,12 @@
             <div class="ic"><svg viewBox="0 0 24 24">{!! $work_icons[$i % count($work_icons)] !!}</svg></div>
             <h3>{{ $area->label() }}</h3>
             <p>
-                @if($area->link_type === 'custom_page' && $area->customPage)
-                    {{ \Illuminate\Support\Str::limit(strip_tags(tf($area->customPage, 'content')), 80) }}
+                @if($area->link_type === 'custom_page' && $area->customPage && tf($area->customPage, 'content'))
+                    {{ plain_excerpt(tf($area->customPage, 'content'), 90) }}
+                @elseif($area->link_type === 'route' && isset($work_fallback_desc[$area->route_name]))
+                    {{ $work_fallback_desc[$area->route_name] }}
                 @else
-                    {{ is_rtl() ? 'مشاهدهٔ جزئیات' : 'Learn more' }}
+                    {{ hc('work_card') }}
                 @endif
             </p>
         </a>
@@ -165,19 +226,19 @@
 <section class="cream"><div class="shell">
     <div class="sec-head">
         <div class="txt">
-            <span class="kicker">{{ is_rtl() ? 'تیم ما' : 'Our people' }}</span>
-            <h2>{{ tf($page_data,'team_heading') ?: (is_rtl() ? 'هماهنگ‌کنندگان شبکه' : 'Network coordinators') }}</h2>
+            <span class="kicker">{{ hc('team_kicker') }}</span>
+            <h2>{{ tf($page_data,'team_heading') ?: (hc('team_heading')) }}</h2>
         </div>
         @if($global_menu->menu_team_member_status == 'Show')
-        <a class="more" href="{{ route('members') }}">{{ is_rtl() ? 'همهٔ اعضا' : 'All members' }}</a>
+        <a class="more" href="{{ route('members') }}">{{ hc('team_more') }}</a>
         @endif
     </div>
-    <div class="cards">
-        @foreach($members->take(3) as $member)
-        <a class="card" href="{{ route('member', $member->slug) }}">
-            <div class="photo"><img src="{{ asset('uploads/'.$member->image) }}" alt="{{ $member->name }}"></div>
+    <div class="cards people">
+        @foreach($members->take(6) as $member)
+        <a class="card" href="{{ route('member', slug_for($member)) }}">
+            <div class="photo"><img src="{{ asset('uploads/'.$member->image) }}" alt="{{ tf($member,'name') }}"></div>
             <span class="dt">{{ tf($member,'designation') }}</span>
-            <h3>{{ $member->name }}</h3>
+            <h3>{{ tf($member,'name') }}</h3>
         </a>
         @endforeach
     </div>
@@ -188,37 +249,27 @@
 <section class="{{ ($page_data->team_status == 'Show' && $members->count()) ? '' : 'cream' }}"><div class="shell">
     <div class="sec-head">
         <div class="txt">
-            <span class="kicker">{{ is_rtl() ? 'رویدادها' : 'Events' }}</span>
-            <h2>{{ tf($page_data,'event_heading') ?: (is_rtl() ? 'اعتراضات، کنفرانس‌ها و نشست‌ها' : 'Protests, conferences and meetings') }}</h2>
+            <span class="kicker">{{ hc('events_kicker') }}</span>
+            <h2>{{ tf($page_data,'event_heading') ?: (hc('events_heading')) }}</h2>
         </div>
-        <a class="more" href="{{ route('events') }}">{{ is_rtl() ? 'تقویم کامل رویدادها' : 'Full events calendar' }}</a>
+        <a class="more" href="{{ route('events') }}">{{ hc('events_more') }}</a>
     </div>
     <ul class="events">
         @foreach($events->take(4) as $event)
-        <li class="event">
-            <div class="leaf">
-                <span class="d">{{ \Carbon\Carbon::parse($event->event_date)->format('d') }}</span>
-                <span class="m">{{ strtoupper(\Carbon\Carbon::parse($event->event_date)->format('M')) }}</span>
-            </div>
-            <div>
-                <h3><a href="{{ route('event', $event->slug) }}" style="color:inherit;text-decoration:none">{{ tf($event,'title') }}</a></h3>
-                <div class="loc">{{ tf($event,'event_location') }}@if($event->event_time) &middot; {{ $event->event_time }}@endif</div>
-            </div>
-            <a class="btn btn-out" href="{{ route('event', $event->slug) }}">{{ is_rtl() ? 'جزئیات' : 'Details' }}</a>
-        </li>
+        @include('front.partials.event-row')
         @endforeach
     </ul>
 </div></section>
 @endif
 
-@if($photos->count())
+@if($photos->count() && hc_on('show_gallery'))
 <section class="shell">
     <div class="sec-head">
         <div class="txt">
-            <span class="kicker">{{ is_rtl() ? 'گالری' : 'Gallery' }}</span>
-            <h2>{{ is_rtl() ? 'فعالیت‌های اخیر' : 'Recent activities' }}</h2>
+            <span class="kicker">{{ hc('gallery_kicker') }}</span>
+            <h2>{{ hc('gallery_heading') }}</h2>
         </div>
-        <a class="more" href="{{ route('gallery') }}">{{ is_rtl() ? 'عکس‌ها و ویدیوها' : 'Photos & videos' }}</a>
+        <a class="more" href="{{ route('gallery') }}">{{ hc('gallery_more') }}</a>
     </div>
     <div class="gallery">
         @foreach($photos as $photo)
@@ -230,30 +281,30 @@
 </section>
 @endif
 
-@if($publications->count())
+@if($publications->count() && hc_on('show_pubs'))
 <section class="cream"><div class="shell">
     <div class="sec-head">
         <div class="txt">
-            <span class="kicker">{{ is_rtl() ? 'انتشارات' : 'Publications' }}</span>
-            <h2>{{ is_rtl() ? 'گزارش‌های اخیر' : 'Recently published reports' }}</h2>
+            <span class="kicker">{{ hc('pubs_kicker') }}</span>
+            <h2>{{ hc('pubs_heading') }}</h2>
         </div>
-        <a class="more" href="{{ route('publications') }}">{{ is_rtl() ? 'همهٔ گزارش‌ها' : 'All publications' }}</a>
+        <a class="more" href="{{ route('publications') }}">{{ hc('pubs_more') }}</a>
     </div>
     <ul class="records">
         @foreach($publications as $pub)
         <li class="record">
             <div class="meta">
-                <b>{{ $pub->published_date ? \Carbon\Carbon::parse($pub->published_date)->format('Y') : '' }}</b>
+                <b>{{ $pub->published_date ? fdate($pub->published_date, 'Y') : '' }}</b>
                 <span>{{ $pub->category ? tf($pub->category,'name') : '' }}</span>
             </div>
             <div>
                 <h3>{{ tf($pub, 'title') }}</h3>
                 @if(tf($pub, 'description'))
-                <p>{{ \Illuminate\Support\Str::limit(strip_tags(tf($pub, 'description')), 120) }}</p>
+                <p>{{ plain_excerpt(tf($pub, 'description'), 120) }}</p>
                 @endif
             </div>
             @if($pub->file)
-            <a class="go" href="{{ asset('uploads/'.$pub->file) }}" target="_blank" rel="noopener">{{ is_rtl() ? 'دانلود PDF' : 'Download PDF' }}</a>
+            <a class="go" href="{{ asset('uploads/'.$pub->file) }}" target="_blank" rel="noopener">{{ hc('pubs_download') }}</a>
             @endif
         </li>
         @endforeach
@@ -265,65 +316,68 @@
 <section class="shell">
     <div class="sec-head">
         <div class="txt">
-            <span class="kicker">{{ is_rtl() ? 'اخبار و به‌روزرسانی‌ها' : 'News & updates' }}</span>
-            <h2>{{ tf($page_data,'blog_heading') ?: (is_rtl() ? 'تازه‌ترین‌های شبکه' : 'Latest from the network') }}</h2>
+            <span class="kicker">{{ hc('news_kicker') }}</span>
+            <h2>{{ tf($page_data,'blog_heading') ?: (hc('news_heading')) }}</h2>
         </div>
-        <a class="more" href="{{ route('blog') }}">{{ is_rtl() ? 'همهٔ اخبار' : 'All news' }}</a>
+        <a class="more" href="{{ route('blog') }}">{{ hc('news_more') }}</a>
     </div>
     <div class="cards">
         @foreach($posts as $post)
-        <a class="card" href="{{ route('post', $post->slug) }}">
+        <a class="card" href="{{ route('post', slug_for($post)) }}">
             <div class="photo"><img src="{{ asset('uploads/'.$post->image) }}" alt="{{ $post->title }}"></div>
-            <span class="dt">{{ optional($post->published_at ?? $post->created_at)->format('j F Y') }}</span>
+            @include('front.partials.post-meta')
             <h3>{{ tf($post,'title') }}</h3>
-            @if(tf($post,'excerpt'))<p>{{ \Illuminate\Support\Str::limit(tf($post,'excerpt'), 110) }}</p>@endif
+            @if(tf($post,'excerpt'))<p>{{ plain_excerpt(tf($post,'excerpt'), 110) }}</p>@endif
+            <span class="readmore">{{ hc('news_readmore') }}</span>
         </a>
         @endforeach
     </div>
 </section>
 @endif
 
+@if(hc_on('show_paths'))
 <section class="shell">
     <div class="sec-head"><div class="txt">
-        <span class="kicker">{{ is_rtl() ? 'مشارکت' : 'Get involved' }}</span>
-        <h2>{{ is_rtl() ? 'سه راه برای مشارکت' : 'Three ways to take part' }}</h2>
+        <span class="kicker">{{ hc('paths_kicker') }}</span>
+        <h2>{{ hc('paths_heading') }}</h2>
     </div></div>
     <div class="paths">
         <div class="path">
-            <h3>{{ is_rtl() ? 'عضویت در شبکه' : 'Become a member' }}</h3>
-            <p>{{ is_rtl() ? 'به شعبهٔ کشوری بپیوندید و در تعیین کمپاین‌های بعدی سهیم شوید.' : 'Join a country chapter and help shape which campaigns we run next.' }}</p>
-            <a class="btn" href="{{ route('register') }}">{{ is_rtl() ? 'درخواست عضویت' : 'Apply for membership' }}</a></div>
+            <h3>{{ hc('paths_1_title') }}</h3>
+            <p>{{ hc('paths_1_text') }}</p>
+            <a class="btn" href="{{ hc_link('paths_1_link') }}">{{ hc('paths_1_btn') }}</a></div>
         <div class="path">
-            <h3>{{ is_rtl() ? 'داوطلبی یا هماهنگی' : 'Volunteer or coordinate' }}</h3>
-            <p>{{ is_rtl() ? 'ترجمه کنید، مستند کنید یا شبکه را در شهر خود هماهنگ کنید.' : 'Translate, document, organise a local action, or coordinate the network in your city.' }}</p>
-            <a class="btn" href="{{ route('contact') }}">{{ is_rtl() ? 'داوطلب شوید' : 'Volunteer with us' }}</a></div>
+            <h3>{{ hc('paths_2_title') }}</h3>
+            <p>{{ hc('paths_2_text') }}</p>
+            <a class="btn" href="{{ hc_link('paths_2_link') }}">{{ hc('paths_2_btn') }}</a></div>
         <div class="path">
-            <h3>{{ is_rtl() ? 'حمایت از کار ما' : 'Support our work' }}</h3>
-            <p>{{ is_rtl() ? 'کمک‌ها صرف کمپاین‌ها، سفر نمایندگان و مستندسازی مستقل می‌شود.' : 'Funds go to campaigns, delegate travel and independent documentation.' }}</p>
-            <a class="btn" href="{{ route('donate') }}">{{ is_rtl() ? 'حمایت مالی' : 'Support our work' }}</a></div>
+            <h3>{{ hc('paths_3_title') }}</h3>
+            <p>{{ hc('paths_3_text') }}</p>
+            <a class="btn" href="{{ hc_link('paths_3_link') }}">{{ hc('paths_3_btn') }}</a></div>
     </div>
 </section>
+@endif
 
 @php
+    $home_partners = \App\Models\Partner::where('status', 'Show')->orderBy('sort_order')->orderBy('id')->get();
     $partnerships_group = \App\Models\MenuItem::where('label', 'Partnerships')->whereNull('parent_id')->first();
     $request_form_item = $partnerships_group ? $partnerships_group->children->firstWhere('label', 'Partnership Request Form') : null;
-    $partner_links = $partnerships_group
-        ? $partnerships_group->visibleChildren()->get()->reject(fn($p) => $p->id === optional($request_form_item)->id)
-        : collect();
 @endphp
-@if($partner_links->count())
+@if($home_partners->count() && hc_on('show_partners'))
 <section class="shell">
     <div class="sec-head">
         <div class="txt">
-            <span class="kicker">{{ is_rtl() ? 'همکاری‌ها' : 'Partnerships' }}</span>
-            <h2>{{ is_rtl() ? 'همکاری با سازمان‌ها و نهادها' : 'We work with organisations and institutions' }}</h2>
-            <p>{{ is_rtl() ? 'با انواع مختلف نهادها همکاری می‌کنیم — از سازمان‌های حقوق بشری تا نهادهای بین‌المللی.' : 'We partner with different kinds of organisations, from human rights groups to international bodies.' }}</p>
+            <span class="kicker">{{ hc('partners_kicker') }}</span>
+            <h2>{{ hc('partners_heading') }}</h2>
+            <p>{{ hc('partners_desc') }}</p>
         </div>
-        <a class="more" href="{{ $request_form_item ? $request_form_item->resolvedUrl() : route('contact') }}">{{ is_rtl() ? 'درخواست همکاری' : 'Propose a partnership' }}</a>
+        <a class="more" href="{{ route('partners') }}">{{ hc('partners_more') }}</a>
     </div>
     <div class="partners">
-        @foreach($partner_links as $p)
-        <a class="plogo" href="{{ $p->resolvedUrl() }}">{{ $p->label() }}</a>
+        @foreach($home_partners as $p)
+        <a class="plogo" href="{{ $p->website ?: route('partners') }}" @if($p->website) target="_blank" rel="noopener" @endif title="{{ tf($p,'name') }}">
+            <img src="{{ asset('uploads/'.$p->logo) }}" alt="{{ tf($p,'name') }}">
+        </a>
         @endforeach
     </div>
 </section>

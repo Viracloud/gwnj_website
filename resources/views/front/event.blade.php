@@ -29,7 +29,7 @@
             <span><b>{{ is_rtl() ? 'مکان' : 'Location' }}:</b> {{ tf($event,'event_location') }}</span>
             @endif
             @if($event->event_date)
-            <span><b>{{ is_rtl() ? 'تاریخ' : 'Date' }}:</b> {{ \Carbon\Carbon::parse($event->event_date)->format('d F Y') }}</span>
+            <span><b>{{ is_rtl() ? 'تاریخ' : 'Date' }}:</b> {{ fdate($event->event_date, 'd F Y') }}</span>
             @endif
             @if($event->event_time)
             <span><b>{{ is_rtl() ? 'ساعت' : 'Time' }}:</b> {{ $event->event_time }}</span>
@@ -37,6 +37,10 @@
             @if($event->ticket_price)
             <span><b>{{ is_rtl() ? 'قیمت بلیت' : 'Ticket' }}:</b> {{ $event->ticket_price }}</span>
             @endif
+        </div>
+
+        <div style="margin-bottom:var(--s6)">
+            @include('front.partials.share', ['share_url' => url()->current(), 'share_title' => tf($event,'title')])
         </div>
 
         @if(tf($event,'event_location_detail'))
@@ -76,7 +80,7 @@
             <div class="in">
                 <ul class="linklist">
                     @if($event->event_date)
-                    <li><b>{{ \Carbon\Carbon::parse($event->event_date)->format('d F Y') }}@if($event->event_time) &middot; {{ $event->event_time }}@endif</b>
+                    <li><b>{{ fdate($event->event_date, 'd F Y') }}@if($event->event_time) &middot; {{ $event->event_time }}@endif</b>
                         <span>{{ is_rtl() ? 'تاریخ و ساعت' : 'Date & time' }}</span></li>
                     @endif
                     @if(tf($event,'event_location'))

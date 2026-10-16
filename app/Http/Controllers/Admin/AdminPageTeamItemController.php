@@ -20,6 +20,8 @@ class AdminPageTeamItemController extends Controller
 
         $obj->page_title = $request->page_title;
         $obj->page_title_sv = $request->page_title_sv;
+        $obj->intro = $request->intro;
+        $obj->intro_sv = $request->intro_sv;
         $obj->seo_title = $request->seo_title;
         $obj->seo_meta_description = $request->seo_meta_description;
 

@@ -30,6 +30,10 @@
                         <input type="text" class="form-control-custom" name="slug">
                     </div>
                     <div class="mb-3">
+                        <label class="label-custom">Slug (Dari) <small>- optional, auto-generated from the Dari title</small></label>
+                        <input type="text" class="form-control-custom" name="slug_sv" dir="rtl">
+                    </div>
+                    <div class="mb-3">
                         <label class="label-custom">Menu Label</label>
                         <input type="text" class="form-control-custom" name="menu_label">
                     </div>
@@ -97,6 +101,10 @@
                                 <div class="mb-3">
                                     <label class="label-custom">Slug *</label>
                                     <input type="text" class="form-control-custom" name="slug" value="{{ $post_category->slug }}">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="label-custom">Slug (Dari) <small>- optional, auto-generated from the Dari title</small></label>
+                                    <input type="text" class="form-control-custom" name="slug_sv" dir="rtl" value="{{ $post_category->slug_sv }}">
                                 </div>
                                 <div class="mb-3">
                                     <label class="label-custom">Menu Label</label>

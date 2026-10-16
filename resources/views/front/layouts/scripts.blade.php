@@ -12,7 +12,7 @@
         autoplayVideos: true
     });
 </script>
-<script src="{{ asset('dist-front/js/custom.js') }}"></script>
+<script src="{{ asset('dist-front/js/custom.js') }}?v={{ filemtime(public_path('dist-front/js/custom.js')) }}"></script>
 @if(!is_rtl())
 <script src="{{ asset('dist-front/js/ltr.js') }}"></script>
 @endif

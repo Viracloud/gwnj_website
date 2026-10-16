@@ -76,8 +76,15 @@ class AdminSettingController extends Controller
     {
         $setting = Setting::where('id',1)->first();
 
+        if($request->boolean('remove_banner') && $setting->banner) {
+            if(file_exists(public_path('uploads/'.$setting->banner))) {
+                unlink(public_path('uploads/'.$setting->banner));
+            }
+            $setting->banner = null;
+        }
+
         if($request->hasFile('banner')) {
-            $request->validate(['banner' => 'mimes:jpeg,png,jpg,gif,svg|max:2048']);
+            $request->validate(['banner' => 'mimes:jpeg,png,jpg,gif,webp|max:4096']);
             $final_name = 'banner_'.time().'.'.$request->banner->extension();
             if($setting->banner && file_exists(public_path('uploads/'.$setting->banner))) {
                 unlink(public_path('uploads/'.$setting->banner));
@@ -129,6 +136,7 @@ class AdminSettingController extends Controller
         $setting->footer_instagram = $request->footer_instagram;
         $setting->footer_phone = $request->footer_phone;
         $setting->footer_email = $request->footer_email;
+        $setting->footer_website = $request->footer_website;
         $setting->footer_copyright = $request->footer_copyright;
         $setting->footer_copyright_sv = $request->footer_copyright_sv;
         $setting->footer_about_text = $request->footer_about_text;
@@ -192,8 +200,81 @@ class AdminSettingController extends Controller
         $setting->paypal_client_id = $request->paypal_client_id;
         $setting->paypal_client_secret = $request->paypal_client_secret;
         $setting->paypal_currency = strtoupper($request->paypal_currency);
+        $setting->membership_dues_amount = $request->membership_dues_amount !== '' ? $request->membership_dues_amount : null;
 
         $setting->save();
         return redirect()->back()->with('success', 'Item updated successfully.');
+    }
+
+    public function seo()
+    {
+        $setting = Setting::where('id',1)->first();
+        return view('admin.setting.seo',compact('setting'));
+    }
+
+    public function seo_update(Request $request)
+    {
+        $request->validate([
+            'seo_og_image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+        ]);
+
+        $setting = Setting::where('id',1)->first();
+
+        $setting->seo_title_template = $request->seo_title_template;
+        $setting->seo_default_description = $request->seo_default_description;
+        $setting->seo_default_description_sv = $request->seo_default_description_sv;
+        $setting->seo_google_verification = $request->seo_google_verification;
+        $setting->seo_analytics_id = $request->seo_analytics_id;
+        $setting->seo_robots_indexable = $request->has('seo_robots_indexable');
+
+        if ($request->hasFile('seo_og_image')) {
+            $final_name = 'seo_og_'.time().'.'.$request->seo_og_image->extension();
+            if ($setting->seo_og_image && file_exists(public_path('uploads/'.$setting->seo_og_image))) {
+                unlink(public_path('uploads/'.$setting->seo_og_image));
+            }
+            $request->seo_og_image->move(public_path('uploads'), $final_name);
+            $setting->seo_og_image = $final_name;
+        }
+
+        $setting->save();
+        return redirect()->back()->with('success', 'SEO settings updated successfully.');
+    }
+
+    public function sitemap()
+    {
+        $setting = Setting::where('id',1)->first();
+        $urls = sitemap_entries($setting);
+        return view('admin.setting.sitemap', compact('setting', 'urls'));
+    }
+
+    public function sitemap_update(Request $request)
+    {
+        $request->validate([
+            'sitemap_priority_static' => 'required|numeric|min:0|max:1',
+            'sitemap_priority_pages' => 'required|numeric|min:0|max:1',
+            'sitemap_priority_events' => 'required|numeric|min:0|max:1',
+            'sitemap_priority_posts' => 'required|numeric|min:0|max:1',
+            'sitemap_priority_campaigns' => 'required|numeric|min:0|max:1',
+            'sitemap_priority_members' => 'required|numeric|min:0|max:1',
+        ]);
+
+        $setting = Setting::where('id',1)->first();
+
+        $setting->sitemap_include_static = $request->has('sitemap_include_static');
+        $setting->sitemap_include_pages = $request->has('sitemap_include_pages');
+        $setting->sitemap_include_events = $request->has('sitemap_include_events');
+        $setting->sitemap_include_posts = $request->has('sitemap_include_posts');
+        $setting->sitemap_include_campaigns = $request->has('sitemap_include_campaigns');
+        $setting->sitemap_include_members = $request->has('sitemap_include_members');
+
+        $setting->sitemap_priority_static = $request->sitemap_priority_static;
+        $setting->sitemap_priority_pages = $request->sitemap_priority_pages;
+        $setting->sitemap_priority_events = $request->sitemap_priority_events;
+        $setting->sitemap_priority_posts = $request->sitemap_priority_posts;
+        $setting->sitemap_priority_campaigns = $request->sitemap_priority_campaigns;
+        $setting->sitemap_priority_members = $request->sitemap_priority_members;
+
+        $setting->save();
+        return redirect()->back()->with('success', 'Sitemap settings updated successfully.');
     }
 }

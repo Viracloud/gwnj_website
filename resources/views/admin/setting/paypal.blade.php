@@ -37,6 +37,15 @@
                 </p>
             </div>
 
+            <h6 class="cus-heading">Membership Dues</h6>
+            <div class="card-custom-p mb-4">
+                <div class="mb-3">
+                    <label class="label-custom">Annual dues amount</label>
+                    <input type="number" step="0.01" min="0" name="membership_dues_amount" value="{{ $setting->membership_dues_amount }}" class="form-control-custom" placeholder="e.g. 25.00">
+                    <small class="text-muted">Charged in the currency above via the same PayPal credentials. Leave empty to hide the "Pay membership dues" button on members' dashboards (dues will then only be trackable manually from Membership &rarr; Members).</small>
+                </div>
+            </div>
+
             <div class="card-custom-p mb-4">
                 <div>
                     <button type="submit" class="btn-admin-primary">Update</button>

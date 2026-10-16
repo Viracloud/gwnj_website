@@ -14,8 +14,14 @@
                     @if($item->is_button)
                         {{-- button-style items render after the list, see below --}}
                     @elseif($item->children->count())
+                    @php $item_url = $item->resolvedUrl(); @endphp
                     <li class="dropdown">
+                        @if($item_url !== '#')
+                        <a href="{{ $item_url }}" class="dropdown-parent-link {{ $item->isActive() ? 'here' : '' }}">{{ $item->label() }}</a>
+                        <button type="button" class="dropdown-toggle dropdown-caret" data-bs-toggle="dropdown" aria-expanded="false" aria-label="{{ is_rtl() ? 'باز کردن زیرمنو' : 'Open submenu' }}"></button>
+                        @else
                         <a href="#" class="dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false">{{ $item->label() }}</a>
+                        @endif
                         <ul class="dropdown-menu">
                             @foreach($item->children as $child)
                                 @if($child->children->count())
@@ -38,14 +44,6 @@
                     @endif
                 @endforeach
             </ul>
-
-            @if($global_menu->menu_login_status == 'Show')
-                @if(Auth::guard('web')->check())
-                <a class="btn btn-out" href="{{ route('dashboard') }}">{{ is_rtl() ? 'داشبورد' : 'Dashboard' }}</a>
-                @else
-                <a class="btn btn-out" href="{{ route('login') }}">{{ is_rtl() ? $global_menu->menu_login_name_sv : $global_menu->menu_login_name }}</a>
-                @endif
-            @endif
 
             @foreach($global_nav as $item)
                 @if($item->is_button)

@@ -10,22 +10,60 @@ use App\Models\Admin;
 use App\Models\User;
 use App\Models\Subscriber;
 use App\Models\Donation;
+use App\Models\Comment;
+use App\Models\Reply;
+use App\Models\Post;
+use App\Models\Event;
+use App\Models\Campaign;
+use App\Models\Publication;
+use App\Models\Photo;
+use App\Models\CustomPage;
 use App\Mail\Websitemail;
 
 class AdminController extends Controller
 {
     public function dashboard()
     {
-        $total_customers = User::count();
+        $today = now()->toDateString();
+
+        // Things waiting for someone to act on them
+        $pending = [
+            'comments' => Comment::where('status', 'Pending')->count(),
+            'replies' => Reply::where('status', 'Pending')->count(),
+            'applications' => User::where('membership_status', 'pending')->count(),
+            'cards' => User::where('card_status', 'requested')->count(),
+        ];
+
+        // Content overview
+        $counts = [
+            'posts' => Post::count(),
+            'upcoming_events' => Event::where('event_date', '>=', $today)->count(),
+            'campaigns' => Campaign::count(),
+            'publications' => Publication::count(),
+            'photos' => Photo::count(),
+            'pages' => CustomPage::count(),
+        ];
+
+        // People & support (shown to super admins only)
+        $total_members = User::where('membership_status', 'approved')->count();
+        $total_users = User::count();
         $total_subscribers = Subscriber::where('status',1)->count();
         $total_donations = Donation::where('status','Completed')->count();
         $total_raised = Donation::where('status','Completed')->sum('amount');
 
+        $upcoming_events = Event::where('event_date', '>=', $today)->orderBy('event_date')->take(5)->get();
+        $latest_posts = Post::orderBy('id', 'desc')->take(5)->get();
+
         return view('admin.dashboard', compact(
-            'total_customers',
+            'pending',
+            'counts',
+            'total_members',
+            'total_users',
             'total_subscribers',
             'total_donations',
-            'total_raised'
+            'total_raised',
+            'upcoming_events',
+            'latest_posts'
         ));
     }
 
@@ -87,7 +125,7 @@ class AdminController extends Controller
         $message = "To reset password, please click on the link below:<br>";
         $message .= "<a href='".$reset_link."'>".$reset_link."</a>";
 
-        \Mail::to($request->email)->send(new Websitemail($subject,$message));
+        \safe_mail($request->email, $subject, $message);
 
         return redirect()->back()->with('success','We have sent a password reset link to your email. Please check your email. If you do not find the email in your inbox, please check your spam folder.');
     }

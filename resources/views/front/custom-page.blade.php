@@ -7,6 +7,9 @@
 <div class="pagehead"><div class="shell">
     <span class="kicker">{{ $menu_parent ? $menu_parent->label() : (is_rtl() ? 'صفحه' : 'Page') }}</span>
     <h1>{{ tf($page,'title') }}</h1>
+    @if(tf($page,'excerpt'))
+    <p class="lede">{{ tf($page,'excerpt') }}</p>
+    @endif
 </div></div>
 
 <section class="shell">
@@ -19,6 +22,16 @@
             <div class="rich-content">
                 {!! tf($page,'content') !!}
             </div>
+            @if($page->images->count())
+            <div class="topic-gallery">
+                @foreach($page->images as $img)
+                <a class="photo plain" href="{{ asset('uploads/'.$img->image) }}" data-glightbox>
+                    <img src="{{ asset('uploads/'.$img->image) }}" alt="{{ tf($img,'caption') }}">
+                    @if(tf($img,'caption'))<span class="cap">{{ tf($img,'caption') }}</span>@endif
+                </a>
+                @endforeach
+            </div>
+            @endif
         </div>
         <aside>
             <div class="aside-box">
@@ -46,6 +59,16 @@
     <div class="rich-content">
         {!! tf($page,'content') !!}
     </div>
+    @if($page->images->count())
+    <div class="topic-gallery">
+        @foreach($page->images as $img)
+        <a class="photo plain" href="{{ asset('uploads/'.$img->image) }}" data-glightbox>
+            <img src="{{ asset('uploads/'.$img->image) }}" alt="{{ tf($img,'caption') }}">
+            @if(tf($img,'caption'))<span class="cap">{{ tf($img,'caption') }}</span>@endif
+        </a>
+        @endforeach
+    </div>
+    @endif
     @endif
 </section>
 @endsection

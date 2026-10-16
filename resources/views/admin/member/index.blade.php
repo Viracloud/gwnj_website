@@ -25,8 +25,25 @@
                         <input type="file" class="form-control-custom" name="image">
                     </div>
                     <div class="mb-3">
+                        <label class="label-custom">Group * <small>- e.g. President, Board of Directors, Executive Team (create groups first under Team → Groups)</small></label>
+                        <select class="form-control-custom" name="member_category_id">
+                            <option value="">Select a group</option>
+                            @foreach($member_categories as $cat)
+                            <option value="{{ $cat->id }}">{{ $cat->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="mb-3">
                         <label class="label-custom">Slug *</label>
                         <input type="text" class="form-control-custom" name="slug">
+                    </div>
+                    <div class="mb-3">
+                        <label class="label-custom">Slug (Dari) <small>- optional, auto-generated from the Dari name</small></label>
+                        <input type="text" class="form-control-custom" name="slug_sv" dir="rtl">
+                    </div>
+                    <div class="mb-3">
+                        <label class="label-custom">Display order inside the group <small>- smaller number shows first</small></label>
+                        <input type="number" min="0" class="form-control-custom" name="sort_order" value="0">
                     </div>
 
                     <h6 class="fw-semibold mt-4 mb-2">English</h6>
@@ -43,11 +60,15 @@
                         <textarea class="form-control-custom" name="short_description" rows="4"></textarea>
                     </div>
                     <div class="mb-3">
-                        <label class="label-custom">Description *</label>
+                        <label class="label-custom">Full biography <small>- optional; the short description is enough for the leadership page</small></label>
                         <textarea id="editor1" class="form-control-custom tinymce-editor" name="description" rows="4"></textarea>
                     </div>
 
                     <h6 class="fw-semibold mt-4 mb-2">دری (second language)</h6>
+                    <div class="mb-3">
+                        <label class="label-custom">Name</label>
+                        <input type="text" class="form-control-custom" name="name_sv" dir="rtl">
+                    </div>
                     <div class="mb-3">
                         <label class="label-custom">Designation</label>
                         <input type="text" class="form-control-custom" name="designation_sv" dir="rtl">
@@ -66,6 +87,13 @@
                         <select class="form-control-custom" name="show_on_home">
                             <option value="Yes">Yes</option>
                             <option value="No">No</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="label-custom">Show phone and email publicly?</label>
+                        <select class="form-control-custom" name="show_contact">
+                            <option value="0">No (recommended)</option>
+                            <option value="1">Yes</option>
                         </select>
                     </div>
                     <div class="mb-3">
@@ -114,6 +142,8 @@
                 <th>ID</th>
                 <th>Image</th>
                 <th>Name</th>
+                <th>Group</th>
+                <th>Order</th>
                 <th>Show on Home?</th>
                 <th>Award</th>
                 <th>Action</th>
@@ -127,6 +157,8 @@
                     <img src="{{ asset('uploads/'.$member->image) }}" alt="" class="w_100">
                 </td>
                 <td>{{ $member->name }}</td>
+                <td>{{ optional($member->category)->name }}</td>
+                <td>{{ $member->sort_order }}</td>
                 <td>
                     @if($member->show_on_home == 'Yes')
                     <span class="badge bg-success">Yes</span>
@@ -169,6 +201,23 @@
                                     <label class="label-custom">Slug *</label>
                                     <input type="text" class="form-control-custom" name="slug" value="{{ $member->slug }}">
                                 </div>
+                                <div class="mb-3">
+                                    <label class="label-custom">Group *</label>
+                                    <select class="form-control-custom" name="member_category_id">
+                                        <option value="">Select a group</option>
+                                        @foreach($member_categories as $cat)
+                                        <option value="{{ $cat->id }}" {{ $member->member_category_id == $cat->id ? 'selected' : '' }}>{{ $cat->name }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="label-custom">Slug (Dari) <small>- optional</small></label>
+                                    <input type="text" class="form-control-custom" name="slug_sv" dir="rtl" value="{{ $member->slug_sv }}">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="label-custom">Display order inside the group <small>- smaller number shows first</small></label>
+                                    <input type="number" min="0" class="form-control-custom" name="sort_order" value="{{ $member->sort_order }}">
+                                </div>
 
                                 <h6 class="fw-semibold mt-4 mb-2">English</h6>
                                 <div class="mb-3">
@@ -184,11 +233,15 @@
                                     <textarea class="form-control-custom" name="short_description" rows="4">{{ $member->short_description }}</textarea>
                                 </div>
                                 <div class="mb-3">
-                                    <label class="label-custom">Description *</label>
+                                    <label class="label-custom">Full biography <small>- optional; the short description is enough for the leadership page</small></label>
                                     <textarea id="editor1_{{ $member->id }}" class="form-control-custom tinymce-editor" name="description" rows="4">{{ $member->description }}</textarea>
                                 </div>
 
                                 <h6 class="fw-semibold mt-4 mb-2">دری (second language)</h6>
+                                <div class="mb-3">
+                                    <label class="label-custom">Name</label>
+                                    <input type="text" class="form-control-custom" name="name_sv" value="{{ $member->name_sv }}" dir="rtl">
+                                </div>
                                 <div class="mb-3">
                                     <label class="label-custom">Designation</label>
                                     <input type="text" class="form-control-custom" name="designation_sv" value="{{ $member->designation_sv }}" dir="rtl">
@@ -207,6 +260,13 @@
                                     <select class="form-control-custom" name="show_on_home">
                                         <option value="Yes" {{ $member->show_on_home == 'Yes' ? 'selected' : '' }}>Yes</option>
                                         <option value="No" {{ $member->show_on_home == 'No' ? 'selected' : '' }}>No</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="label-custom">Show phone and email publicly?</label>
+                                    <select class="form-control-custom" name="show_contact">
+                                        <option value="0" {{ !$member->show_contact ? 'selected' : '' }}>No (recommended)</option>
+                                        <option value="1" {{ $member->show_contact ? 'selected' : '' }}>Yes</option>
                                     </select>
                                 </div>
                                 <div class="mb-3">

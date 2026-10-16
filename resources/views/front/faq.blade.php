@@ -10,6 +10,7 @@
 </div></div>
 
 <section class="shell">
+    @if($faqs->count())
     <div class="accordion" id="faqAccordion" style="max-width:840px;margin-inline:auto">
         @foreach($faqs as $faq)
         <div class="accordion-item">
@@ -33,5 +34,8 @@
     <div style="max-width:840px;margin-inline:auto">
         {{ $faqs->links() }}
     </div>
+    @else
+    <p style="color:var(--muted)">{{ is_rtl() ? 'هنوز سوالی ثبت نشده است.' : 'No questions have been added yet.' }}</p>
+    @endif
 </section>
 @endsection

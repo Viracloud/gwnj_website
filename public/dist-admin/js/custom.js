@@ -1,15 +1,11 @@
-// Sidebar active state — runs immediately, then reveals nav
+// Sidebar active state — the "active" class is already set server-side (Blade);
+// just open whichever dropdown contains the active link, then reveal the nav.
 (function () {
-  var page = location.pathname.split('/').pop() || 'index.html';
-  $('.sidebar-nav .nav-link').each(function () {
-    var href = $(this).attr('href');
-    if (href === page) {
-      $(this).addClass('active');
-      var $dropdown = $(this).closest('.nav-dropdown');
-      if ($dropdown.length) {
-        $dropdown.addClass('open');
-        $dropdown.find('.nav-dropdown-toggle').addClass('active');
-      }
+  $('.sidebar-nav .nav-link.active').each(function () {
+    var $dropdown = $(this).closest('.nav-dropdown');
+    if ($dropdown.length) {
+      $dropdown.addClass('open');
+      $dropdown.find('.nav-dropdown-toggle').addClass('active');
     }
   });
   $('.sidebar-nav').addClass('ready');
@@ -158,4 +154,69 @@ $(function () {
     });
   }
 
+});
+
+// Open the "Add" form straight away when a page is reached via a "#add" link
+// (used by the dashboard's quick-action buttons).
+$(function () {
+  if (window.location.hash === '#add' && $('#modal_add').length && window.bootstrap) {
+    bootstrap.Modal.getOrCreateInstance(document.getElementById('modal_add')).show();
+    history.replaceState(null, '', window.location.pathname + window.location.search);
+  }
+});
+
+// Top-bar search: type a section name ("events", "logo", "comments"...) and jump to it.
+// Searches the links in the sidebar, so it only offers what this user is allowed to see.
+$(function () {
+  var $input = $('#adminSearch');
+  var $box = $('#adminSearchResults');
+  if (!$input.length) return;
+
+  var items = [];
+  $('.sidebar-nav a.nav-link').each(function () {
+    var href = $(this).attr('href');
+    if (!href || href.indexOf('javascript') === 0) return;
+    var label = $.trim($(this).clone().children('.nav-badge').remove().end().text());
+    var group = $.trim($(this).closest('.nav-dropdown').find('> .nav-dropdown-toggle .sidebar-label').first().text());
+    items.push({ label: label, group: group, href: href, hay: (label + ' ' + group).toLowerCase() });
+  });
+
+  var render = function () {
+    var q = $.trim($input.val()).toLowerCase();
+    if (!q) { $box.removeClass('show').empty(); return; }
+    var words = q.split(/\s+/);
+    var hits = items.filter(function (it) {
+      return words.every(function (w) { return it.hay.indexOf(w) > -1; });
+    }).slice(0, 10);
+    $box.empty();
+    if (!hits.length) {
+      $box.append($('<div class="none">').text('No section found for "' + q + '"'));
+    } else {
+      hits.forEach(function (it, i) {
+        var $a = $('<a>').attr('href', it.href).toggleClass('focus', i === 0);
+        $a.append($('<span>').text(it.label));
+        if (it.group) $a.append($('<small>').text(it.group));
+        $box.append($a);
+      });
+    }
+    $box.addClass('show');
+  };
+
+  $input.on('input focus', render);
+  $input.on('keydown', function (e) {
+    var $links = $box.find('a');
+    var idx = $links.index($links.filter('.focus'));
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+      e.preventDefault();
+      idx = e.key === 'ArrowDown' ? Math.min(idx + 1, $links.length - 1) : Math.max(idx - 1, 0);
+      $links.removeClass('focus').eq(idx).addClass('focus');
+    } else if (e.key === 'Enter' && $links.length) {
+      window.location = $links.filter('.focus').attr('href') || $links.first().attr('href');
+    } else if (e.key === 'Escape') {
+      $box.removeClass('show');
+    }
+  });
+  $(document).on('click', function (e) {
+    if (!$(e.target).closest('.topbar-search').length) $box.removeClass('show');
+  });
 });

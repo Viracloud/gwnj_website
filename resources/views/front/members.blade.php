@@ -4,26 +4,52 @@
 @endsection
 
 @section('content')
+@php
+    $intro = trim((string) tf($page_data, 'intro'));
+    $intro_paragraphs = $intro !== '' ? preg_split('/\R{2,}/u', $intro) : [];
+@endphp
 <div class="pagehead"><div class="shell">
-    <span class="kicker">{{ is_rtl() ? 'تیم' : 'Team' }}</span>
+    <span class="kicker">{{ is_rtl() ? 'درباره ما' : 'About us' }}</span>
     <h1>{{ tf($page_data,'page_title') }}</h1>
 </div></div>
 
-<section class="shell" style="padding-block:var(--s8)">
-    <div class="cards">
-        @foreach($members as $member)
-        <a class="card" href="{{ route('member', $member->slug) }}">
-            <div class="photo"><img src="{{ asset('uploads/'.$member->image) }}" alt="{{ $member->name }}"></div>
-            <span class="dt">{{ tf($member,'designation') }}</span>
-            <h3>{{ $member->name }}</h3>
-        </a>
+@if(count($intro_paragraphs))
+<section class="shell structure-intro">
+    <span class="kicker">{{ is_rtl() ? 'ساختار سازمانی' : 'Organizational structure' }}</span>
+    @foreach($intro_paragraphs as $para)
+    <p class="lead">{!! nl2br(e(trim($para))) !!}</p>
+    @endforeach
+</section>
+@endif
+
+@foreach($categories as $category)
+<section class="shell people-group">
+    <div class="sec-head">
+        <div class="txt">
+            <h2>{{ tf($category,'name') }}</h2>
+        </div>
+    </div>
+    <div class="cards people">
+        @foreach($category->members as $member)
+        @include('front.partials.person-card')
         @endforeach
     </div>
-
-    @if($members->hasPages())
-    <div style="margin-top:var(--s7)">
-        {{ $members->links() }}
-    </div>
-    @endif
 </section>
+@endforeach
+
+@if($uncategorized->count())
+<section class="shell people-group">
+    <div class="cards people">
+        @foreach($uncategorized as $member)
+        @include('front.partials.person-card')
+        @endforeach
+    </div>
+</section>
+@endif
+
+@if(!$categories->count() && !$uncategorized->count())
+<section class="shell">
+    <p style="color:var(--muted)">{{ is_rtl() ? 'هنوز معرفی‌ای ثبت نشده است.' : 'No one has been introduced here yet.' }}</p>
+</section>
+@endif
 @endsection

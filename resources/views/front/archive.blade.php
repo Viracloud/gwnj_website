@@ -5,7 +5,7 @@
 
 @php
     try {
-        $month_label = \Carbon\Carbon::parse($month)->format('F Y');
+        $month_label = fdate($month, 'F Y');
     } catch (\Throwable $e) {
         $month_label = $month;
     }
@@ -22,11 +22,12 @@
     @if($posts->count())
     <div class="cards">
         @foreach($posts as $post)
-        <a class="card" href="{{ route('post', $post->slug) }}">
+        <a class="card" href="{{ route('post', slug_for($post)) }}">
             <div class="photo"><img src="{{ asset('uploads/'.$post->image) }}" alt="{{ tf($post,'title') }}"></div>
-            <span class="dt">{{ optional($post->published_at ?? $post->created_at)->format('j F Y') }}</span>
+            @include('front.partials.post-meta')
             <h3>{{ tf($post,'title') }}</h3>
-            @if(tf($post,'excerpt'))<p>{{ \Illuminate\Support\Str::limit(tf($post,'excerpt'), 130) }}</p>@endif
+            @if(tf($post,'excerpt'))<p>{{ plain_excerpt(tf($post,'excerpt'), 130) }}</p>@endif
+            <span class="readmore">{{ hc('news_readmore') }}</span>
         </a>
         @endforeach
     </div>

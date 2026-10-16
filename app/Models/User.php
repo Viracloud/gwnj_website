@@ -19,8 +19,34 @@ class User extends Authenticatable
      */
     protected $fillable = [
         'name',
+        'surname',
+        'photo',
         'email',
         'password',
+        'position',
+        'position_sv',
+        'occupation',
+        'occupation_sv',
+        'phone',
+        'address',
+        'country',
+        'state',
+        'city',
+        'zip',
+        'membership_status',
+        'membership_type',
+        'membership_source',
+        'membership_id',
+        'membership_applied_at',
+        'membership_approved_at',
+        'membership_rejected_reason',
+        'dues_paid',
+        'dues_exempt_override',
+        'card_status',
+        'card_requested_at',
+        'card_issued_at',
+        'card_expires_at',
+        'verification_token',
     ];
 
     /**
@@ -43,6 +69,61 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'membership_applied_at' => 'datetime',
+            'membership_approved_at' => 'datetime',
+            'card_requested_at' => 'datetime',
+            'card_issued_at' => 'datetime',
+            'card_expires_at' => 'datetime',
+            'dues_paid' => 'boolean',
+            'dues_exempt_override' => 'boolean',
         ];
+    }
+
+    public function isApprovedMember(): bool
+    {
+        return $this->membership_status === 'approved';
+    }
+
+    /** Members based in Iran, Afghanistan or Pakistan are exempt from dues (admin can override per-member). */
+    public function isDuesExempt(): bool
+    {
+        if (!is_null($this->dues_exempt_override)) {
+            return (bool) $this->dues_exempt_override;
+        }
+
+        $exempt_countries = [
+            'iran', 'islamic republic of iran', 'ايران', 'ایران',
+            'afghanistan', 'afghanestan', 'afqanistan', 'افغانستان',
+            'pakistan', 'islamic republic of pakistan', 'پاکستان',
+        ];
+
+        return in_array(mb_strtolower(trim((string) $this->country)), $exempt_countries, true);
+    }
+
+    /** Dues must be paid before a card is issued, unless the member is exempt. */
+    public function canReceiveCard(): bool
+    {
+        return $this->isDuesExempt() || $this->dues_paid;
+    }
+
+    public function profileIsComplete(): bool
+    {
+        foreach (['name', 'surname', 'photo', 'phone', 'address', 'country', 'state', 'city', 'zip'] as $field) {
+            if (trim((string) $this->{$field}) === '') {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public function fullName(): string
+    {
+        return trim($this->name . ' ' . $this->surname);
+    }
+
+    /** The committees this member belongs to - a person can be on more than one. */
+    public function committees()
+    {
+        return $this->belongsToMany(MemberCategory::class, 'user_committee')->orderBy('sort_order');
     }
 }
