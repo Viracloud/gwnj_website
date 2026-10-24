@@ -39,7 +39,7 @@
                     </div>
                     <div class="mb-3">
                         <label class="label-custom">Slug (Dari) <small>- optional, auto-generated from the Dari title</small></label>
-                        <input type="text" class="form-control-custom" name="slug_sv" dir="rtl">
+                        <input type="text" class="form-control-custom" name="slug_fa" dir="rtl">
                     </div>
                     <div class="mb-3">
                         <label class="label-custom">Tags (Comma Separated)</label>
@@ -78,26 +78,27 @@
                     <h6 class="fw-semibold mt-4 mb-2">دری (second language)</h6>
                     <div class="mb-3">
                         <label class="label-custom">Title</label>
-                        <input type="text" class="form-control-custom" name="title_sv" dir="rtl">
+                        <input type="text" class="form-control-custom" name="title_fa" dir="rtl">
                     </div>
                     <div class="mb-3">
                         <label class="label-custom">Excerpt</label>
-                        <textarea class="form-control-custom" name="excerpt_sv" rows="2" dir="rtl"></textarea>
+                        <textarea class="form-control-custom" name="excerpt_fa" rows="2" dir="rtl"></textarea>
                     </div>
                     <div class="mb-3">
                         <label class="label-custom">Description</label>
-                        <textarea id="editor1_sv" class="form-control-custom tinymce-editor" name="description_sv" rows="4" dir="rtl"></textarea>
+                        <textarea id="editor1_fa" class="form-control-custom tinymce-editor" name="description_fa" rows="4" dir="rtl"></textarea>
                     </div>
                     <div class="mb-3">
                         <label class="label-custom">SEO Title</label>
-                        <input type="text" class="form-control-custom" name="seo_title_sv" dir="rtl">
+                        <input type="text" class="form-control-custom" name="seo_title_fa" dir="rtl">
                     </div>
                     <div class="mb-3">
                         <label class="label-custom">SEO Description</label>
-                        <textarea class="form-control-custom" name="seo_meta_description_sv" rows="3" dir="rtl"></textarea>
+                        <textarea class="form-control-custom" name="seo_meta_description_fa" rows="3" dir="rtl"></textarea>
                     </div>
 
                     <div class="mb-3">
+                        @include('admin.partials.extra-locales', ['table' => 'posts', 'item' => null, 'fields' => ['slug' => 'input', 'title' => 'input', 'excerpt' => 'textarea', 'description' => 'editor', 'seo_title' => 'input', 'seo_meta_description' => 'textarea']])
                         <button type="submit" class="btn-admin-primary">Submit</button>
                     </div>
                 </form>
@@ -171,7 +172,7 @@
                                 </div>
                                 <div class="mb-3">
                                     <label class="label-custom">Slug (Dari) <small>- optional, auto-generated from the Dari title</small></label>
-                                    <input type="text" class="form-control-custom" name="slug_sv" dir="rtl" value="{{ $post->slug_sv }}">
+                                    <input type="text" class="form-control-custom" name="slug_fa" dir="rtl" value="{{ $post->slug_fa }}">
                                 </div>
                                 <div class="mb-3">
                                     <label class="label-custom">Tags (Comma Separated)</label>
@@ -210,26 +211,27 @@
                                 <h6 class="fw-semibold mt-4 mb-2">دری (second language)</h6>
                                 <div class="mb-3">
                                     <label class="label-custom">Title</label>
-                                    <input type="text" class="form-control-custom" name="title_sv" value="{{ $post->title_sv }}" dir="rtl">
+                                    <input type="text" class="form-control-custom" name="title_fa" value="{{ $post->title_fa }}" dir="rtl">
                                 </div>
                                 <div class="mb-3">
                                     <label class="label-custom">Excerpt</label>
-                                    <textarea class="form-control-custom" name="excerpt_sv" rows="2" dir="rtl">{{ $post->excerpt_sv }}</textarea>
+                                    <textarea class="form-control-custom" name="excerpt_fa" rows="2" dir="rtl">{{ $post->excerpt_fa }}</textarea>
                                 </div>
                                 <div class="mb-3">
                                     <label class="label-custom">Description</label>
-                                    <textarea id="editor2_{{ $post->id }}_sv" class="form-control-custom tinymce-editor" name="description_sv" rows="4" dir="rtl">{{ $post->description_sv }}</textarea>
+                                    <textarea id="editor2_{{ $post->id }}_fa" class="form-control-custom tinymce-editor" name="description_fa" rows="4" dir="rtl">{{ $post->description_fa }}</textarea>
                                 </div>
                                 <div class="mb-3">
                                     <label class="label-custom">SEO Title</label>
-                                    <input type="text" class="form-control-custom" name="seo_title_sv" value="{{ $post->seo_title_sv }}" dir="rtl">
+                                    <input type="text" class="form-control-custom" name="seo_title_fa" value="{{ $post->seo_title_fa }}" dir="rtl">
                                 </div>
                                 <div class="mb-3">
                                     <label class="label-custom">SEO Description</label>
-                                    <textarea class="form-control-custom" name="seo_meta_description_sv" rows="3" dir="rtl">{{ $post->seo_meta_description_sv }}</textarea>
+                                    <textarea class="form-control-custom" name="seo_meta_description_fa" rows="3" dir="rtl">{{ $post->seo_meta_description_fa }}</textarea>
                                 </div>
 
                                 <div class="mb-3">
+                                    @include('admin.partials.extra-locales', ['table' => 'posts', 'item' => ($post ?? null), 'fields' => ['slug' => 'input', 'title' => 'input', 'excerpt' => 'textarea', 'seo_title' => 'input', 'seo_meta_description' => 'textarea']])
                                     <button type="submit" class="btn-admin-primary">Update</button>
                                 </div>
                             </form>

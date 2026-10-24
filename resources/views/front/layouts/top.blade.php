@@ -1,27 +1,29 @@
 <div class="topbar">
     <div class="shell">
-        <a href="{{ route('blog') }}">{{ is_rtl() ? 'مرکز رسانه' : 'Media centre' }}</a>
-        <a href="{{ route('donate') }}">{{ is_rtl() ? 'شفافیت' : 'Transparency' }}</a>
-        <a href="{{ route('contact') }}">{{ is_rtl() ? 'تماس با ما' : 'Contact' }}</a>
+        <a class="tb-link" href="{{ route('blog') }}">{{ __('Media centre') }}</a>
+        <a class="tb-link" href="{{ route('donate') }}">{{ __('Transparency') }}</a>
+        <a class="tb-link" href="{{ route('contact') }}">{{ __('Contact') }}</a>
         <span class="sp"></span>
         <div class="lang-switch dropdown">
             <button type="button" class="lang-switch-toggle" data-bs-toggle="dropdown" aria-expanded="false">
                 <i class="bi bi-globe2" aria-hidden="true"></i>
-                <span>{{ is_rtl() ? 'دری' : 'English' }}</span>
+                <span>{{ locale_meta()['native'] }}</span>
                 <i class="fa-solid fa-chevron-down" aria-hidden="true" style="font-size:.6rem"></i>
             </button>
+            {{-- Same page in every switched-on language --}}
             <ul class="dropdown-menu dropdown-menu-end">
-                <li><a class="dropdown-item {{ !is_rtl() ? 'active' : '' }}" href="{{ route('switch_lang', 'en') }}">English</a></li>
-                <li><a class="dropdown-item {{ is_rtl() ? 'active' : '' }}" href="{{ route('switch_lang', 'fa') }}">دری</a></li>
+                @foreach(alternate_urls() as $alt_locale => $alt_url)
+                <li><a class="dropdown-item {{ $alt_locale === site_locale() ? 'active' : '' }}" href="{{ $alt_url }}" hreflang="{{ locale_meta($alt_locale)['hreflang'] }}" lang="{{ locale_meta($alt_locale)['hreflang'] }}">{{ locale_meta($alt_locale)['native'] }}</a></li>
+                @endforeach
             </ul>
         </div>
         @if($global_menu->menu_login_status == 'Show')
             @if(Auth::guard('web')->check())
-            <a href="{{ route('dashboard') }}">{{ is_rtl() ? 'داشبورد' : 'Dashboard' }}</a>
+            <a href="{{ route('dashboard') }}">{{ __('Dashboard') }}</a>
             @else
-            <a href="{{ route('login') }}">{{ is_rtl() ? $global_menu->menu_login_name_sv : $global_menu->menu_login_name }}</a>
+            <a href="{{ route('login') }}">{{ tf($global_menu, 'menu_login_name') }}</a>
             @endif
         @endif
-        <button type="button" class="exit" onclick="window.location.replace('https://www.google.com')">{{ is_rtl() ? 'خروج سریع' : 'Quick exit' }}</button>
+        <button type="button" class="exit" onclick="window.location.replace('https://www.google.com')">{{ __('Quick exit') }}</button>
     </div>
 </div>

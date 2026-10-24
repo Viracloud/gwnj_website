@@ -16,6 +16,7 @@ use App\Http\Controllers\Admin\AdminMembershipController;
 use App\Http\Controllers\Admin\AdminMemberCategoryController;
 use App\Http\Controllers\Admin\AdminPostCategoryController;
 use App\Http\Controllers\Admin\AdminEventCategoryController;
+use App\Http\Controllers\Admin\AdminCampaignCategoryController;
 use App\Http\Controllers\Admin\AdminPublicationCategoryController;
 use App\Http\Controllers\Admin\AdminPostController;
 use App\Http\Controllers\Admin\AdminUserController;
@@ -45,18 +46,31 @@ use App\Http\Controllers\Admin\AdminAccountController;
 Route::get('/robots.txt', [FrontController::class, 'robots'])->name('robots');
 Route::get('/sitemap.xml', [FrontController::class, 'sitemap'])->name('sitemap');
 
-Route::get('/', [FrontController::class, 'home'])->name('home');
+// "/" → the visitor's language (or the default); /lang/xx keeps old switcher links working.
+Route::get('/', fn () => redirect('/'.preferred_locale()));
 Route::get('/lang/{locale}', [FrontController::class, 'switch_lang'])->name('switch_lang');
+
+/*
+| Every public page lives under its language: /en/..., /fa/... (later /fr/..., /de/...).
+| Only switched-on languages (SITE_LOCALES in .env) match; the SetLocale middleware
+| applies the language and removes {locale} before the controller is called.
+*/
+Route::prefix('{locale}')
+    ->where(['locale' => implode('|', array_map('preg_quote', config('locales.enabled')))])
+    ->middleware(\App\Http\Middleware\SetLocale::class)
+    ->group(function () {
+
+Route::get('/', [FrontController::class, 'home'])->name('home');
 Route::get('/about', [FrontController::class, 'about'])->name('about');
 Route::get('/login', [FrontController::class, 'login'])->name('login');
-Route::post('/login',[FrontController::class,'login_submit'])->name('login_submit');
+Route::post('/login',[FrontController::class,'login_submit'])->name('login_submit')->middleware('throttle:forms5');
 Route::get('/register', [FrontController::class, 'register'])->name('register');
-Route::post('/register_submit',[FrontController::class,'register_submit'])->name('register_submit');
+Route::post('/register_submit',[FrontController::class,'register_submit'])->name('register_submit')->middleware('throttle:forms5');
 Route::get('/register_verify/{token}/{email}',[FrontController::class,'register_verify'])->name('register_verify');
 Route::get('/forget-password',[FrontController::class,'forget_password'])->name('forget_password');
-Route::post('/forget-password',[FrontController::class,'forget_password_submit'])->name('forget_password_submit');
+Route::post('/forget-password',[FrontController::class,'forget_password_submit'])->name('forget_password_submit')->middleware('throttle:forms3');
 Route::get('/reset-password/{token}/{email}',[FrontController::class,'reset_password'])->name('reset_password');
-Route::post('/reset-password/{token}/{email}',[FrontController::class,'reset_password_submit'])->name('reset_password_submit');
+Route::post('/reset-password/{token}/{email}',[FrontController::class,'reset_password_submit'])->name('reset_password_submit')->middleware('throttle:forms5');
 Route::get('/gallery', [FrontController::class, 'gallery'])->name('gallery');
 Route::get('/faq', [FrontController::class, 'faq'])->name('faq');
 Route::get('/publications', [FrontController::class, 'publications'])->name('publications');
@@ -77,27 +91,31 @@ Route::get('/archive/{month}', [FrontController::class, 'archive'])->name('archi
 Route::get('/tag/{tag}', [FrontController::class, 'tag'])->name('tag');
 Route::get('/search', [FrontController::class, 'search'])->name('search');
 
-Route::post('/comment/store',[FrontController::class,'comment_store'])->name('comment_store');
-Route::post('/reply/store',[FrontController::class,'reply_store'])->name('reply_store');
+Route::post('/comment/store',[FrontController::class,'comment_store'])->name('comment_store')->middleware('throttle:forms5');
+Route::post('/reply/store',[FrontController::class,'reply_store'])->name('reply_store')->middleware('throttle:forms5');
 
 Route::get('/terms-of-use', [FrontController::class, 'terms'])->name('terms');
 Route::get('/privacy-policy', [FrontController::class, 'privacy'])->name('privacy');
 Route::get('/contact', [FrontController::class, 'contact'])->name('contact');
-Route::post('/contact', [FrontController::class, 'contact_submit'])->name('contact_submit');
+Route::post('/contact', [FrontController::class, 'contact_submit'])->name('contact_submit')->middleware('throttle:forms3');
 
 Route::get('/donate', [FrontController::class, 'donate'])->name('donate');
-Route::post('/donate', [FrontController::class, 'donate_submit'])->name('donate_submit');
+Route::post('/donate', [FrontController::class, 'donate_submit'])->name('donate_submit')->middleware('throttle:forms10');
 Route::get('/donate/success', [FrontController::class, 'donate_success'])->name('donate_success');
 Route::get('/donate/cancel', [FrontController::class, 'donate_cancel'])->name('donate_cancel');
 
-Route::post('/subscriber/send-email', [FrontController::class, 'subscriber_send_email'])->name('subscriber_send_email');
+Route::post('/subscriber/send-email', [FrontController::class, 'subscriber_send_email'])->name('subscriber_send_email')->middleware('throttle:forms5');
 Route::get('/subscriber/verify/{email}/{token}', [FrontController::class, 'subscriber_verify'])->name('subscriber_verify');
 
 Route::get('/page/{slug}', [FrontController::class, 'custom_page'])->name('custom_page');
 
 Route::get('/invite/{token}', [MembershipController::class, 'invite_show'])->name('invite_show');
-Route::post('/invite/{token}', [MembershipController::class, 'invite_submit'])->name('invite_submit');
+Route::post('/invite/{token}', [MembershipController::class, 'invite_submit'])->name('invite_submit')->middleware('throttle:forms5');
 Route::get('/verify/{token}', [MembershipController::class, 'verify'])->name('membership_verify');
+Route::get('/membership', [MembershipController::class, 'info'])->name('membership_info');
+Route::get('/polls', [\App\Http\Controllers\Front\PollController::class, 'index'])->name('polls');
+Route::get('/poll/{slug}', [\App\Http\Controllers\Front\PollController::class, 'show'])->name('poll');
+Route::post('/poll/{slug}/vote', [\App\Http\Controllers\Front\PollController::class, 'vote'])->name('poll_vote')->middleware('throttle:forms10');
 
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard',[UserController::class,'dashboard'])->name('dashboard');
@@ -111,16 +129,24 @@ Route::middleware('auth')->group(function () {
     Route::get('/membership/dues/cancel', [MembershipController::class, 'dues_cancel'])->name('membership_dues_cancel');
 });
 
+    }); // end of /{locale} group
+
+// Old addresses without a language (/events, /post/..., /verify/... on printed cards,
+// links in old e-mails) → 301 to the same page with a language prefix.
+Route::fallback(function (\Illuminate\Http\Request $request) {
+    return \App\Http\Middleware\RedirectToLocalizedUrl::redirect($request) ?? abort(404);
+});
+
 
 Route::prefix('admin')->group(function () {
     Route::get('/', function () {return redirect('/admin/login');});
     Route::get('/login',[AdminController::class,'login'])->name('admin_login');
-    Route::post('/login',[AdminController::class,'login_submit'])->name('admin_login_submit');
+    Route::post('/login',[AdminController::class,'login_submit'])->name('admin_login_submit')->middleware('throttle:forms5');
     Route::get('/logout',[AdminController::class,'logout'])->name('admin_logout');
     Route::get('/forget-password',[AdminController::class,'forget_password'])->name('admin_forget_password');
-    Route::post('/forget_password_submit',[AdminController::class,'forget_password_submit'])->name('admin_forget_password_submit');
+    Route::post('/forget_password_submit',[AdminController::class,'forget_password_submit'])->name('admin_forget_password_submit')->middleware('throttle:forms3');
     Route::get('/reset-password/{token}/{email}',[AdminController::class,'reset_password'])->name('admin_reset_password');
-    Route::post('/reset-password/{token}/{email}',[AdminController::class,'reset_password_submit'])->name('admin_reset_password_submit');
+    Route::post('/reset-password/{token}/{email}',[AdminController::class,'reset_password_submit'])->name('admin_reset_password_submit')->middleware('throttle:forms5');
 });
 
 Route::middleware('admin')->prefix('admin')->group(function () {
@@ -142,6 +168,9 @@ Route::middleware('admin')->prefix('admin')->group(function () {
         Route::get('/member/{member_id}/awards', [AdminMemberController::class, 'awards'])->name('admin_member_awards');
         Route::get('/post-category/index',[AdminPostCategoryController::class,'index'])->name('admin_post_category_index');
         Route::get('/event-category/index',[AdminEventCategoryController::class,'index'])->name('admin_event_category_index');
+        Route::get('/campaign-category/index',[AdminCampaignCategoryController::class,'index'])->name('admin_campaign_category_index');
+        Route::get('/poll/index',[\App\Http\Controllers\Admin\AdminPollController::class,'index'])->name('admin_poll_index');
+        Route::get('/poll/{id}/results',[\App\Http\Controllers\Admin\AdminPollController::class,'results'])->name('admin_poll_results');
         Route::get('/publication-category/index',[AdminPublicationCategoryController::class,'index'])->name('admin_publication_category_index');
         Route::get('/post/index',[AdminPostController::class,'index'])->name('admin_post_index');
         Route::get('/post/comments',[AdminPostController::class,'comments'])->name('admin_post_comments');
@@ -187,6 +216,9 @@ Route::middleware('admin')->prefix('admin')->group(function () {
         Route::post('/faq/delete/{id}',[AdminFaqController::class,'delete'])->name('admin_faq_delete');
 
         Route::post('/about-item/update',[AdminAboutItemController::class,'update'])->name('admin_about_item_update');
+        Route::post('/about-item/images/store',[AdminAboutItemController::class,'image_store'])->name('admin_about_item_image_store');
+        Route::post('/about-item/images/{id}/update',[AdminAboutItemController::class,'image_update'])->name('admin_about_item_image_update');
+        Route::post('/about-item/images/{id}/delete',[AdminAboutItemController::class,'image_delete'])->name('admin_about_item_image_delete');
 
         Route::post('/event/store',[AdminEventController::class,'store'])->name('admin_event_store');
         Route::post('/event/update/{id}',[AdminEventController::class,'update'])->name('admin_event_update');
@@ -216,6 +248,22 @@ Route::middleware('admin')->prefix('admin')->group(function () {
         Route::post('/event-category/store',[AdminEventCategoryController::class,'store'])->name('admin_event_category_store');
         Route::post('/event-category/update/{id}',[AdminEventCategoryController::class,'update'])->name('admin_event_category_update');
         Route::post('/event-category/delete/{id}',[AdminEventCategoryController::class,'delete'])->name('admin_event_category_delete');
+        Route::post('/campaign-category/store',[AdminCampaignCategoryController::class,'store'])->name('admin_campaign_category_store');
+        Route::post('/campaign-category/update/{id}',[AdminCampaignCategoryController::class,'update'])->name('admin_campaign_category_update');
+        Route::post('/campaign-category/delete/{id}',[AdminCampaignCategoryController::class,'delete'])->name('admin_campaign_category_delete');
+        Route::get('/poll/create',[\App\Http\Controllers\Admin\AdminPollController::class,'create'])->name('admin_poll_create');
+        Route::post('/poll/store',[\App\Http\Controllers\Admin\AdminPollController::class,'store'])->name('admin_poll_store');
+        Route::get('/poll/{id}/edit',[\App\Http\Controllers\Admin\AdminPollController::class,'edit'])->name('admin_poll_edit');
+        Route::post('/poll/{id}/update',[\App\Http\Controllers\Admin\AdminPollController::class,'update'])->name('admin_poll_update');
+        Route::get('/poll/{id}/questions',[\App\Http\Controllers\Admin\AdminPollController::class,'questions'])->name('admin_poll_questions');
+        Route::post('/poll/{id}/questions/store',[\App\Http\Controllers\Admin\AdminPollController::class,'question_store'])->name('admin_poll_question_store');
+        Route::post('/poll/question/{qid}/update',[\App\Http\Controllers\Admin\AdminPollController::class,'question_update'])->name('admin_poll_question_update');
+        Route::post('/poll/question/{qid}/delete',[\App\Http\Controllers\Admin\AdminPollController::class,'question_delete'])->name('admin_poll_question_delete');
+        Route::get('/poll/{id}/google',[\App\Http\Controllers\Admin\AdminPollController::class,'google'])->name('admin_poll_google');
+        Route::post('/poll/{id}/google/url',[\App\Http\Controllers\Admin\AdminPollController::class,'google_save_url'])->name('admin_poll_google_url');
+        Route::post('/poll/{id}/google/columns',[\App\Http\Controllers\Admin\AdminPollController::class,'google_save_columns'])->name('admin_poll_google_columns');
+        Route::post('/poll/{id}/google/refresh',[\App\Http\Controllers\Admin\AdminPollController::class,'google_refresh'])->name('admin_poll_google_refresh');
+        Route::get('/poll/{id}/export',[\App\Http\Controllers\Admin\AdminPollController::class,'export'])->name('admin_poll_export');
 
         Route::post('/publication-category/store',[AdminPublicationCategoryController::class,'store'])->name('admin_publication_category_store');
         Route::post('/publication-category/update/{id}',[AdminPublicationCategoryController::class,'update'])->name('admin_publication_category_update');
@@ -264,6 +312,18 @@ Route::middleware('admin')->prefix('admin')->group(function () {
     // ===== Site-wide, financial and personal-data areas — super_admin only =====
     Route::middleware('role:super_admin')->group(function () {
         Route::get('/admin-user/index',[AdminAccountController::class,'index'])->name('admin_account_index');
+        Route::get('/setting/languages', function () {
+            $languages = [];
+            foreach (config('locales.supported') as $code => $meta) {
+                $languages[$code] = $meta + [
+                    'enabled' => in_array($code, enabled_locales(), true),
+                    'prepared' => in_array($code, config('locales.prepare', []), true),
+                    'progress' => $code === base_locale() ? null : \App\Support\LocaleColumns::completeness($code),
+                ];
+            }
+            return view('admin.setting.languages', compact('languages'));
+        })->name('admin_setting_languages');
+        Route::post('/poll/{id}/delete',[\App\Http\Controllers\Admin\AdminPollController::class,'delete'])->name('admin_poll_delete');
         Route::post('/admin-user/store',[AdminAccountController::class,'store'])->name('admin_account_store');
         Route::post('/admin-user/update/{id}',[AdminAccountController::class,'update'])->name('admin_account_update');
         Route::post('/admin-user/delete/{id}',[AdminAccountController::class,'delete'])->name('admin_account_delete');

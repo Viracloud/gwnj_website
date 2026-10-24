@@ -39,7 +39,7 @@
                     </div>
                     <div class="mb-3">
                         <label class="label-custom">Slug (Dari) <small>- optional, auto-generated from the Dari name</small></label>
-                        <input type="text" class="form-control-custom" name="slug_sv" dir="rtl">
+                        <input type="text" class="form-control-custom" name="slug_fa" dir="rtl">
                     </div>
                     <div class="mb-3">
                         <label class="label-custom">Display order inside the group <small>- smaller number shows first</small></label>
@@ -67,19 +67,19 @@
                     <h6 class="fw-semibold mt-4 mb-2">دری (second language)</h6>
                     <div class="mb-3">
                         <label class="label-custom">Name</label>
-                        <input type="text" class="form-control-custom" name="name_sv" dir="rtl">
+                        <input type="text" class="form-control-custom" name="name_fa" dir="rtl">
                     </div>
                     <div class="mb-3">
                         <label class="label-custom">Designation</label>
-                        <input type="text" class="form-control-custom" name="designation_sv" dir="rtl">
+                        <input type="text" class="form-control-custom" name="designation_fa" dir="rtl">
                     </div>
                     <div class="mb-3">
                         <label class="label-custom">Short Description</label>
-                        <textarea class="form-control-custom" name="short_description_sv" rows="4" dir="rtl"></textarea>
+                        <textarea class="form-control-custom" name="short_description_fa" rows="4" dir="rtl"></textarea>
                     </div>
                     <div class="mb-3">
                         <label class="label-custom">Description</label>
-                        <textarea id="editor1_sv" class="form-control-custom tinymce-editor" name="description_sv" rows="4" dir="rtl"></textarea>
+                        <textarea id="editor1_fa" class="form-control-custom tinymce-editor" name="description_fa" rows="4" dir="rtl"></textarea>
                     </div>
 
                     <div class="mb-3">
@@ -125,6 +125,7 @@
                         <input type="text" class="form-control-custom" name="instagram">
                     </div>
                     <div class="mb-3">
+                        @include('admin.partials.extra-locales', ['table' => 'members', 'item' => null, 'fields' => ['slug' => 'input', 'name' => 'input', 'designation' => 'input', 'short_description' => 'textarea', 'description' => 'editor']])
                         <button type="submit" class="btn-admin-primary">Submit</button>
                     </div>
                 </form>
@@ -212,7 +213,7 @@
                                 </div>
                                 <div class="mb-3">
                                     <label class="label-custom">Slug (Dari) <small>- optional</small></label>
-                                    <input type="text" class="form-control-custom" name="slug_sv" dir="rtl" value="{{ $member->slug_sv }}">
+                                    <input type="text" class="form-control-custom" name="slug_fa" dir="rtl" value="{{ $member->slug_fa }}">
                                 </div>
                                 <div class="mb-3">
                                     <label class="label-custom">Display order inside the group <small>- smaller number shows first</small></label>
@@ -240,19 +241,19 @@
                                 <h6 class="fw-semibold mt-4 mb-2">دری (second language)</h6>
                                 <div class="mb-3">
                                     <label class="label-custom">Name</label>
-                                    <input type="text" class="form-control-custom" name="name_sv" value="{{ $member->name_sv }}" dir="rtl">
+                                    <input type="text" class="form-control-custom" name="name_fa" value="{{ $member->name_fa }}" dir="rtl">
                                 </div>
                                 <div class="mb-3">
                                     <label class="label-custom">Designation</label>
-                                    <input type="text" class="form-control-custom" name="designation_sv" value="{{ $member->designation_sv }}" dir="rtl">
+                                    <input type="text" class="form-control-custom" name="designation_fa" value="{{ $member->designation_fa }}" dir="rtl">
                                 </div>
                                 <div class="mb-3">
                                     <label class="label-custom">Short Description</label>
-                                    <textarea class="form-control-custom" name="short_description_sv" rows="4" dir="rtl">{{ $member->short_description_sv }}</textarea>
+                                    <textarea class="form-control-custom" name="short_description_fa" rows="4" dir="rtl">{{ $member->short_description_fa }}</textarea>
                                 </div>
                                 <div class="mb-3">
                                     <label class="label-custom">Description</label>
-                                    <textarea id="editor1_{{ $member->id }}_sv" class="form-control-custom tinymce-editor" name="description_sv" rows="4" dir="rtl">{{ $member->description_sv }}</textarea>
+                                    <textarea id="editor1_{{ $member->id }}_fa" class="form-control-custom tinymce-editor" name="description_fa" rows="4" dir="rtl">{{ $member->description_fa }}</textarea>
                                 </div>
 
                                 <div class="mb-3">
@@ -298,6 +299,7 @@
                                     <input type="text" class="form-control-custom" name="instagram" value="{{ $member->instagram }}">
                                 </div>
                                 <div class="mb-3">
+                                    @include('admin.partials.extra-locales', ['table' => 'members', 'item' => ($member ?? null), 'fields' => ['slug' => 'input', 'name' => 'input', 'designation' => 'input', 'short_description' => 'textarea']])
                                     <button type="submit" class="btn-admin-primary">Update</button>
                                 </div>
                             </form>

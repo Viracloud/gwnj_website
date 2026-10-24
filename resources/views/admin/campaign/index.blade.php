@@ -37,6 +37,15 @@
                             @endforeach
                         </select>
                     </div>
+                    <div class="mb-3">
+                        <label class="label-custom">Category <small>- manage the list under Campaigns → Campaign Categories</small></label>
+                        <select name="campaign_category_id" class="form-control-custom">
+                            <option value="">— No category —</option>
+                            @foreach($campaign_categories as $cc)
+                            <option value="{{ $cc->id }}">{{ $cc->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
 
                     <h6 class="fw-semibold mt-4 mb-2">English</h6>
                     <div class="mb-3">
@@ -49,7 +58,7 @@
                     </div>
                     <div class="mb-3">
                         <label class="label-custom">Slug (Dari) <small>- optional, auto-generated from the Dari title</small></label>
-                        <input type="text" class="form-control-custom" name="slug_sv" dir="rtl">
+                        <input type="text" class="form-control-custom" name="slug_fa" dir="rtl">
                     </div>
                     <div class="mb-3">
                         <label class="label-custom">Summary <small>- shown on cards and at the top of the page</small></label>
@@ -67,19 +76,19 @@
                     <h6 class="fw-semibold mt-4 mb-2">دری (second language)</h6>
                     <div class="mb-3">
                         <label class="label-custom">Title</label>
-                        <input type="text" class="form-control-custom" name="title_sv" dir="rtl">
+                        <input type="text" class="form-control-custom" name="title_fa" dir="rtl">
                     </div>
                     <div class="mb-3">
                         <label class="label-custom">Summary</label>
-                        <textarea class="form-control-custom" name="excerpt_sv" rows="2" dir="rtl"></textarea>
+                        <textarea class="form-control-custom" name="excerpt_fa" rows="2" dir="rtl"></textarea>
                     </div>
                     <div class="mb-3">
                         <label class="label-custom">Goal / ask</label>
-                        <input type="text" class="form-control-custom" name="goal_sv" dir="rtl">
+                        <input type="text" class="form-control-custom" name="goal_fa" dir="rtl">
                     </div>
                     <div class="mb-3">
                         <label class="label-custom">Full description</label>
-                        <textarea id="editor1_sv" class="form-control-custom tinymce-editor" name="content_sv" rows="4" dir="rtl"></textarea>
+                        <textarea id="editor1_fa" class="form-control-custom tinymce-editor" name="content_fa" rows="4" dir="rtl"></textarea>
                     </div>
 
                     <h6 class="fw-semibold mt-4 mb-2">Call to action</h6>
@@ -90,7 +99,7 @@
                         </div>
                         <div class="col-lg-6 mb-3">
                             <label class="label-custom">Button text (Dari)</label>
-                            <input type="text" class="form-control-custom" name="cta_text_sv" dir="rtl">
+                            <input type="text" class="form-control-custom" name="cta_text_fa" dir="rtl">
                         </div>
                     </div>
                     <div class="mb-3">
@@ -110,7 +119,7 @@
                         </div>
                         <div class="col-lg-4 mb-3">
                             <label class="label-custom">Label (Dari)</label>
-                            <input type="text" class="form-control-custom" name="stat_label_sv" dir="rtl">
+                            <input type="text" class="form-control-custom" name="stat_label_fa" dir="rtl">
                         </div>
                     </div>
 
@@ -122,7 +131,7 @@
                         </div>
                         <div class="col-lg-6 mb-3">
                             <label class="label-custom">Countries (Dari)</label>
-                            <input type="text" class="form-control-custom" name="countries_sv" dir="rtl">
+                            <input type="text" class="form-control-custom" name="countries_fa" dir="rtl">
                         </div>
                         <div class="col-lg-6 mb-3">
                             <label class="label-custom">Started on</label>
@@ -153,6 +162,7 @@
                     </div>
 
                     <div class="mb-3">
+                        @include('admin.partials.extra-locales', ['table' => 'campaigns', 'item' => null, 'fields' => ['slug' => 'input', 'title' => 'input', 'excerpt' => 'textarea', 'goal' => 'input', 'content' => 'editor', 'cta_text' => 'input', 'stat_label' => 'input', 'countries' => 'input']])
                         <button type="submit" class="btn-admin-primary">Submit</button>
                     </div>
                 </form>
@@ -234,6 +244,15 @@
                                         @endforeach
                                     </select>
                                 </div>
+                                <div class="mb-3">
+                                    <label class="label-custom">Category</label>
+                                    <select name="campaign_category_id" class="form-control-custom">
+                                        <option value="">— No category —</option>
+                                        @foreach($campaign_categories as $cc)
+                                        <option value="{{ $cc->id }}" {{ $campaign->campaign_category_id == $cc->id ? 'selected' : '' }}>{{ $cc->name }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
 
                                 <h6 class="fw-semibold mt-4 mb-2">English</h6>
                                 <div class="mb-3">
@@ -246,7 +265,7 @@
                                 </div>
                                 <div class="mb-3">
                                     <label class="label-custom">Slug (Dari) <small>- optional</small></label>
-                                    <input type="text" class="form-control-custom" name="slug_sv" dir="rtl" value="{{ $campaign->slug_sv }}">
+                                    <input type="text" class="form-control-custom" name="slug_fa" dir="rtl" value="{{ $campaign->slug_fa }}">
                                 </div>
                                 <div class="mb-3">
                                     <label class="label-custom">Summary</label>
@@ -264,19 +283,19 @@
                                 <h6 class="fw-semibold mt-4 mb-2">دری (second language)</h6>
                                 <div class="mb-3">
                                     <label class="label-custom">Title</label>
-                                    <input type="text" class="form-control-custom" name="title_sv" value="{{ $campaign->title_sv }}" dir="rtl">
+                                    <input type="text" class="form-control-custom" name="title_fa" value="{{ $campaign->title_fa }}" dir="rtl">
                                 </div>
                                 <div class="mb-3">
                                     <label class="label-custom">Summary</label>
-                                    <textarea class="form-control-custom" name="excerpt_sv" rows="2" dir="rtl">{{ $campaign->excerpt_sv }}</textarea>
+                                    <textarea class="form-control-custom" name="excerpt_fa" rows="2" dir="rtl">{{ $campaign->excerpt_fa }}</textarea>
                                 </div>
                                 <div class="mb-3">
                                     <label class="label-custom">Goal / ask</label>
-                                    <input type="text" class="form-control-custom" name="goal_sv" value="{{ $campaign->goal_sv }}" dir="rtl">
+                                    <input type="text" class="form-control-custom" name="goal_fa" value="{{ $campaign->goal_fa }}" dir="rtl">
                                 </div>
                                 <div class="mb-3">
                                     <label class="label-custom">Full description</label>
-                                    <textarea id="editor2_{{ $campaign->id }}_sv" class="form-control-custom tinymce-editor" name="content_sv" rows="4" dir="rtl">{{ $campaign->content_sv }}</textarea>
+                                    <textarea id="editor2_{{ $campaign->id }}_fa" class="form-control-custom tinymce-editor" name="content_fa" rows="4" dir="rtl">{{ $campaign->content_fa }}</textarea>
                                 </div>
 
                                 <h6 class="fw-semibold mt-4 mb-2">Call to action</h6>
@@ -287,7 +306,7 @@
                                     </div>
                                     <div class="col-lg-6 mb-3">
                                         <label class="label-custom">Button text (Dari)</label>
-                                        <input type="text" class="form-control-custom" name="cta_text_sv" value="{{ $campaign->cta_text_sv }}" dir="rtl">
+                                        <input type="text" class="form-control-custom" name="cta_text_fa" value="{{ $campaign->cta_text_fa }}" dir="rtl">
                                     </div>
                                 </div>
                                 <div class="mb-3">
@@ -307,7 +326,7 @@
                                     </div>
                                     <div class="col-lg-4 mb-3">
                                         <label class="label-custom">Label (Dari)</label>
-                                        <input type="text" class="form-control-custom" name="stat_label_sv" value="{{ $campaign->stat_label_sv }}" dir="rtl">
+                                        <input type="text" class="form-control-custom" name="stat_label_fa" value="{{ $campaign->stat_label_fa }}" dir="rtl">
                                     </div>
                                 </div>
 
@@ -319,7 +338,7 @@
                                     </div>
                                     <div class="col-lg-6 mb-3">
                                         <label class="label-custom">Countries (Dari)</label>
-                                        <input type="text" class="form-control-custom" name="countries_sv" value="{{ $campaign->countries_sv }}" dir="rtl">
+                                        <input type="text" class="form-control-custom" name="countries_fa" value="{{ $campaign->countries_fa }}" dir="rtl">
                                     </div>
                                     <div class="col-lg-6 mb-3">
                                         <label class="label-custom">Started on</label>
@@ -349,6 +368,7 @@
                                 </div>
 
                                 <div class="mb-3">
+                                    @include('admin.partials.extra-locales', ['table' => 'campaigns', 'item' => ($campaign ?? null), 'fields' => ['slug' => 'input', 'title' => 'input', 'excerpt' => 'textarea', 'goal' => 'input', 'cta_text' => 'input', 'stat_label' => 'input', 'countries' => 'input']])
                                     <button type="submit" class="btn-admin-primary">Update</button>
                                 </div>
                             </form>

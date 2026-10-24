@@ -64,8 +64,14 @@
                             @csrf
                             <button type="submit" class="btn btn-outline-secondary btn-sm">{{ $m->dues_paid ? 'Mark unpaid' : 'Mark paid' }}</button>
                         </form>
-                        @if($m->card_status == 'issued')
-                        <a class="btn btn-outline-primary btn-sm" href="{{ route('admin_membership_card_view', $m->id) }}" target="_blank">View / print card</a>
+                        @if($m->cardIsExpired())
+                        <span class="badge bg-warning text-dark" title="Expired {{ $m->card_expires_at->format('j M Y') }}">Card expired</span>
+                        <form action="{{ route('admin_membership_card_issue_direct', $m->id) }}" method="post">
+                            @csrf
+                            <button type="submit" class="btn btn-success btn-sm">Renew card (1 year)</button>
+                        </form>
+                        @elseif($m->card_status == 'issued')
+                        <a class="btn btn-outline-primary btn-sm" href="{{ route('admin_membership_card_view', $m->id) }}" target="_blank" title="Valid until {{ optional($m->card_expires_at)->format('j M Y') }}">View / print card</a>
                         @else
                         <form action="{{ route('admin_membership_card_issue_direct', $m->id) }}" method="post">
                             @csrf
@@ -92,7 +98,7 @@
                                 </div>
                                 <div class="mb-3">
                                     <label class="label-custom">Position (Dari)</label>
-                                    <input type="text" class="form-control-custom" name="position_sv" dir="rtl" value="{{ $m->position_sv }}">
+                                    <input type="text" class="form-control-custom" name="position_fa" dir="rtl" value="{{ $m->position_fa }}">
                                 </div>
                                 <div class="mb-3">
                                     <label class="label-custom">Occupation (English) <small>- their real-world profession, e.g. "Student" or "Human Rights Activist". Only shown on the card when Position above is empty.</small></label>
@@ -100,7 +106,7 @@
                                 </div>
                                 <div class="mb-3">
                                     <label class="label-custom">Occupation (Dari)</label>
-                                    <input type="text" class="form-control-custom" name="occupation_sv" dir="rtl" value="{{ $m->occupation_sv }}">
+                                    <input type="text" class="form-control-custom" name="occupation_fa" dir="rtl" value="{{ $m->occupation_fa }}">
                                 </div>
                                 <div class="mb-3">
                                     <label class="label-custom">Committees <small>- a member can belong to more than one; all are shown on the back of the card</small></label>
@@ -121,6 +127,7 @@
                                     </select>
                                 </div>
                                 <div class="mb-3">
+                                    @include('admin.partials.extra-locales', ['table' => 'users', 'item' => ($m ?? null), 'fields' => ['position' => 'input', 'occupation' => 'input']])
                                     <button type="submit" class="btn-admin-primary">Save</button>
                                 </div>
                             </form>

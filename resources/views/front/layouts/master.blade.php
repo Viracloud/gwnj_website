@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html class="no-js" lang="{{ is_rtl() ? 'fa' : 'en' }}" @if(is_rtl()) dir="rtl" @endif>
+<html class="no-js" lang="{{ locale_meta()['hreflang'] }}" dir="{{ locale_meta()['dir'] }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -8,6 +8,16 @@
     <title>{{ $seo['title'] }}</title>
     <meta name="description" content="{{ $seo['description'] }}">
     <link rel="canonical" href="{{ $seo['canonical'] }}">
+    {{-- Every language version of this page, so Google indexes and serves each one --}}
+    @php $alternates = alternate_urls(); @endphp
+    @foreach($alternates as $alt_locale => $alt_url)
+    <link rel="alternate" hreflang="{{ locale_meta($alt_locale)['hreflang'] }}" href="{{ $alt_url }}">
+    @endforeach
+    <link rel="alternate" hreflang="x-default" href="{{ $alternates[base_locale()] ?? reset($alternates) }}">
+    <meta property="og:locale" content="{{ locale_meta()['og'] }}">
+    @foreach($alternates as $alt_locale => $alt_url)@if($alt_locale !== site_locale())
+    <meta property="og:locale:alternate" content="{{ locale_meta($alt_locale)['og'] }}">
+    @endif @endforeach
     <meta name="robots" content="{{ $seo['noindex'] ? 'noindex,nofollow' : 'index,follow' }}">
     @if($global_setting->seo_google_verification)
     <meta name="google-site-verification" content="{{ $global_setting->seo_google_verification }}">
@@ -55,7 +65,7 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,300;1,6..72,400&family=Vazirmatn:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Vazirmatn:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
     @include('front.layouts.styles')
 
@@ -82,7 +92,7 @@
         @yield('content')
     </main>
     @include('front.layouts.footer')
-    <button type="button" class="scroll-top" id="scrollTop" aria-label="{{ is_rtl() ? 'بازگشت به بالا' : 'Back to top' }}" title="{{ is_rtl() ? 'بازگشت به بالا' : 'Back to top' }}"><span class="scroll-top-in"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg></span></button>
+    <button type="button" class="scroll-top" id="scrollTop" aria-label="{{ __('Back to top') }}" title="{{ __('Back to top') }}"><span class="scroll-top-in"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg></span></button>
     @include('front.layouts.scripts')
     @stack('scripts')
     <script>

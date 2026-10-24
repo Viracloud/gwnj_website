@@ -19,11 +19,11 @@ class AdminPageDonateItemController extends Controller
         $obj = PageDonateItem::where('id', 1)->first();
 
         $obj->page_title = $request->page_title;
-        $obj->page_title_sv = $request->page_title_sv;
+        $obj->page_title_fa = $request->page_title_fa;
         $obj->heading = $request->heading;
-        $obj->heading_sv = $request->heading_sv;
+        $obj->heading_fa = $request->heading_fa;
         $obj->description = $request->description;
-        $obj->description_sv = $request->description_sv;
+        $obj->description_fa = $request->description_fa;
         $obj->preset_amounts = $request->preset_amounts;
         $obj->goal_amount = $request->goal_amount;
         $obj->seo_title = $request->seo_title;

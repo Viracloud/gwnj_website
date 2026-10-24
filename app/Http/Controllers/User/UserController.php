@@ -38,7 +38,7 @@ class UserController extends Controller
         $request->validate([
             'name' => 'required',
             'surname' => 'required',
-            'email' => 'required|email',
+            'email' => 'required|email|unique:users,email,'.Auth::guard('web')->user()->id,
             'phone' => 'required',
             'address' => 'required',
             'country' => 'required',
@@ -51,7 +51,7 @@ class UserController extends Controller
 
         if($request->password != null) {
             $request->validate([
-                'password' => ['required'],
+                'password' => ['required','min:8'],
                 'confirm_password' => ['required','same:password'],
             ]);
             $user->password = Hash::make($request->password);

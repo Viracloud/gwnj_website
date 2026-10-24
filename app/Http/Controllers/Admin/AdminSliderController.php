@@ -29,11 +29,11 @@ class AdminSliderController extends Controller
             $slider->image = $final_name;
         }
         $slider->heading = $request->heading;
-        $slider->heading_sv = $request->heading_sv;
+        $slider->heading_fa = $request->heading_fa;
         $slider->text = $request->text;
-        $slider->text_sv = $request->text_sv;
+        $slider->text_fa = $request->text_fa;
         $slider->button_text = $request->button_text;
-        $slider->button_text_sv = $request->button_text_sv;
+        $slider->button_text_fa = $request->button_text_fa;
         $slider->button_link = $request->button_link;
         $slider->save();
 
@@ -47,7 +47,7 @@ class AdminSliderController extends Controller
             'text' => 'required|string',
         ]);
 
-        $slider = Slider::where('id', $id)->first();
+        $slider = Slider::findOrFail($id);
         if($request->hasFile('image')) {
             $request->validate([
                 'image' => 'mimes:jpeg,png,jpg,gif,svg|max:2048',
@@ -60,11 +60,11 @@ class AdminSliderController extends Controller
             $slider->image = $final_name;
         }
         $slider->heading = $request->heading;
-        $slider->heading_sv = $request->heading_sv;
+        $slider->heading_fa = $request->heading_fa;
         $slider->text = $request->text;
-        $slider->text_sv = $request->text_sv;
+        $slider->text_fa = $request->text_fa;
         $slider->button_text = $request->button_text;
-        $slider->button_text_sv = $request->button_text_sv;
+        $slider->button_text_fa = $request->button_text_fa;
         $slider->button_link = $request->button_link;
         $slider->save();
 
@@ -73,7 +73,7 @@ class AdminSliderController extends Controller
 
     public function delete($id)
     {
-        $slider = Slider::where('id', $id)->first();
+        $slider = Slider::findOrFail($id);
         if($slider->image && file_exists(public_path('uploads/'.$slider->image))) {
             unlink(public_path('uploads/'.$slider->image));
         }

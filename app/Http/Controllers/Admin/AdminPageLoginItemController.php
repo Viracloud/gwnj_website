@@ -19,13 +19,13 @@ class AdminPageLoginItemController extends Controller
         $obj = PageLoginItem::where('id', 1)->first();
 
         $obj->login_page_title = $request->login_page_title;
-        $obj->login_page_title_sv = $request->login_page_title_sv;
+        $obj->login_page_title_fa = $request->login_page_title_fa;
         $obj->register_page_title = $request->register_page_title;
-        $obj->register_page_title_sv = $request->register_page_title_sv;
+        $obj->register_page_title_fa = $request->register_page_title_fa;
         $obj->forget_password_page_title = $request->forget_password_page_title;
-        $obj->forget_password_page_title_sv = $request->forget_password_page_title_sv;
+        $obj->forget_password_page_title_fa = $request->forget_password_page_title_fa;
         $obj->reset_password_page_title = $request->reset_password_page_title;
-        $obj->reset_password_page_title_sv = $request->reset_password_page_title_sv;
+        $obj->reset_password_page_title_fa = $request->reset_password_page_title_fa;
         $obj->seo_title = $request->seo_title;
         $obj->seo_meta_description = $request->seo_meta_description;
 

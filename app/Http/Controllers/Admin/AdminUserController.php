@@ -52,7 +52,7 @@ class AdminUserController extends Controller
             'email' => 'required|string|email|max:255|unique:users,email,'.$id,
         ]);
 
-        $user = User::where('id', $id)->first();
+        $user = User::findOrFail($id);
         $user->name = $request->name;
         $user->email = $request->email;
         $user->phone = $request->phone;
@@ -82,7 +82,7 @@ class AdminUserController extends Controller
 
     public function delete($id)
     {
-        $user = User::where('id', $id)->first();
+        $user = User::findOrFail($id);
         $user->delete();
 
         return redirect()->back()->with('success', 'Item deleted successfully.');

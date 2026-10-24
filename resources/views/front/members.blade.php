@@ -9,13 +9,13 @@
     $intro_paragraphs = $intro !== '' ? preg_split('/\R{2,}/u', $intro) : [];
 @endphp
 <div class="pagehead"><div class="shell">
-    <span class="kicker">{{ is_rtl() ? 'درباره ما' : 'About us' }}</span>
+    <span class="kicker">{{ __('About us') }}</span>
     <h1>{{ tf($page_data,'page_title') }}</h1>
 </div></div>
 
 @if(count($intro_paragraphs))
 <section class="shell structure-intro">
-    <span class="kicker">{{ is_rtl() ? 'ساختار سازمانی' : 'Organizational structure' }}</span>
+    <span class="kicker">{{ __('Organizational structure') }}</span>
     @foreach($intro_paragraphs as $para)
     <p class="lead">{!! nl2br(e(trim($para))) !!}</p>
     @endforeach
@@ -49,7 +49,7 @@
 
 @if(!$categories->count() && !$uncategorized->count())
 <section class="shell">
-    <p style="color:var(--muted)">{{ is_rtl() ? 'هنوز معرفی‌ای ثبت نشده است.' : 'No one has been introduced here yet.' }}</p>
+    <p style="color:var(--muted)">{{ __('No one has been introduced here yet.') }}</p>
 </section>
 @endif
 @endsection

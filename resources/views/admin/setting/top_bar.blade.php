@@ -27,7 +27,7 @@
                 <h6 class="cus-heading">دری (second language)</h6>
                 <div class="mb-3">
                     <label class="label-custom">Address</label>
-                    <input type="text" dir="rtl" name="top_bar_address_sv" value="{{ $setting->top_bar_address_sv }}" class="form-control-custom">
+                    <input type="text" dir="rtl" name="top_bar_address_fa" value="{{ $setting->top_bar_address_fa }}" class="form-control-custom">
                 </div>
             </div>
 
@@ -53,6 +53,7 @@
 
             <div class="card-custom-p mb-4">
                 <div>
+                    @include('admin.partials.extra-locales', ['table' => 'settings', 'item' => ($setting ?? null), 'fields' => ['top_bar_address' => 'input']])
                     <button type="submit" class="btn-admin-primary">Update</button>
                 </div>
             </div>

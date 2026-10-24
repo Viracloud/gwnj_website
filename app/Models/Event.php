@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class Event extends Model
 {
+    use \App\Models\Concerns\SavesExtraLocales;
+
     public function event_faqs()
     {
         return $this->hasMany(EventFaq::class);

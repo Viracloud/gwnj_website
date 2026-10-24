@@ -26,7 +26,7 @@ class AdminPartnerController extends Controller
 
         $partner = new Partner();
         $partner->name = $request->name;
-        $partner->name_sv = $request->name_sv;
+        $partner->name_fa = $request->name_fa;
         $partner->website = $request->website;
         $partner->sort_order = (int) $request->sort_order;
         $partner->status = $request->status;
@@ -52,7 +52,7 @@ class AdminPartnerController extends Controller
 
         $partner = Partner::findOrFail($id);
         $partner->name = $request->name;
-        $partner->name_sv = $request->name_sv;
+        $partner->name_fa = $request->name_fa;
         $partner->website = $request->website;
         $partner->sort_order = (int) $request->sort_order;
         $partner->status = $request->status;

@@ -24,7 +24,7 @@ class AdminPublicationCategoryController extends Controller
 
         $obj = new PublicationCategory();
         $obj->name = $request->name;
-        $obj->name_sv = $request->name_sv;
+        $obj->name_fa = $request->name_fa;
         $obj->slug = $request->slug;
         $obj->save();
 
@@ -38,9 +38,9 @@ class AdminPublicationCategoryController extends Controller
             'slug' => 'required|alpha_dash|unique:publication_categories,slug,'.$id,
         ]);
 
-        $obj = PublicationCategory::where('id', $id)->first();
+        $obj = PublicationCategory::findOrFail($id);
         $obj->name = $request->name;
-        $obj->name_sv = $request->name_sv;
+        $obj->name_fa = $request->name_fa;
         $obj->slug = $request->slug;
         $obj->save();
 
@@ -55,7 +55,7 @@ class AdminPublicationCategoryController extends Controller
             return redirect()->back()->with('error', 'Cannot delete category with associated publications.');
         }
 
-        $obj = PublicationCategory::where('id', $id)->first();
+        $obj = PublicationCategory::findOrFail($id);
         $obj->delete();
 
         return redirect()->back()->with('success', 'Item deleted successfully.');

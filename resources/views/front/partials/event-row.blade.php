@@ -1,17 +1,17 @@
 @php
     $ev_date = $event->event_date ? \Carbon\Carbon::parse($event->event_date)->startOfDay() : null;
     $ev_days = $ev_date ? (int) now()->startOfDay()->diffInDays($ev_date, false) : null;
-    $ev_num = fn($n) => is_rtl() ? strtr((string) $n, ['0'=>'۰','1'=>'۱','2'=>'۲','3'=>'۳','4'=>'۴','5'=>'۵','6'=>'۶','7'=>'۷','8'=>'۸','9'=>'۹']) : $n;
+    $ev_num = fn($n) => local_digits($n);
     if ($ev_days === null) {
         $ev_status = null;
     } elseif ($ev_days < 0) {
-        $ev_status = is_rtl() ? 'برگزار شد' : 'Past';
+        $ev_status = __('Past');
     } elseif ($ev_days === 0) {
-        $ev_status = is_rtl() ? 'امروز' : 'Today';
+        $ev_status = __('Today');
     } elseif ($ev_days === 1) {
-        $ev_status = is_rtl() ? 'فردا' : 'Tomorrow';
+        $ev_status = __('Tomorrow');
     } else {
-        $ev_status = is_rtl() ? $ev_num($ev_days).' روز دیگر' : 'In '.$ev_days.' days';
+        $ev_status = __('In :count days', ['count' => $ev_num($ev_days)]);
     }
 @endphp
 <li class="event{{ $event->image ? ' has-img' : '' }}{{ ($ev_days !== null && $ev_days < 0) ? ' is-past' : '' }}">
@@ -24,8 +24,11 @@
     <div class="ev-thumb"><img src="{{ asset('uploads/'.$event->image) }}" alt="" loading="lazy"></div>
     @endif
     <div class="ev-body">
-        @if($ev_status)
-        <span class="ev-status">{{ $ev_status }}</span>
+        @if($ev_status || $event->category)
+        <div class="ev-tags">
+            @if($ev_status)<span class="ev-status">{{ $ev_status }}</span>@endif
+            @if($event->category)<span class="ev-cat">{{ tf($event->category,'name') }}</span>@endif
+        </div>
         @endif
         <h3><a href="{{ route('event', slug_for($event)) }}">{{ tf($event,'title') }}</a></h3>
         <div class="ev-meta">

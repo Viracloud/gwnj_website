@@ -24,7 +24,7 @@ class AdminEventCategoryController extends Controller
 
         $obj = new EventCategory();
         $obj->name = $request->name;
-        $obj->name_sv = $request->name_sv;
+        $obj->name_fa = $request->name_fa;
         $obj->slug = $request->slug;
         $obj->save();
 
@@ -38,9 +38,9 @@ class AdminEventCategoryController extends Controller
             'slug' => 'required|alpha_dash|unique:event_categories,slug,'.$id,
         ]);
 
-        $obj = EventCategory::where('id', $id)->first();
+        $obj = EventCategory::findOrFail($id);
         $obj->name = $request->name;
-        $obj->name_sv = $request->name_sv;
+        $obj->name_fa = $request->name_fa;
         $obj->slug = $request->slug;
         $obj->save();
 
@@ -55,7 +55,7 @@ class AdminEventCategoryController extends Controller
             return redirect()->back()->with('error', 'Cannot delete category with associated events.');
         }
 
-        $obj = EventCategory::where('id', $id)->first();
+        $obj = EventCategory::findOrFail($id);
         $obj->delete();
 
         return redirect()->back()->with('success', 'Item deleted successfully.');

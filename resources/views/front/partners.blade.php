@@ -5,8 +5,8 @@
 
 @section('content')
 <div class="pagehead"><div class="shell">
-    <span class="kicker">{{ is_rtl() ? 'شراکت‌ها' : 'Partnerships' }}</span>
-    <h1>{{ is_rtl() ? 'سازمان‌های شریک ما' : 'Our Partners' }}</h1>
+    <span class="kicker">{{ __('Partnerships') }}</span>
+    <h1>{{ __('Our Partners') }}</h1>
 </div></div>
 
 <section class="shell">
@@ -19,7 +19,7 @@
         @endforeach
     </div>
     @else
-    <p style="color:var(--muted)">{{ is_rtl() ? 'هنوز سازمان شریکی ثبت نشده است.' : 'No partner organisations have been added yet.' }}</p>
+    <p style="color:var(--muted)">{{ __('No partner organisations have been added yet.') }}</p>
     @endif
 </section>
 @endsection

@@ -29,7 +29,7 @@
                     </div>
                     <div class="mb-3">
                         <label class="label-custom">Slug (Dari) <small>- optional, auto-generated from the Dari title</small></label>
-                        <input type="text" class="form-control-custom" name="slug_sv" dir="rtl">
+                        <input type="text" class="form-control-custom" name="slug_fa" dir="rtl">
                     </div>
                     <div class="mb-3">
                         <label class="label-custom">Featured image</label>
@@ -38,6 +38,14 @@
                     <div class="mb-3">
                         <label class="label-custom">Homepage banner background <small>- optional, used when this page is the homepage campaign banner</small></label>
                         <input type="file" class="form-control-custom" name="home_bg_image" accept="image/*">
+                    </div>
+
+                    <div class="mb-3 mt-3">
+                        <label class="label-custom">Visibility</label>
+                        <select name="status" class="form-control-custom">
+                            <option value="Show">Visible on the website</option>
+                            <option value="Hide">Hidden (kept, but not published)</option>
+                        </select>
                     </div>
 
                     <h6 class="fw-semibold mt-4 mb-2">English</h6>
@@ -65,26 +73,27 @@
                     <h6 class="fw-semibold mt-4 mb-2">دری (second language)</h6>
                     <div class="mb-3">
                         <label class="label-custom">Title</label>
-                        <input type="text" class="form-control-custom" name="title_sv" dir="rtl">
+                        <input type="text" class="form-control-custom" name="title_fa" dir="rtl">
                     </div>
                     <div class="mb-3">
                         <label class="label-custom">Summary</label>
-                        <textarea class="form-control-custom" name="excerpt_sv" rows="2" dir="rtl"></textarea>
+                        <textarea class="form-control-custom" name="excerpt_fa" rows="2" dir="rtl"></textarea>
                     </div>
                     <div class="mb-3">
                         <label class="label-custom">Content</label>
-                        <textarea id="editor1_sv" class="form-control-custom tinymce-editor" name="content_sv" rows="4" dir="rtl"></textarea>
+                        <textarea id="editor1_fa" class="form-control-custom tinymce-editor" name="content_fa" rows="4" dir="rtl"></textarea>
                     </div>
                     <div class="mb-3">
                         <label class="label-custom">SEO Title</label>
-                        <input type="text" class="form-control-custom" name="seo_title_sv" dir="rtl">
+                        <input type="text" class="form-control-custom" name="seo_title_fa" dir="rtl">
                     </div>
                     <div class="mb-3">
                         <label class="label-custom">SEO Description</label>
-                        <textarea class="form-control-custom" name="seo_meta_description_sv" rows="3" dir="rtl"></textarea>
+                        <textarea class="form-control-custom" name="seo_meta_description_fa" rows="3" dir="rtl"></textarea>
                     </div>
 
                     <div class="mb-3">
+                        @include('admin.partials.extra-locales', ['table' => 'custom_pages', 'item' => null, 'fields' => ['slug' => 'input', 'title' => 'input', 'excerpt' => 'textarea', 'content' => 'editor', 'seo_title' => 'input', 'seo_meta_description' => 'textarea']])
                         <button type="submit" class="btn-admin-primary">Submit</button>
                     </div>
                 </form>
@@ -110,7 +119,7 @@
             @foreach($custom_pages as $custom_page)
             <tr>
                 <td>{{ $loop->iteration }}</td>
-                <td>{{ $custom_page->title }}</td>
+                <td>{{ $custom_page->title }} @unless($custom_page->isVisible())<span class="badge bg-secondary ms-1">Hidden</span>@endunless</td>
                 <td>{{ $custom_page->slug }}</td>
                 <td><a href="{{ route('admin_custom_page_gallery', $custom_page->id) }}" class="btn btn-info btn-sm">Manage Gallery ({{ $custom_page->images_count }})</a></td>
                 <td>
@@ -137,7 +146,7 @@
                                 </div>
                                 <div class="mb-3">
                                     <label class="label-custom">Slug (Dari) <small>- optional, auto-generated from the Dari title</small></label>
-                                    <input type="text" class="form-control-custom" name="slug_sv" dir="rtl" value="{{ $custom_page->slug_sv }}">
+                                    <input type="text" class="form-control-custom" name="slug_fa" dir="rtl" value="{{ $custom_page->slug_fa }}">
                                 </div>
                                 <div class="mb-3">
                                     <label class="label-custom">Featured image</label>
@@ -153,6 +162,15 @@
                                     <img src="{{ asset('uploads/'.$custom_page->home_bg_image) }}" alt="" style="height:70px;border-radius:8px;margin-top:.5rem;display:block">
                                     <label class="d-block mt-2"><input type="checkbox" name="remove_home_bg_image" value="1"> Remove current background</label>
                                     @endif
+                                </div>
+
+                                <div class="mb-3 mt-3">
+                                    <label class="label-custom">Visibility</label>
+                                    <select name="status" class="form-control-custom">
+                                        <option value="Show" {{ $custom_page->isVisible() ? 'selected' : '' }}>Visible on the website</option>
+                                        <option value="Hide" {{ !$custom_page->isVisible() ? 'selected' : '' }}>Hidden (kept, but not published)</option>
+                                    </select>
+                                    <small class="text-muted">A hidden page is removed from the website, the menus and the sitemap, but nothing is deleted.</small>
                                 </div>
 
                                 <h6 class="fw-semibold mt-4 mb-2">English</h6>
@@ -180,26 +198,27 @@
                                 <h6 class="fw-semibold mt-4 mb-2">دری (second language)</h6>
                                 <div class="mb-3">
                                     <label class="label-custom">Title</label>
-                                    <input type="text" class="form-control-custom" name="title_sv" value="{{ $custom_page->title_sv }}" dir="rtl">
+                                    <input type="text" class="form-control-custom" name="title_fa" value="{{ $custom_page->title_fa }}" dir="rtl">
                                 </div>
                                 <div class="mb-3">
                                     <label class="label-custom">Summary</label>
-                                    <textarea class="form-control-custom" name="excerpt_sv" rows="2" dir="rtl">{{ $custom_page->excerpt_sv }}</textarea>
+                                    <textarea class="form-control-custom" name="excerpt_fa" rows="2" dir="rtl">{{ $custom_page->excerpt_fa }}</textarea>
                                 </div>
                                 <div class="mb-3">
                                     <label class="label-custom">Content</label>
-                                    <textarea id="editor2_{{ $custom_page->id }}_sv" class="form-control-custom tinymce-editor" name="content_sv" rows="4" dir="rtl">{{ $custom_page->content_sv }}</textarea>
+                                    <textarea id="editor2_{{ $custom_page->id }}_fa" class="form-control-custom tinymce-editor" name="content_fa" rows="4" dir="rtl">{{ $custom_page->content_fa }}</textarea>
                                 </div>
                                 <div class="mb-3">
                                     <label class="label-custom">SEO Title</label>
-                                    <input type="text" class="form-control-custom" name="seo_title_sv" value="{{ $custom_page->seo_title_sv }}" dir="rtl">
+                                    <input type="text" class="form-control-custom" name="seo_title_fa" value="{{ $custom_page->seo_title_fa }}" dir="rtl">
                                 </div>
                                 <div class="mb-3">
                                     <label class="label-custom">SEO Description</label>
-                                    <textarea class="form-control-custom" name="seo_meta_description_sv" rows="3" dir="rtl">{{ $custom_page->seo_meta_description_sv }}</textarea>
+                                    <textarea class="form-control-custom" name="seo_meta_description_fa" rows="3" dir="rtl">{{ $custom_page->seo_meta_description_fa }}</textarea>
                                 </div>
 
                                 <div class="mb-3">
+                                    @include('admin.partials.extra-locales', ['table' => 'custom_pages', 'item' => ($custom_page ?? null), 'fields' => ['slug' => 'input', 'title' => 'input', 'excerpt' => 'textarea', 'seo_title' => 'input', 'seo_meta_description' => 'textarea']])
                                     <button type="submit" class="btn-admin-primary">Update</button>
                                 </div>
                             </form>

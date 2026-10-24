@@ -31,7 +31,7 @@
                     </div>
                     <div class="mb-3">
                         <label class="label-custom">Slug (Dari) <small>- optional, auto-generated from the Dari title</small></label>
-                        <input type="text" class="form-control-custom" name="slug_sv" dir="rtl">
+                        <input type="text" class="form-control-custom" name="slug_fa" dir="rtl">
                     </div>
                     <div class="mb-3">
                         <label class="label-custom">Menu Label</label>
@@ -41,14 +41,15 @@
                     <h6 class="fw-semibold mt-4 mb-2">دری (second language)</h6>
                     <div class="mb-3">
                         <label class="label-custom">Name</label>
-                        <input type="text" class="form-control-custom" name="name_sv" dir="rtl">
+                        <input type="text" class="form-control-custom" name="name_fa" dir="rtl">
                     </div>
                     <div class="mb-3">
                         <label class="label-custom">Menu Label</label>
-                        <input type="text" class="form-control-custom" name="menu_label_sv" dir="rtl">
+                        <input type="text" class="form-control-custom" name="menu_label_fa" dir="rtl">
                     </div>
 
                     <div class="mb-3">
+                        @include('admin.partials.extra-locales', ['table' => 'post_categories', 'item' => null, 'fields' => ['slug' => 'input', 'name' => 'input', 'menu_label' => 'input']])
                         <button type="submit" class="btn-admin-primary">Submit</button>
                     </div>
                 </form>
@@ -104,7 +105,7 @@
                                 </div>
                                 <div class="mb-3">
                                     <label class="label-custom">Slug (Dari) <small>- optional, auto-generated from the Dari title</small></label>
-                                    <input type="text" class="form-control-custom" name="slug_sv" dir="rtl" value="{{ $post_category->slug_sv }}">
+                                    <input type="text" class="form-control-custom" name="slug_fa" dir="rtl" value="{{ $post_category->slug_fa }}">
                                 </div>
                                 <div class="mb-3">
                                     <label class="label-custom">Menu Label</label>
@@ -114,14 +115,15 @@
                                 <h6 class="fw-semibold mt-4 mb-2">دری (second language)</h6>
                                 <div class="mb-3">
                                     <label class="label-custom">Name</label>
-                                    <input type="text" class="form-control-custom" name="name_sv" value="{{ $post_category->name_sv }}" dir="rtl">
+                                    <input type="text" class="form-control-custom" name="name_fa" value="{{ $post_category->name_fa }}" dir="rtl">
                                 </div>
                                 <div class="mb-3">
                                     <label class="label-custom">Menu Label</label>
-                                    <input type="text" class="form-control-custom" name="menu_label_sv" value="{{ $post_category->menu_label_sv }}" dir="rtl">
+                                    <input type="text" class="form-control-custom" name="menu_label_fa" value="{{ $post_category->menu_label_fa }}" dir="rtl">
                                 </div>
 
                                 <div class="mb-3">
+                                    @include('admin.partials.extra-locales', ['table' => 'post_categories', 'item' => ($post_category ?? null), 'fields' => ['slug' => 'input', 'name' => 'input', 'menu_label' => 'input']])
                                     <button type="submit" class="btn-admin-primary">Update</button>
                                 </div>
                             </form>

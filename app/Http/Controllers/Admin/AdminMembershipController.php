@@ -84,9 +84,9 @@ class AdminMembershipController extends Controller
     {
         $user = User::findOrFail($id);
         $user->position = $request->position;
-        $user->position_sv = $request->position_sv;
+        $user->position_fa = $request->position_fa;
         $user->occupation = $request->occupation;
-        $user->occupation_sv = $request->occupation_sv;
+        $user->occupation_fa = $request->occupation_fa;
         $user->dues_exempt_override = $request->dues_exempt_override === '' || $request->dues_exempt_override === null
             ? null
             : (bool) $request->dues_exempt_override;
@@ -136,7 +136,10 @@ class AdminMembershipController extends Controller
 
     public function card_issue_direct($id)
     {
-        $user = User::where('id', $id)->where('membership_status', 'approved')->where('card_status', '!=', 'issued')->firstOrFail();
+        // A new card, or a renewal once the previous card has expired.
+        $user = User::where('id', $id)->where('membership_status', 'approved')
+            ->where(fn ($q) => $q->where('card_status', '!=', 'issued')->orWhere('card_expires_at', '<', now()))
+            ->firstOrFail();
 
         if (!$user->canReceiveCard()) {
             return redirect()->back()->with('error', 'This member has not paid their annual dues yet (not exempt) - the card cannot be issued.');

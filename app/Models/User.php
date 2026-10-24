@@ -9,6 +9,8 @@ use Illuminate\Notifications\Notifiable;
 
 class User extends Authenticatable
 {
+    use \App\Models\Concerns\SavesExtraLocales;
+
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable;
 
@@ -24,9 +26,9 @@ class User extends Authenticatable
         'email',
         'password',
         'position',
-        'position_sv',
+        'position_fa',
         'occupation',
-        'occupation_sv',
+        'occupation_fa',
         'phone',
         'address',
         'country',
@@ -104,6 +106,34 @@ class User extends Authenticatable
     public function canReceiveCard(): bool
     {
         return $this->isDuesExempt() || $this->dues_paid;
+    }
+
+    /** An issued card that has passed its expiry date (cards are valid for one year). */
+    public function cardIsExpired(): bool
+    {
+        return $this->card_status === 'issued' && $this->card_expires_at && $this->card_expires_at->isPast();
+    }
+
+    /** Issued and not yet expired. */
+    public function cardIsValid(): bool
+    {
+        return $this->card_status === 'issued' && !$this->cardIsExpired();
+    }
+
+    /**
+     * For a renewal, members who pay dues must pay again for the new year:
+     * a dues payment recorded after the current card was issued counts.
+     */
+    public function duesPaidForRenewal(): bool
+    {
+        $amount = optional(\App\Models\Setting::where('id', 1)->first())->membership_dues_amount;
+        if ($this->isDuesExempt() || !$amount) {
+            return true;
+        }
+        return \App\Models\Donation::where('message', 'Membership dues - '.$this->membership_id)
+            ->where('status', 'Completed')
+            ->when($this->card_issued_at, fn ($q) => $q->where('created_at', '>', $this->card_issued_at))
+            ->exists();
     }
 
     public function profileIsComplete(): bool

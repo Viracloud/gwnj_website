@@ -5,14 +5,14 @@
 
 @section('content')
 <div class="pagehead"><div class="shell">
-    <span class="kicker">{{ is_rtl() ? 'انتشارات' : 'Publications' }}</span>
-    <h1>{{ is_rtl() ? 'گزارش‌ها و انتشارات' : 'Reports and publications' }}</h1>
+    <span class="kicker">{{ __('Publications') }}</span>
+    <h1>{{ __('Reports and publications') }}</h1>
 </div></div>
 
 <section class="shell">
     @if($publication_categories->count())
     <div class="filters">
-        <a href="{{ route('publications') }}" class="{{ !request('category') ? 'active' : '' }}">{{ is_rtl() ? 'همه' : 'All' }}</a>
+        <a href="{{ route('publications') }}" class="{{ !request('category') ? 'active' : '' }}">{{ __('All') }}</a>
         @foreach($publication_categories as $cat)
         <a href="{{ route('publications', ['category' => $cat->slug]) }}" class="{{ request('category') == $cat->slug ? 'active' : '' }}">{{ tf($cat,'name') }}</a>
         @endforeach
@@ -32,15 +32,33 @@
                 <p>{{ plain_excerpt(tf($pub, 'description'), 160) }}</p>
                 @endif
             </div>
-            @if($pub->file)
-            <a class="go" href="{{ asset('uploads/'.$pub->file) }}" target="_blank" rel="noopener">{{ hc('pubs_download') }}</a>
+            @if($pub->file || $pub->hasVideo())
+            <div class="record-actions">
+                @if($pub->hasVideo())
+                @php
+                    // Plays on the site (YouTube / Instagram / Facebook / Vimeo / uploaded file) only after a click;
+                    // an unrecognised link opens in a new tab.
+                    $vsrc = $pub->videoSource();
+                    $vemb = $pub->video_file ? null : video_embed($vsrc);
+                @endphp
+                <a class="go go-video" href="{{ $vsrc }}"
+                   @if($pub->video_file) data-video-file="{{ $vsrc }}"
+                   @elseif($vemb) data-video-embed="{{ $vemb['embed'] }}" data-video-portrait="{{ $vemb['portrait'] ? 1 : 0 }}"
+                   @else target="_blank" rel="noopener" @endif>
+                    <i class="fa-solid fa-circle-play"></i> {{ __('Watch video') }}
+                </a>
+                @endif
+                @if($pub->file)
+                <a class="go" href="{{ asset('uploads/'.$pub->file) }}" target="_blank" rel="noopener">{{ hc('pubs_download') }}</a>
+                @endif
+            </div>
             @endif
         </li>
         @endforeach
     </ul>
     {{ $publications->links() }}
     @else
-    <p style="color:var(--muted)">{{ is_rtl() ? 'هنوز گزارشی منتشر نشده است.' : 'No publications have been posted yet.' }}</p>
+    <p style="color:var(--muted)">{{ __('No publications have been posted yet.') }}</p>
     @endif
 </section>
 @endsection

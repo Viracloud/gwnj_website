@@ -23,9 +23,9 @@ class AdminFaqController extends Controller
 
         $faq = new Faq();
         $faq->question = $request->question;
-        $faq->question_sv = $request->question_sv;
+        $faq->question_fa = $request->question_fa;
         $faq->answer = $request->answer;
-        $faq->answer_sv = $request->answer_sv;
+        $faq->answer_fa = $request->answer_fa;
         $faq->save();
 
         return redirect()->back()->with('success', 'Item created successfully.');
@@ -38,11 +38,11 @@ class AdminFaqController extends Controller
             'answer' => 'required|string',
         ]);
 
-        $faq = Faq::where('id', $id)->first();
+        $faq = Faq::findOrFail($id);
         $faq->question = $request->question;
-        $faq->question_sv = $request->question_sv;
+        $faq->question_fa = $request->question_fa;
         $faq->answer = $request->answer;
-        $faq->answer_sv = $request->answer_sv;
+        $faq->answer_fa = $request->answer_fa;
         $faq->save();
 
         return redirect()->back()->with('success', 'Item updated successfully.');
@@ -50,7 +50,7 @@ class AdminFaqController extends Controller
 
     public function delete($id)
     {
-        $faq = Faq::where('id', $id)->first();
+        $faq = Faq::findOrFail($id);
         $faq->delete();
 
         return redirect()->back()->with('success', 'Item deleted successfully.');

@@ -1,3 +1,150 @@
+// Language tabs in admin forms: English | دری | Français | Deutsch.
+// Built from the field names, so every form gets them without changes to its markup:
+//   "<field>_fa"            → Dari tab
+//   xl[table][fr][field]    → French tab (from the "other languages" component), same for de
+//   "<field>" with a _fa twin → English tab
+//   anything else (image, status, dates …) stays above the tabs, shared by all languages.
+// Runs BEFORE TinyMCE is started further down, because moving an editor afterwards breaks it.
+(function () {
+  var LABELS = { en: 'English', fa: 'دری' };
+  var uid = 0;
+
+  function fieldBox(el, form) {
+    var box = el.closest('.mb-3, .form-group');
+    return box && form.contains(box) ? box : el.parentElement;
+  }
+
+  function langOf(box, faNames) {
+    var langs = {};
+    box.querySelectorAll('input[name], textarea[name], select[name]').forEach(function (f) {
+      var n = f.getAttribute('name');
+      if (/^xl\[/.test(n)) return; // handled with its <details> box
+      if (/_fa(\[\])?$/.test(n)) langs.fa = 1;
+      else if (faNames[n]) langs.en = 1;
+      else langs.shared = 1;
+    });
+    var keys = Object.keys(langs);
+    return keys.length === 1 && keys[0] !== 'shared' ? keys[0] : null; // mixed boxes stay put
+  }
+
+  function hasValue(pane) {
+    return Array.prototype.some.call(pane.querySelectorAll('input[type=text], input:not([type]), textarea'), function (f) {
+      return f.value && f.value.trim() !== '';
+    });
+  }
+
+  function build(form) {
+    var faNames = {};
+    form.querySelectorAll('[name$="_fa"]').forEach(function (f) {
+      faNames[f.getAttribute('name').replace(/_fa$/, '')] = 1;
+    });
+    if (!Object.keys(faNames).length) return;
+
+    // Group the language fields by their parent element (one tab set per card / section).
+    var groups = [];
+    form.querySelectorAll('input[name], textarea[name]').forEach(function (f) {
+      var box = fieldBox(f, form);
+      if (!box || box.dataset.ltDone) return;
+      box.dataset.ltDone = '1';
+      var lang = langOf(box, faNames);
+      if (!lang) return;
+      var parent = box.parentElement;
+      var g = groups.find(function (x) { return x.parent === parent; });
+      if (!g) groups.push(g = { parent: parent, boxes: [] });
+      g.boxes.push({ box: box, lang: lang });
+    });
+    groups = groups.filter(function (g) {
+      var l = g.boxes.map(function (b) { return b.lang; });
+      return l.indexOf('en') > -1 && l.indexOf('fa') > -1;
+    });
+    if (!groups.length) return;
+
+    var extras = Array.prototype.slice.call(form.querySelectorAll('details.xl-box[data-locale]'));
+
+    groups.forEach(function (g) {
+      var id = 'lt' + (++uid);
+      var order = ['en', 'fa'];
+      var labels = { en: LABELS.en, fa: LABELS.fa };
+      var live = {};
+      // French / German boxes join the tabs when the form has a single language section.
+      var ownExtras = groups.length === 1 ? extras : [];
+      ownExtras.forEach(function (d) {
+        var c = d.dataset.locale;
+        order.push(c);
+        labels[c] = d.dataset.localeLabel;
+        live[c] = d.dataset.localeLive === '1';
+      });
+
+      var wrap = document.createElement('div');
+      wrap.className = 'lt-wrap';
+      var nav = document.createElement('div');
+      nav.className = 'lt-nav';
+      nav.setAttribute('role', 'tablist');
+      wrap.appendChild(nav);
+      var panes = {};
+      order.forEach(function (c, i) {
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'lt-tab' + (i === 0 ? ' active' : '');
+        btn.setAttribute('role', 'tab');
+        btn.setAttribute('aria-controls', id + '-' + c);
+        btn.dataset.lang = c;
+        btn.innerHTML = '<span></span><i class="lt-check fa-solid fa-circle-check" aria-hidden="true"></i>';
+        btn.querySelector('span').textContent = labels[c] + (live[c] === false ? ' (not published)' : '');
+        nav.appendChild(btn);
+        var pane = document.createElement('div');
+        pane.className = 'lt-pane' + (i === 0 ? ' active' : '');
+        pane.id = id + '-' + c;
+        pane.setAttribute('role', 'tabpanel');
+        pane.dataset.lang = c;
+        panes[c] = pane;
+        wrap.appendChild(pane);
+      });
+
+      // Put the tab set where the first language field was, then move the fields in.
+      g.parent.insertBefore(wrap, g.boxes[0].box);
+      g.boxes.forEach(function (b) { panes[b.lang].appendChild(b.box); });
+      ownExtras.forEach(function (d) {
+        d.open = true;
+        d.classList.add('lt-inline');
+        panes[d.dataset.locale].appendChild(d);
+      });
+
+      // Old section headings ("English", "دری (second language)") and their divider are no longer needed.
+      g.parent.querySelectorAll(':scope > h6, :scope > hr').forEach(function (h) {
+        var t = h.textContent.trim();
+        if (h.tagName === 'HR' || t === 'English' || t.indexOf('دری') === 0) h.style.display = 'none';
+      });
+
+      function refresh() {
+        nav.querySelectorAll('.lt-tab').forEach(function (btn) {
+          btn.classList.toggle('filled', hasValue(panes[btn.dataset.lang]));
+        });
+      }
+      nav.addEventListener('click', function (e) {
+        var btn = e.target.closest('.lt-tab');
+        if (!btn) return;
+        nav.querySelectorAll('.lt-tab').forEach(function (b) { b.classList.toggle('active', b === btn); });
+        Object.keys(panes).forEach(function (c) { panes[c].classList.toggle('active', c === btn.dataset.lang); });
+      });
+      wrap.addEventListener('input', refresh);
+      refresh();
+    });
+  }
+
+  document.querySelectorAll('form').forEach(build);
+
+  // A required field in a hidden tab: open that tab so the browser can show the message.
+  document.addEventListener('invalid', function (e) {
+    var pane = e.target.closest && e.target.closest('.lt-pane');
+    if (pane && !pane.classList.contains('active')) {
+      var nav = pane.parentElement.querySelector('.lt-nav');
+      var btn = nav && nav.querySelector('.lt-tab[data-lang="' + pane.dataset.lang + '"]');
+      if (btn) btn.click();
+    }
+  }, true);
+})();
+
 // Sidebar active state — the "active" class is already set server-side (Blade);
 // just open whichever dropdown contains the active link, then reveal the nav.
 (function () {
@@ -23,8 +170,9 @@ $(function () {
       selector: '#editor1',
       height: 300,
       menubar: false,
-      plugins: 'lists link image code table wordcount',
-      toolbar: 'undo redo | blocks | bold italic underline strikethrough | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image table | code | removeformat',
+      plugins: 'lists link image media code table wordcount',
+      media_live_embeds: true,
+      toolbar: 'undo redo | blocks | bold italic underline strikethrough | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image media table | code | removeformat',
       block_formats: 'Paragraph=p; Heading 1=h1; Heading 2=h2; Heading 3=h3; Heading 4=h4; Heading 5=h5; Heading 6=h6',
       content_style: 'body { font-family: system-ui, -apple-system, sans-serif; font-size: 14px; }',
       branding: false,
@@ -39,8 +187,9 @@ $(function () {
       selector: '#editor2',
       height: 300,
       menubar: false,
-      plugins: 'lists link image code table wordcount',
-      toolbar: 'undo redo | blocks | bold italic underline strikethrough | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image table | code | removeformat',
+      plugins: 'lists link image media code table wordcount',
+      media_live_embeds: true,
+      toolbar: 'undo redo | blocks | bold italic underline strikethrough | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image media table | code | removeformat',
       block_formats: 'Paragraph=p; Heading 1=h1; Heading 2=h2; Heading 3=h3; Heading 4=h4; Heading 5=h5; Heading 6=h6',
       content_style: 'body { font-family: system-ui, -apple-system, sans-serif; font-size: 14px; }',
       branding: false,
@@ -58,8 +207,9 @@ $(function () {
       selector: '#' + el.id,
       height: 300,
       menubar: false,
-      plugins: 'lists link image code table wordcount',
-      toolbar: 'undo redo | blocks | bold italic underline strikethrough | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image table | code | removeformat',
+      plugins: 'lists link image media code table wordcount',
+      media_live_embeds: true,
+      toolbar: 'undo redo | blocks | bold italic underline strikethrough | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image media table | code | removeformat',
       block_formats: 'Paragraph=p; Heading 1=h1; Heading 2=h2; Heading 3=h3; Heading 4=h4; Heading 5=h5; Heading 6=h6',
       content_style: 'body { font-family: system-ui, -apple-system, sans-serif; font-size: 14px; }',
       branding: false,

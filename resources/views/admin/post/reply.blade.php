@@ -64,7 +64,7 @@
                     <!-- // Admin Reply Modal -->
                 </td>
                 <td>{{ $reply->name }}<br>{{ $reply->email }}</td>
-                <td>{!! nl2br($reply->reply) !!}</td>
+                <td>{!! nl2br(e($reply->reply)) !!}</td>
                 <td>
                     {{ $reply->reply_by }}
                 </td>

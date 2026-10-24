@@ -25,7 +25,7 @@ class AdminMemberCategoryController extends Controller
 
         $obj = new MemberCategory();
         $obj->name = $request->name;
-        $obj->name_sv = $request->name_sv;
+        $obj->name_fa = $request->name_fa;
         $obj->slug = $request->slug;
         $obj->sort_order = (int) $request->sort_order;
         $obj->save();
@@ -41,9 +41,9 @@ class AdminMemberCategoryController extends Controller
             'sort_order' => 'nullable|integer|min:0',
         ]);
 
-        $obj = MemberCategory::where('id', $id)->first();
+        $obj = MemberCategory::findOrFail($id);
         $obj->name = $request->name;
-        $obj->name_sv = $request->name_sv;
+        $obj->name_fa = $request->name_fa;
         $obj->slug = $request->slug;
         $obj->sort_order = (int) $request->sort_order;
         $obj->save();

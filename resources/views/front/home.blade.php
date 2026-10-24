@@ -23,7 +23,7 @@
     @endif
     <div class="shell"><div class="hero-grid">
     <div class="inner">
-        <span class="org">{{ hc('hero_org') }}</span>
+        <span class="org">{{ preg_replace('/[\s·•|\-–—]+$/u', '', hc('hero_org')) }}</span>
         <h1>{{ $slide ? tf($slide, 'heading') : (hc('hero_heading')) }}</h1>
         <p class="lede">{{ $slide ? tf($slide, 'text') : (hc('hero_text')) }}</p>
         <div class="hero-actions">
@@ -100,7 +100,7 @@
 @if($page_data->about_status == 'Show' && $about_item)
 <section class="shell"><div class="feature">
     <div class="feature-media">
-        <div class="photo"><img src="{{ asset('uploads/'.$about_item->image) }}" alt=""></div>
+        <div class="photo">@include('front.partials.about-slides', ['alt' => ''])</div>
         <div class="feature-badge"><b>{{ hc('about_badge_num') }}</b><span>{{ hc('about_badge_label') }}</span></div>
     </div>
     <div class="feature-body">
@@ -157,7 +157,7 @@
 @endphp
 <div class="band-action"><div class="shell">
     <div class="dateblock">
-        <span class="d">{{ fdate($next->event_date, 'd') }}</span>
+        <span class="d">{{ fdate($next->event_date, 'j') }}</span>
         <span class="m">{{ strtoupper(fdate($next->event_date, 'M')) }}</span>
     </div>
     <div>
@@ -185,11 +185,11 @@
     if ($news_media_group) $work_areas = $work_areas->merge($news_media_group->visibleChildren()->get());
     $work_areas = $work_areas->reject(fn($i) => $i->children()->count() > 0)->values();
     $work_fallback_desc = [
-        'campaigns' => is_rtl() ? 'بسیج عمومی، پیگیری حقوقی و فشار هماهنگ.' : 'Public mobilisation, legal advocacy and coordinated pressure.',
-        'events' => is_rtl() ? 'اعتراضات، کنفرانس‌ها و نشست‌های پیش رو.' : 'Upcoming protests, conferences and meetings.',
-        'blog' => is_rtl() ? 'بیانیه‌ها و به‌روزرسانی‌های اخیر شبکه.' : 'Recent statements and updates from the network.',
-        'gallery' => is_rtl() ? 'عکس‌ها و ویدیوهای فعالیت‌های ما.' : 'Photos and videos from our activities.',
-        'publications' => is_rtl() ? 'گزارش‌های سالانه، خلاصه‌های سیاستی و اسناد شواهد.' : 'Annual reports, policy briefs and evidence documents.',
+        'campaigns' => __('Public mobilisation, legal advocacy and coordinated pressure.'),
+        'events' => __('Upcoming protests, conferences and meetings.'),
+        'blog' => __('Recent statements and updates from the network.'),
+        'gallery' => __('Photos and videos from our activities.'),
+        'publications' => __('Annual reports, policy briefs and evidence documents.'),
     ];
 @endphp
 @if($work_areas->count() && hc_on('show_work'))
@@ -202,7 +202,8 @@
         </div>
         @if($our_work_group)<a class="more" href="{{ route('about') }}">{{ hc('work_more') }}</a>@endif
     </div>
-    <div class="areas">
+    @php $area_cols = (int) ceil($work_areas->count() / max(1, ceil($work_areas->count() / 4))); @endphp
+    <div class="areas" style="--area-cols:{{ $area_cols }}">
         @foreach($work_areas as $i => $area)
         <a class="area {{ $loop->last ? 'last' : '' }}" href="{{ $area->resolvedUrl() }}">
             <div class="ic"><svg viewBox="0 0 24 24">{!! $work_icons[$i % count($work_icons)] !!}</svg></div>
@@ -354,6 +355,36 @@
             <h3>{{ hc('paths_3_title') }}</h3>
             <p>{{ hc('paths_3_text') }}</p>
             <a class="btn" href="{{ hc_link('paths_3_link') }}">{{ hc('paths_3_btn') }}</a></div>
+    </div>
+</section>
+@endif
+
+@php
+    $home_polls = \Illuminate\Support\Facades\Schema::hasTable('polls')
+        ? \App\Models\Poll::published()->where('show_on_home', true)
+            ->orderByRaw("CASE WHEN status = 'open' THEN 0 ELSE 1 END")->orderBy('sort_order')->orderBy('id', 'desc')->take(3)->get()
+        : collect();
+@endphp
+@if($home_polls->count())
+<section class="shell">
+    <div class="sec-head">
+        <div class="txt">
+            <span class="kicker">{{ __('Have your say') }}</span>
+            <h2>{{ __('Polls & surveys') }}</h2>
+        </div>
+        <a class="more" href="{{ route('polls') }}">{{ __('All polls') }}</a>
+    </div>
+    <div class="poll-list">
+        @foreach($home_polls as $poll)
+        <a class="poll-card" href="{{ route('poll', $poll->slug) }}">
+            <div class="poll-card-top">
+                <span class="chip {{ $poll->isOpen() ? 'done' : 'plain' }}">{{ $poll->isOpen() ? (__('Open')) : (__('Closed')) }}</span>
+            </div>
+            <h3>{{ tf($poll, 'title') }}</h3>
+            @if(tf($poll, 'description'))<p>{{ \Illuminate\Support\Str::limit(tf($poll, 'description'), 130) }}</p>@endif
+            <span class="readmore">{{ $poll->isOpen() ? (__('Take part')) : (__('See results')) }}</span>
+        </a>
+        @endforeach
     </div>
 </section>
 @endif

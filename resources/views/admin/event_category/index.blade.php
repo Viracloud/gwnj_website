@@ -33,10 +33,11 @@
                     <h6 class="fw-semibold mt-4 mb-2">دری (second language)</h6>
                     <div class="mb-3">
                         <label class="label-custom">Name</label>
-                        <input type="text" class="form-control-custom" name="name_sv" dir="rtl">
+                        <input type="text" class="form-control-custom" name="name_fa" dir="rtl">
                     </div>
 
                     <div class="mb-3">
+                        @include('admin.partials.extra-locales', ['table' => 'event_categories', 'item' => null, 'fields' => ['name' => 'input']])
                         <button type="submit" class="btn-admin-primary">Submit</button>
                     </div>
                 </form>
@@ -94,10 +95,11 @@
                                 <h6 class="fw-semibold mt-4 mb-2">دری (second language)</h6>
                                 <div class="mb-3">
                                     <label class="label-custom">Name</label>
-                                    <input type="text" class="form-control-custom" name="name_sv" value="{{ $event_category->name_sv }}" dir="rtl">
+                                    <input type="text" class="form-control-custom" name="name_fa" value="{{ $event_category->name_fa }}" dir="rtl">
                                 </div>
 
                                 <div class="mb-3">
+                                    @include('admin.partials.extra-locales', ['table' => 'event_categories', 'item' => ($event_category ?? null), 'fields' => ['name' => 'input']])
                                     <button type="submit" class="btn-admin-primary">Update</button>
                                 </div>
                             </form>

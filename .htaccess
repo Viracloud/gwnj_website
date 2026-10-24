@@ -1,9 +1,20 @@
 <IfModule mod_rewrite.c>
     <IfModule mod_negotiation.c>
-        Options -MultiViews
+        Options -MultiViews -Indexes
     </IfModule>
 
     RewriteEngine On
+
+    # ---- Security: never serve project internals from the web root ----
+    # Hidden files (.env, .git, .htaccess ...), source folders, backups and dumps.
+    RewriteRule (^|/)\.(?!well-known/) - [F,L]
+    RewriteRule ^(app|bootstrap|config|database|DB|help|resources|routes|storage|tests|vendor|node_modules)(/|$) - [F,L,NC]
+    RewriteRule ^(artisan|composer\.(json|lock)|package(-lock)?\.json|phpunit\.xml|vite\.config\.js|README\.md)$ - [F,L,NC]
+    # server.php is the internal front controller: block it only when asked for directly.
+    RewriteCond %{THE_REQUEST} \s[^?\s]*/server\.php [NC]
+    RewriteRule ^ - [F,L]
+    RewriteRule \.(sql|sqlite|log|bak|backup|old|orig|swp|zip|tar|gz|rar|7z|env|ini|sh)$ - [F,L,NC]
+
     RewriteRule ^update - [L]
     RewriteCond %{REQUEST_FILENAME} -d [OR]
     RewriteCond %{REQUEST_FILENAME} -f
@@ -17,4 +28,8 @@
     RewriteRule ^ server.php
 
 
+</IfModule>
+
+<IfModule mod_headers.c>
+    Header always unset X-Powered-By
 </IfModule>

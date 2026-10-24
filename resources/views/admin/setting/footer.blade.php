@@ -55,7 +55,7 @@
                 <h6 class="cus-heading">دری (second language)</h6>
                 <div class="mb-3">
                     <label class="label-custom">About Text</label>
-                    <textarea dir="rtl" name="footer_about_text_sv" class="form-control-custom" rows="4">{{ $setting->footer_about_text_sv }}</textarea>
+                    <textarea dir="rtl" name="footer_about_text_fa" class="form-control-custom" rows="4">{{ $setting->footer_about_text_fa }}</textarea>
                 </div>
             </div>
 
@@ -69,12 +69,13 @@
                 <h6 class="cus-heading">دری (second language)</h6>
                 <div class="mb-3">
                     <label class="label-custom">Copyright Text</label>
-                    <input type="text" dir="rtl" name="footer_copyright_sv" value="{{ $setting->footer_copyright_sv }}" class="form-control-custom">
+                    <input type="text" dir="rtl" name="footer_copyright_fa" value="{{ $setting->footer_copyright_fa }}" class="form-control-custom">
                 </div>
             </div>
 
             <div class="card-custom-p mb-4">
                 <div>
+                    @include('admin.partials.extra-locales', ['table' => 'settings', 'item' => ($setting ?? null), 'fields' => ['footer_about_text' => 'textarea', 'footer_copyright' => 'input']])
                     <button type="submit" class="btn-admin-primary">Update</button>
                 </div>
             </div>

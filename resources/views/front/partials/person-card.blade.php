@@ -3,5 +3,5 @@
     @if(tf($member,'designation'))<span class="dt">{{ tf($member,'designation') }}</span>@endif
     <h3>{{ tf($member,'name') }}</h3>
     @if(tf($member,'short_description'))<p>{{ plain_excerpt(tf($member,'short_description'), 130) }}</p>@endif
-    <span class="readmore">{{ is_rtl() ? 'مشاهدهٔ معرفی کامل' : 'View profile' }}</span>
+    <span class="readmore">{{ __('View profile') }}</span>
 </a>

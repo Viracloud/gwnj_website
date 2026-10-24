@@ -49,11 +49,22 @@
                 <div class="col-md-6">
                     <small class="text-muted d-block">دری</small>
                     @if($def['type'] === 'textarea')
-                    <textarea dir="rtl" name="fa[{{ $key }}]" rows="3" class="form-control-custom">{{ $row->value_sv ?? $def['fa'] }}</textarea>
+                    <textarea dir="rtl" name="fa[{{ $key }}]" rows="3" class="form-control-custom">{{ $row->value_fa ?? $def['fa'] }}</textarea>
                     @else
-                    <input type="text" dir="rtl" name="fa[{{ $key }}]" class="form-control-custom" value="{{ $row->value_sv ?? $def['fa'] }}">
+                    <input type="text" dir="rtl" name="fa[{{ $key }}]" class="form-control-custom" value="{{ $row->value_fa ?? $def['fa'] }}">
                     @endif
                 </div>
+                {{-- Extra languages (French, German ...) when published or being prepared --}}
+                @foreach(extra_locales() as $xl_code)
+                <div class="col-md-6">
+                    <small class="text-muted d-block">{{ locale_meta($xl_code)['native'] }} <span class="text-muted">(empty = English)</span></small>
+                    @if($def['type'] === 'textarea')
+                    <textarea name="xl_text[{{ $xl_code }}][{{ $key }}]" rows="3" class="form-control-custom" lang="{{ $xl_code }}">{{ $row->{'value_'.$xl_code} ?? '' }}</textarea>
+                    @else
+                    <input type="text" name="xl_text[{{ $xl_code }}][{{ $key }}]" class="form-control-custom" value="{{ $row->{'value_'.$xl_code} ?? '' }}" lang="{{ $xl_code }}">
+                    @endif
+                </div>
+                @endforeach
             </div>
             @endif
         </div>

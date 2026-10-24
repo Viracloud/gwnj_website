@@ -19,9 +19,9 @@ class AdminPageUserItemController extends Controller
         $obj = PageUserItem::where('id', 1)->first();
 
         $obj->dashboard_page_title = $request->dashboard_page_title;
-        $obj->dashboard_page_title_sv = $request->dashboard_page_title_sv;
+        $obj->dashboard_page_title_fa = $request->dashboard_page_title_fa;
         $obj->profile_page_title = $request->profile_page_title;
-        $obj->profile_page_title_sv = $request->profile_page_title_sv;
+        $obj->profile_page_title_fa = $request->profile_page_title_fa;
         $obj->seo_title = $request->seo_title;
         $obj->seo_meta_description = $request->seo_meta_description;
 

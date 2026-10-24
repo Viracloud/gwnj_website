@@ -6,7 +6,7 @@
 @section('content')
 
 <div class="pagehead"><div class="shell">
-    <span class="kicker">{{ is_rtl() ? 'دسته‌بندی' : 'Category' }}</span>
+    <span class="kicker">{{ __('Category') }}</span>
     <h1>{{ tf($category,'name') }}</h1>
     @if($category->description)
     <p style="color:var(--muted);max-width:60ch;margin-top:var(--s3)">{{ $category->description }}</p>
@@ -28,7 +28,7 @@
     </div>
     {{ $posts->links() }}
     @else
-    <p style="text-align:center;color:var(--muted)">{{ is_rtl() ? 'در این دسته‌بندی هنوز خبری وجود ندارد.' : 'No posts found in this category yet.' }}</p>
+    <p style="text-align:center;color:var(--muted)">{{ __('No posts found in this category yet.') }}</p>
     @endif
 </section>
 

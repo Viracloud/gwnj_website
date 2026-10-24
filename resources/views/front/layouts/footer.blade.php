@@ -3,7 +3,7 @@
         <div class="cols">
             <div class="about">
                 <img src="{{ asset('uploads/'.$global_setting->logo_2) }}" alt="{{ config('app.name') }}">
-                <p>{{ is_rtl() ? 'شبکه‌ای بین‌المللی که برای عدالت، برابری و آزادی زنان کمپاین می‌کند.' : 'An international network campaigning for justice, equality and freedom for women.' }}</p>
+                <p>{{ __('An international network campaigning for justice, equality and freedom for women.') }}</p>
                 <div class="social">
                     @if($global_setting->footer_facebook != '')<a href="{{ $global_setting->footer_facebook }}" target="_blank" rel="noopener"><i class="fab fa-facebook-f"></i></a>@endif
                     @if($global_setting->footer_twitter != '')<a href="{{ $global_setting->footer_twitter }}" target="_blank" rel="noopener"><i class="fab fa-twitter"></i></a>@endif
@@ -14,7 +14,7 @@
 
             @php($donate_item = $global_nav->firstWhere('route_name', 'donate'))
             <div>
-                <h4>{{ is_rtl() ? 'درباره ما' : 'ABOUT' }}</h4>
+                <h4>{{ __('ABOUT') }}</h4>
                 <ul>
                     @foreach($global_footer_items->where('footer_column', 'about') as $item)
                     <li><a href="{{ $item->resolvedUrl() }}" @if($item->open_new_tab) target="_blank" rel="noopener" @endif>{{ $item->label() }}</a></li>
@@ -23,7 +23,7 @@
             </div>
 
             <div>
-                <h4>{{ is_rtl() ? 'کار ما' : 'OUR WORK' }}</h4>
+                <h4>{{ __('OUR WORK') }}</h4>
                 <ul>
                     @foreach($global_footer_items->where('footer_column', 'work') as $item)
                     <li><a href="{{ $item->resolvedUrl() }}" @if($item->open_new_tab) target="_blank" rel="noopener" @endif>{{ $item->label() }}</a></li>
@@ -32,21 +32,21 @@
             </div>
 
             <div>
-                <h4>{{ is_rtl() ? 'مشارکت' : 'GET INVOLVED' }}</h4>
+                <h4>{{ __('GET INVOLVED') }}</h4>
                 <ul>
-                    @if($global_menu->menu_login_status == 'Show')<li><a href="{{ route('register') }}">{{ is_rtl() ? 'عضویت' : 'Become a member' }}</a></li>@endif
+                    @if($global_menu->menu_login_status == 'Show')<li><a href="{{ route('register') }}">{{ __('Become a member') }}</a></li>@endif
                     @if($donate_item)<li><a href="{{ $donate_item->resolvedUrl() }}">{{ $donate_item->label() }}</a></li>@endif
-                    <li><a href="{{ route('contact') }}">{{ is_rtl() ? 'داوطلبی یا هماهنگی' : 'Volunteer or coordinate' }}</a></li>
+                    <li><a href="{{ route('contact') }}">{{ __('Volunteer or coordinate') }}</a></li>
                 </ul>
             </div>
 
             @php($transparency_item = \App\Models\MenuItem::where('label', 'Transparency & Accountability')->first())
             <div>
-                <h4>{{ is_rtl() ? 'پاسخگویی' : 'ACCOUNTABILITY' }}</h4>
+                <h4>{{ __('ACCOUNTABILITY') }}</h4>
                 <ul>
                     @if($transparency_item)<li><a href="{{ $transparency_item->resolvedUrl() }}">{{ $transparency_item->label() }}</a></li>@endif
-                    <li><a href="{{ route('terms') }}">{{ is_rtl() ? 'شرایط استفاده' : 'Terms' }}</a></li>
-                    <li><a href="{{ route('privacy') }}">{{ is_rtl() ? 'سیاست حریم خصوصی' : 'Privacy policy' }}</a></li>
+                    <li><a href="{{ route('terms') }}">{{ __('Terms') }}</a></li>
+                    <li><a href="{{ route('privacy') }}">{{ __('Privacy policy') }}</a></li>
                     @if($global_setting->footer_phone != '')<li><a href="tel:{{ $global_setting->footer_phone }}" dir="ltr" style="unicode-bidi:isolate">{{ $global_setting->footer_phone }}</a></li>@endif
                     @if($global_setting->footer_email != '')<li><a href="mailto:{{ $global_setting->footer_email }}" dir="ltr" style="unicode-bidi:isolate">{{ $global_setting->footer_email }}</a></li>@endif
                 </ul>
@@ -54,10 +54,10 @@
         </div>
 
         <div style="max-width:420px;margin-top:var(--s7)">
-            <h4>{{ is_rtl() ? 'خبرنامه' : 'SUBSCRIBE' }}</h4>
+            <h4>{{ __('SUBSCRIBE') }}</h4>
             <form action="{{ route('subscriber_send_email') }}" class="footer-subscribe form_subscribe_ajax" method="post">
                 @csrf
-                <input name="email" type="email" required placeholder="{{ is_rtl() ? 'ایمیل شما' : 'Your email address' }}">
+                <input name="email" type="email" required placeholder="{{ __('Your email address') }}">
                 <button type="submit" aria-label="Subscribe"><i class="fa-regular fa-envelope"></i></button>
             </form>
             <div id="loader"></div>
@@ -65,8 +65,8 @@
 
         <div class="legal">
             <span>&copy; {{ date('Y') }} GWJN. {{ tf($global_setting,'footer_copyright') }}</span>
-            <a href="{{ route('privacy') }}">{{ is_rtl() ? 'سیاست حریم خصوصی' : 'Privacy policy' }}</a>
-            <a href="{{ route('terms') }}">{{ is_rtl() ? 'شرایط استفاده' : 'Terms' }}</a>
+            <a href="{{ route('privacy') }}">{{ __('Privacy policy') }}</a>
+            <a href="{{ route('terms') }}">{{ __('Terms') }}</a>
         </div>
     </div>
 </footer>

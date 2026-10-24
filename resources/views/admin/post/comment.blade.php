@@ -28,7 +28,7 @@
                     <a href="{{ route('post', $comment->post->slug) }}" target="_blank">Visit Link</a>
                 </td>
                 <td>{{ $comment->name }} <br> {{ $comment->email }}</td>
-                <td>{!! nl2br($comment->comment) !!}</td>
+                <td>{!! nl2br(e($comment->comment)) !!}</td>
                 <td>
                     @if($comment->status == 'Pending')
                         <span class="badge bg-warning">Pending</span>

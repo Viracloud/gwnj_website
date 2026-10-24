@@ -5,7 +5,7 @@
 
 @section('content')
 <div class="pagehead"><div class="shell">
-    <span class="kicker">{{ is_rtl() ? 'گالری' : 'Gallery' }}</span>
+    <span class="kicker">{{ __('Gallery') }}</span>
     <h1>{{ tf($page_data,'page_title') }}</h1>
 </div></div>
 
@@ -22,7 +22,7 @@
 
     {{ $photos->links() }}
     @else
-    <p style="color:var(--muted)">{{ is_rtl() ? 'هنوز عکسی اضافه نشده است.' : 'No photos have been added yet.' }}</p>
+    <p style="color:var(--muted)">{{ __('No photos have been added yet.') }}</p>
     @endif
 </section>
 @endsection

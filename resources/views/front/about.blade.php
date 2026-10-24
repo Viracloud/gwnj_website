@@ -6,7 +6,7 @@
 @section('content')
 <div class="pagehead"><div class="shell">
     @if(tf($about_item,'subheading'))<span class="kicker">{{ tf($about_item,'subheading') }}</span>@endif
-    <h1>{{ is_rtl() ? 'درباره ما' : 'About us' }}</h1>
+    <h1>{{ __('About us') }}</h1>
 </div></div>
 
 @if($page_data->about_status == 'Show' && $about_item)
@@ -14,14 +14,9 @@
     <div class="feature">
         <div class="feature-media">
             <div class="photo">
-                <img src="{{ asset('uploads/'.$about_item->image) }}" alt="{{ tf($about_item,'heading') }}">
-                @if($about_item->youtube_id != '')
-                <a href="https://www.youtube.com/watch?v={{ $about_item->youtube_id }}" class="glightbox" aria-label="{{ is_rtl() ? 'پخش ویدیو' : 'Play video' }}"
-                    style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:2">
-                    <span style="width:64px;height:64px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow)">
-                        <i class="fa-solid fa-play" style="color:var(--brand)"></i>
-                    </span>
-                </a>
+                @include('front.partials.about-slides', ['alt' => tf($about_item,'heading')])
+                @if($about_item->youtube_id != '' && ($about_video = video_embed($about_item->youtube_id)))
+                {!! video_facade($about_video, 'vf-overlay') !!}
                 @endif
             </div>
             @if($about_item->experience_year != '')
@@ -66,15 +61,15 @@
         '<circle cx="9" cy="8" r="3"/><circle cx="17" cy="10" r="2.4"/><path d="M3 20c0-3.3 2.7-5 6-5s6 1.7 6 5M15.5 20c0-2.3 1.4-3.6 3.5-3.6s2.5 1 2.5 3.6"/>',
     ];
     $about_fallback_desc = [
-        'members' => is_rtl() ? 'هیئت مدیره، دبیرکل و تیم‌های اجرایی و هماهنگ‌کنندگان کشوری ما را بشناسید.' : 'Meet our board, secretary-general, executive teams and country coordinators.',
+        'members' => __('Meet our board, secretary-general, executive teams and country coordinators.'),
     ];
 @endphp
 @if($about_links->count())
 <section class="shell">
     <div class="sec-head">
         <div class="txt">
-            <span class="kicker">{{ is_rtl() ? 'بیشتر بدانید' : 'Learn more' }}</span>
-            <h2>{{ is_rtl() ? 'شبکهٔ جهانی عدالت برای زنان را بشناسید' : 'Get to know GWJN' }}</h2>
+            <span class="kicker">{{ __('Learn more') }}</span>
+            <h2>{{ __('Get to know GWJN') }}</h2>
         </div>
     </div>
     <div class="areas wrap">
@@ -126,7 +121,7 @@
     <div class="sec-head">
         <div class="txt">
             <span class="kicker">{{ hc('team_kicker') }}</span>
-            <h2>{{ is_rtl() ? 'رهبری شبکه' : 'Our leadership' }}</h2>
+            <h2>{{ __('Our leadership') }}</h2>
         </div>
         <a class="more" href="{{ route('members') }}">{{ hc('team_more') }}</a>
     </div>

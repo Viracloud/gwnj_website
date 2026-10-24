@@ -38,17 +38,17 @@ class AdminPostController extends Controller
         
         $obj->post_category_id = $request->post_category_id;
         $obj->title = $request->title;
-        $obj->title_sv = $request->title_sv;
+        $obj->title_fa = $request->title_fa;
         $obj->slug = resolve_slug('posts', $request->slug, $request->title, $obj->id);
-        $obj->slug_sv = resolve_slug_sv('posts', $request->slug_sv, $request->title_sv, $obj->id);
+        $obj->slug_fa = resolve_slug_fa('posts', $request->slug_fa, $request->title_fa, $obj->id);
         $obj->excerpt = $request->excerpt;
-        $obj->excerpt_sv = $request->excerpt_sv;
+        $obj->excerpt_fa = $request->excerpt_fa;
         $obj->description = $request->description;
-        $obj->description_sv = $request->description_sv;
+        $obj->description_fa = $request->description_fa;
         $obj->seo_title = $request->seo_title;
-        $obj->seo_title_sv = $request->seo_title_sv;
+        $obj->seo_title_fa = $request->seo_title_fa;
         $obj->seo_meta_description = $request->seo_meta_description;
-        $obj->seo_meta_description_sv = $request->seo_meta_description_sv;
+        $obj->seo_meta_description_fa = $request->seo_meta_description_fa;
         $obj->show_on_home = $request->show_on_home ?: 'Yes';
 
         // remove duplicate tags and remove extra spaces between tags
@@ -71,7 +71,7 @@ class AdminPostController extends Controller
             'description' => 'required|string',
         ]);
 
-        $obj = Post::where('id', $id)->first();
+        $obj = Post::findOrFail($id);
         if($request->hasFile('image')) {
             $request->validate([
                 'image' => 'mimes:jpeg,png,jpg,gif,svg|max:2048',
@@ -85,17 +85,17 @@ class AdminPostController extends Controller
         }
         $obj->post_category_id = $request->post_category_id;
         $obj->title = $request->title;
-        $obj->title_sv = $request->title_sv;
+        $obj->title_fa = $request->title_fa;
         $obj->slug = resolve_slug('posts', $request->slug, $request->title, $obj->id);
-        $obj->slug_sv = resolve_slug_sv('posts', $request->slug_sv, $request->title_sv, $obj->id);
+        $obj->slug_fa = resolve_slug_fa('posts', $request->slug_fa, $request->title_fa, $obj->id);
         $obj->excerpt = $request->excerpt;
-        $obj->excerpt_sv = $request->excerpt_sv;
+        $obj->excerpt_fa = $request->excerpt_fa;
         $obj->description = $request->description;
-        $obj->description_sv = $request->description_sv;
+        $obj->description_fa = $request->description_fa;
         $obj->seo_title = $request->seo_title;
-        $obj->seo_title_sv = $request->seo_title_sv;
+        $obj->seo_title_fa = $request->seo_title_fa;
         $obj->seo_meta_description = $request->seo_meta_description;
-        $obj->seo_meta_description_sv = $request->seo_meta_description_sv;
+        $obj->seo_meta_description_fa = $request->seo_meta_description_fa;
         $obj->show_on_home = $request->show_on_home ?: 'Yes';
 
         // remove duplicate tags and remove extra spaces between tags
@@ -115,7 +115,7 @@ class AdminPostController extends Controller
         Comment::where('post_id', $id)->delete();
         Reply::where('post_id', $id)->delete();
 
-        $obj = Post::where('id', $id)->first();
+        $obj = Post::findOrFail($id);
         if($obj->image && file_exists(public_path('uploads/'.$obj->image))) {
             unlink(public_path('uploads/'.$obj->image));
         }
@@ -132,7 +132,7 @@ class AdminPostController extends Controller
 
     public function change_comment_status(Request $request, $id)
     {
-        $comment = Comment::where('id', $id)->first();
+        $comment = Comment::findOrFail($id);
         $comment->status = $request->status;
         $comment->save();
 
@@ -150,7 +150,7 @@ class AdminPostController extends Controller
     {
         Reply::where('comment_id', $id)->delete();
 
-        $comment = Comment::where('id', $id)->first();
+        $comment = Comment::findOrFail($id);
         $comment->delete();
 
         return back()->with('success', 'Comment deleted successfully.');
@@ -164,7 +164,7 @@ class AdminPostController extends Controller
 
     public function change_reply_status(Request $request, $id)
     {
-        $reply = Reply::where('id', $id)->first();
+        $reply = Reply::findOrFail($id);
         $reply->status = $request->status;
         $reply->save();
 
@@ -180,7 +180,7 @@ class AdminPostController extends Controller
 
     public function delete_reply(Request $request, $id)
     {
-        $reply = Reply::where('id', $id)->first();
+        $reply = Reply::findOrFail($id);
         $reply->delete();
 
         return back()->with('success', 'Reply deleted successfully.');

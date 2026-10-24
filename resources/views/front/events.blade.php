@@ -5,11 +5,19 @@
 
 @section('content')
 <div class="pagehead"><div class="shell">
-    <span class="kicker">{{ is_rtl() ? 'رویدادها' : 'Events' }}</span>
+    <span class="kicker">{{ __('Events') }}</span>
     <h1>{{ tf($page_data,'page_title') }}</h1>
 </div></div>
 
 <section class="shell">
+    @if($event_categories->count())
+    <div class="filters">
+        <a href="{{ route('events') }}" class="{{ !request('category') ? 'active' : '' }}">{{ __('All') }}</a>
+        @foreach($event_categories as $cat)
+        <a href="{{ route('events', ['category' => $cat->slug]) }}" class="{{ request('category') == $cat->slug ? 'active' : '' }}">{{ tf($cat,'name') }}</a>
+        @endforeach
+    </div>
+    @endif
     @if($events->count())
     <ul class="events">
         @foreach($events as $event)
@@ -18,7 +26,7 @@
     </ul>
     <div class="mt-5">{{ $events->links() }}</div>
     @else
-    <p>{{ is_rtl() ? 'در حال حاضر رویدادی برای نمایش وجود ندارد.' : 'There are no events to show right now.' }}</p>
+    <p>{{ __('There are no events to show right now.') }}</p>
     @endif
 </section>
 @endsection

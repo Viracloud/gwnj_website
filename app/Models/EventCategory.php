@@ -6,7 +6,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class EventCategory extends Model
 {
-    protected $fillable = ['name', 'name_sv', 'slug'];
+    use \App\Models\Concerns\SavesExtraLocales;
+
+    protected $fillable = ['name', 'name_fa', 'slug'];
 
     public function events()
     {

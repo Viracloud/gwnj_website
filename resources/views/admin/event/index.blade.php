@@ -48,7 +48,7 @@
                     </div>
                     <div class="mb-3">
                         <label class="label-custom">Slug (Dari) <small>- optional, auto-generated from the Dari title</small></label>
-                        <input type="text" class="form-control-custom" name="slug_sv" dir="rtl">
+                        <input type="text" class="form-control-custom" name="slug_fa" dir="rtl">
                     </div>
                     <div class="mb-3">
                         <label class="label-custom">Description *</label>
@@ -70,23 +70,23 @@
                     <h6 class="fw-semibold mt-4 mb-2">دری (second language)</h6>
                     <div class="mb-3">
                         <label class="label-custom">Title</label>
-                        <input type="text" class="form-control-custom" name="title_sv" dir="rtl">
+                        <input type="text" class="form-control-custom" name="title_fa" dir="rtl">
                     </div>
                     <div class="mb-3">
                         <label class="label-custom">Description</label>
-                        <textarea id="editor1_sv" class="form-control-custom tinymce-editor" name="description_sv" rows="4" dir="rtl"></textarea>
+                        <textarea id="editor1_fa" class="form-control-custom tinymce-editor" name="description_fa" rows="4" dir="rtl"></textarea>
                     </div>
                     <div class="mb-3">
                         <label class="label-custom">Event Location</label>
-                        <input type="text" class="form-control-custom" name="event_location_sv" dir="rtl">
+                        <input type="text" class="form-control-custom" name="event_location_fa" dir="rtl">
                     </div>
                     <div class="mb-3">
                         <label class="label-custom">Event Location Detail</label>
-                        <textarea class="form-control-custom" name="event_location_detail_sv" rows="4" dir="rtl"></textarea>
+                        <textarea class="form-control-custom" name="event_location_detail_fa" rows="4" dir="rtl"></textarea>
                     </div>
                     <div class="mb-3">
                         <label class="label-custom">Button Text</label>
-                        <input type="text" class="form-control-custom" name="button_text_sv" dir="rtl">
+                        <input type="text" class="form-control-custom" name="button_text_fa" dir="rtl">
                     </div>
 
                     <div class="mb-3">
@@ -110,7 +110,7 @@
                             <input type="text" class="form-control-custom" name="ticket_price">
                         </div>
                         <div class="col-lg-6 mb-3">
-                            <label class="label-custom">YouTube Id</label>
+                            <label class="label-custom">Video link <small>- YouTube, Instagram, Facebook or Vimeo link (or a YouTube id)</small></label>
                             <input type="text" class="form-control-custom" name="youtube_id">
                         </div>
                         <div class="col-lg-6 mb-3">
@@ -119,6 +119,7 @@
                         </div>
                     </div>
                     <div class="mb-3">
+                        @include('admin.partials.extra-locales', ['table' => 'events', 'item' => null, 'fields' => ['slug' => 'input', 'title' => 'input', 'description' => 'editor', 'event_location' => 'input', 'event_location_detail' => 'textarea', 'button_text' => 'input']])
                         <button type="submit" class="btn-admin-primary">Submit</button>
                     </div>
                 </form>
@@ -210,7 +211,7 @@
                                 </div>
                                 <div class="mb-3">
                                     <label class="label-custom">Slug (Dari) <small>- optional, auto-generated from the Dari title</small></label>
-                                    <input type="text" class="form-control-custom" name="slug_sv" dir="rtl" value="{{ $event->slug_sv }}">
+                                    <input type="text" class="form-control-custom" name="slug_fa" dir="rtl" value="{{ $event->slug_fa }}">
                                 </div>
                                 <div class="mb-3">
                                     <label class="label-custom">Description *</label>
@@ -232,23 +233,23 @@
                                 <h6 class="fw-semibold mt-4 mb-2">دری (second language)</h6>
                                 <div class="mb-3">
                                     <label class="label-custom">Title</label>
-                                    <input type="text" class="form-control-custom" name="title_sv" value="{{ $event->title_sv }}" dir="rtl">
+                                    <input type="text" class="form-control-custom" name="title_fa" value="{{ $event->title_fa }}" dir="rtl">
                                 </div>
                                 <div class="mb-3">
                                     <label class="label-custom">Description</label>
-                                    <textarea id="editor1_{{ $event->id }}_sv" class="form-control-custom tinymce-editor" name="description_sv" rows="4" dir="rtl">{{ $event->description_sv }}</textarea>
+                                    <textarea id="editor1_{{ $event->id }}_fa" class="form-control-custom tinymce-editor" name="description_fa" rows="4" dir="rtl">{{ $event->description_fa }}</textarea>
                                 </div>
                                 <div class="mb-3">
                                     <label class="label-custom">Event Location</label>
-                                    <input type="text" class="form-control-custom" name="event_location_sv" value="{{ $event->event_location_sv }}" dir="rtl">
+                                    <input type="text" class="form-control-custom" name="event_location_fa" value="{{ $event->event_location_fa }}" dir="rtl">
                                 </div>
                                 <div class="mb-3">
                                     <label class="label-custom">Event Location Detail</label>
-                                    <textarea class="form-control-custom" name="event_location_detail_sv" rows="4" dir="rtl">{{ $event->event_location_detail_sv }}</textarea>
+                                    <textarea class="form-control-custom" name="event_location_detail_fa" rows="4" dir="rtl">{{ $event->event_location_detail_fa }}</textarea>
                                 </div>
                                 <div class="mb-3">
                                     <label class="label-custom">Button Text</label>
-                                    <input type="text" class="form-control-custom" name="button_text_sv" value="{{ $event->button_text_sv }}" dir="rtl">
+                                    <input type="text" class="form-control-custom" name="button_text_fa" value="{{ $event->button_text_fa }}" dir="rtl">
                                 </div>
 
                                 <div class="mb-3">
@@ -272,7 +273,7 @@
                                         <input type="text" class="form-control-custom" name="ticket_price" value="{{ $event->ticket_price }}">
                                     </div>
                                     <div class="col-lg-6 mb-3">
-                                        <label class="label-custom">YouTube Id</label>
+                                        <label class="label-custom">Video link <small>- YouTube, Instagram, Facebook or Vimeo link (or a YouTube id)</small></label>
                                         <input type="text" class="form-control-custom" name="youtube_id" value="{{ $event->youtube_id }}">
                                     </div>
                                     <div class="col-lg-6 mb-3">
@@ -281,6 +282,7 @@
                                     </div>
                                 </div>
                                 <div class="mb-3">
+                                    @include('admin.partials.extra-locales', ['table' => 'events', 'item' => ($event ?? null), 'fields' => ['slug' => 'input', 'title' => 'input', 'event_location' => 'input', 'event_location_detail' => 'textarea', 'button_text' => 'input']])
                                     <button type="submit" class="btn-admin-primary">Update</button>
                                 </div>
                             </form>

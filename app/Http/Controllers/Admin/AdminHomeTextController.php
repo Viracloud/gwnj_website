@@ -17,14 +17,14 @@ class AdminHomeTextController extends Controller
 
     public function update(Request $request)
     {
-        $save = function (string $key, ?string $value, ?string $value_sv = null) {
+        $save = function (string $key, ?string $value, ?string $value_fa = null) {
             $value = ($value !== null && trim($value) !== '') ? trim($value) : null;
-            $value_sv = ($value_sv !== null && trim($value_sv) !== '') ? trim($value_sv) : null;
-            if ($value === null && $value_sv === null) {
+            $value_fa = ($value_fa !== null && trim($value_fa) !== '') ? trim($value_fa) : null;
+            if ($value === null && $value_fa === null) {
                 HomeText::where('key', $key)->delete();
                 return;
             }
-            HomeText::updateOrCreate(['key' => $key], ['value' => $value, 'value_sv' => $value_sv]);
+            HomeText::updateOrCreate(['key' => $key], ['value' => $value, 'value_fa' => $value_fa]);
         };
 
         foreach (config('home_content.sections') as $section) {
@@ -43,6 +43,26 @@ class AdminHomeTextController extends Controller
                     ($en !== null && trim($en) === trim($def['en'])) ? null : $en,
                     ($fa !== null && trim($fa) === trim($def['fa'])) ? null : $fa
                 );
+            }
+        }
+
+        // Extra languages (French, German ...): empty means "use the English text".
+        foreach (extra_locales() as $code) {
+            $column = 'value_'.$code;
+            if (!\Illuminate\Support\Facades\Schema::hasColumn('home_texts', $column)) {
+                continue;
+            }
+            foreach ((array) $request->input("xl_text.$code", []) as $key => $text) {
+                if (!is_string($key) || !array_key_exists($key, home_content_fields())) {
+                    continue;
+                }
+                $text = is_string($text) && trim($text) !== '' ? trim($text) : null;
+                $row = HomeText::firstOrNew(['key' => $key]);
+                if (!$row->exists && $text === null) {
+                    continue;
+                }
+                $row->{$column} = $text;
+                $row->save();
             }
         }
 

@@ -31,19 +31,19 @@
                 <h6 class="cus-heading">دری (second language)</h6>
                 <div class="mb-3">
                     <label class="label-custom">Login Page Title</label>
-                    <input type="text" dir="rtl" name="login_page_title_sv" value="{{ $page_data->login_page_title_sv }}" class="form-control-custom">
+                    <input type="text" dir="rtl" name="login_page_title_fa" value="{{ $page_data->login_page_title_fa }}" class="form-control-custom">
                 </div>
                 <div class="mb-3">
                     <label class="label-custom">Register Page Title</label>
-                    <input type="text" dir="rtl" name="register_page_title_sv" value="{{ $page_data->register_page_title_sv }}" class="form-control-custom">
+                    <input type="text" dir="rtl" name="register_page_title_fa" value="{{ $page_data->register_page_title_fa }}" class="form-control-custom">
                 </div>
                 <div class="mb-3">
                     <label class="label-custom">Forget Password Page Title</label>
-                    <input type="text" dir="rtl" name="forget_password_page_title_sv" value="{{ $page_data->forget_password_page_title_sv }}" class="form-control-custom">
+                    <input type="text" dir="rtl" name="forget_password_page_title_fa" value="{{ $page_data->forget_password_page_title_fa }}" class="form-control-custom">
                 </div>
                 <div class="mb-3">
                     <label class="label-custom">Reset Password Page Title</label>
-                    <input type="text" dir="rtl" name="reset_password_page_title_sv" value="{{ $page_data->reset_password_page_title_sv }}" class="form-control-custom">
+                    <input type="text" dir="rtl" name="reset_password_page_title_fa" value="{{ $page_data->reset_password_page_title_fa }}" class="form-control-custom">
                 </div>
             </div>
 
@@ -61,6 +61,7 @@
             
             <div class="card-custom-p mb-4">
                 <div>
+                    @include('admin.partials.extra-locales', ['table' => 'page_login_items', 'item' => ($page_data ?? null), 'fields' => ['login_page_title' => 'input', 'register_page_title' => 'input', 'forget_password_page_title' => 'input', 'reset_password_page_title' => 'input']])
                     <button type="submit" class="btn-admin-primary">Update</button>
                 </div>
             </div>

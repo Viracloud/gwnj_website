@@ -6,8 +6,10 @@ use Illuminate\Database\Eloquent\Model;
 
 class MenuItem extends Model
 {
+    use \App\Models\Concerns\SavesExtraLocales;
+
     protected $fillable = [
-        'parent_id', 'label', 'label_sv', 'link_type', 'route_name',
+        'parent_id', 'label', 'label_fa', 'link_type', 'route_name',
         'custom_page_id', 'url', 'open_new_tab', 'is_button', 'order', 'status',
         'show_in_footer', 'footer_column',
     ];
@@ -28,6 +30,11 @@ class MenuItem extends Model
             'register' => 'Register',
             'terms' => 'Terms of use',
             'privacy' => 'Privacy policy',
+            'polls' => 'Polls & surveys',
+            'membership_info' => 'How to become a member',
+            'campaigns' => 'Campaigns',
+            'publications' => 'Publications / reports',
+            'partners' => 'Partners',
         ];
     }
 
@@ -43,7 +50,15 @@ class MenuItem extends Model
 
     public function visibleChildren()
     {
-        return $this->hasMany(MenuItem::class, 'parent_id')->where('status', 'Show')->orderBy('order');
+        return $this->hasMany(MenuItem::class, 'parent_id')->where('status', 'Show')->linkVisible()->orderBy('order');
+    }
+
+    /** Leave out items that point to a hidden page. */
+    public function scopeLinkVisible($query)
+    {
+        return $query->where(fn ($q) => $q->where('link_type', '!=', 'custom_page')
+            ->orWhereNull('custom_page_id')
+            ->orWhereHas('customPage', fn ($p) => $p->visible()));
     }
 
     public function customPage()
@@ -81,7 +96,7 @@ class MenuItem extends Model
 
         if ($this->link_type === 'custom_page' && $this->customPage) {
             return request()->is('page/' . $this->customPage->slug)
-                || ($this->customPage->slug_sv && request()->is('page/' . $this->customPage->slug_sv));
+                || ($this->customPage->slug_fa && request()->is('page/' . $this->customPage->slug_fa));
         }
 
         return false;

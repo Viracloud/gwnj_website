@@ -6,5 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Partner extends Model
 {
-    protected $fillable = ['name', 'name_sv', 'logo', 'website', 'sort_order', 'status'];
+    use \App\Models\Concerns\SavesExtraLocales;
+
+    protected $fillable = ['name', 'name_fa', 'logo', 'website', 'sort_order', 'status'];
 }

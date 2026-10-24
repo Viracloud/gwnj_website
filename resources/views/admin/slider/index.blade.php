@@ -45,18 +45,19 @@
                     <h6 class="fw-semibold mt-4 mb-2">دری (second language)</h6>
                     <div class="mb-3">
                         <label class="label-custom">Heading</label>
-                        <input type="text" class="form-control-custom" name="heading_sv" dir="rtl">
+                        <input type="text" class="form-control-custom" name="heading_fa" dir="rtl">
                     </div>
                     <div class="mb-3">
                         <label class="label-custom">Text</label>
-                        <textarea class="form-control-custom" name="text_sv" rows="4" dir="rtl"></textarea>
+                        <textarea class="form-control-custom" name="text_fa" rows="4" dir="rtl"></textarea>
                     </div>
                     <div class="mb-3">
                         <label class="label-custom">Button Text</label>
-                        <input type="text" class="form-control-custom" name="button_text_sv" dir="rtl">
+                        <input type="text" class="form-control-custom" name="button_text_fa" dir="rtl">
                     </div>
 
                     <div class="mb-3">
+                        @include('admin.partials.extra-locales', ['table' => 'sliders', 'item' => null, 'fields' => ['heading' => 'input', 'text' => 'textarea', 'button_text' => 'input']])
                         <button type="submit" class="btn-admin-primary">Submit</button>
                     </div>
                 </form>
@@ -136,18 +137,19 @@
                                 <h6 class="fw-semibold mt-4 mb-2">دری (second language)</h6>
                                 <div class="mb-3">
                                     <label class="label-custom">Heading</label>
-                                    <input type="text" class="form-control-custom" name="heading_sv" value="{{ $slider->heading_sv }}" dir="rtl">
+                                    <input type="text" class="form-control-custom" name="heading_fa" value="{{ $slider->heading_fa }}" dir="rtl">
                                 </div>
                                 <div class="mb-3">
                                     <label class="label-custom">Text</label>
-                                    <textarea class="form-control-custom" name="text_sv" rows="4" dir="rtl">{{ $slider->text_sv }}</textarea>
+                                    <textarea class="form-control-custom" name="text_fa" rows="4" dir="rtl">{{ $slider->text_fa }}</textarea>
                                 </div>
                                 <div class="mb-3">
                                     <label class="label-custom">Button Text</label>
-                                    <input type="text" class="form-control-custom" name="button_text_sv" value="{{ $slider->button_text_sv }}" dir="rtl">
+                                    <input type="text" class="form-control-custom" name="button_text_fa" value="{{ $slider->button_text_fa }}" dir="rtl">
                                 </div>
 
                                 <div class="mb-3">
+                                    @include('admin.partials.extra-locales', ['table' => 'sliders', 'item' => ($slider ?? null), 'fields' => ['heading' => 'input', 'text' => 'textarea', 'button_text' => 'input']])
                                     <button type="submit" class="btn-admin-primary">Update</button>
                                 </div>
                             </form>

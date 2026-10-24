@@ -43,11 +43,11 @@
                         <h6 class="cus-heading">دری (second language)</h6>
                         <div class="mb-3">
                             <label class="label-custom">Subheading</label>
-                            <input type="text" dir="rtl" name="team_subheading_sv" value="{{ $page_data->team_subheading_sv }}" class="form-control-custom">
+                            <input type="text" dir="rtl" name="team_subheading_fa" value="{{ $page_data->team_subheading_fa }}" class="form-control-custom">
                         </div>
                         <div class="mb-3">
                             <label class="label-custom">Heading</label>
-                            <textarea dir="rtl" name="team_heading_sv" class="form-control-custom">{{ $page_data->team_heading_sv }}</textarea>
+                            <textarea dir="rtl" name="team_heading_fa" class="form-control-custom">{{ $page_data->team_heading_fa }}</textarea>
                         </div>
                     </div>
                 </div>
@@ -78,11 +78,11 @@
                         <h6 class="cus-heading">دری (second language)</h6>
                         <div class="mb-3">
                             <label class="label-custom">Subheading</label>
-                            <input type="text" dir="rtl" name="event_subheading_sv" value="{{ $page_data->event_subheading_sv }}" class="form-control-custom">
+                            <input type="text" dir="rtl" name="event_subheading_fa" value="{{ $page_data->event_subheading_fa }}" class="form-control-custom">
                         </div>
                         <div class="mb-3">
                             <label class="label-custom">Heading</label>
-                            <textarea dir="rtl" name="event_heading_sv" class="form-control-custom">{{ $page_data->event_heading_sv }}</textarea>
+                            <textarea dir="rtl" name="event_heading_fa" class="form-control-custom">{{ $page_data->event_heading_fa }}</textarea>
                         </div>
                     </div>
                 </div>
@@ -108,11 +108,11 @@
                         <h6 class="cus-heading">دری (second language)</h6>
                         <div class="mb-3">
                             <label class="label-custom">Subheading</label>
-                            <input type="text" dir="rtl" name="blog_subheading_sv" value="{{ $page_data->blog_subheading_sv }}" class="form-control-custom">
+                            <input type="text" dir="rtl" name="blog_subheading_fa" value="{{ $page_data->blog_subheading_fa }}" class="form-control-custom">
                         </div>
                         <div class="mb-3">
                             <label class="label-custom">Heading</label>
-                            <textarea dir="rtl" name="blog_heading_sv" class="form-control-custom">{{ $page_data->blog_heading_sv }}</textarea>
+                            <textarea dir="rtl" name="blog_heading_fa" class="form-control-custom">{{ $page_data->blog_heading_fa }}</textarea>
                         </div>
                     </div>
                 </div>
@@ -134,6 +134,7 @@
             
             <div class="card-custom-p mb-4">
                 <div>
+                    @include('admin.partials.extra-locales', ['table' => 'page_home_items', 'item' => ($page_data ?? null), 'fields' => ['team_subheading' => 'input', 'team_heading' => 'textarea', 'event_subheading' => 'input', 'event_heading' => 'textarea', 'blog_subheading' => 'input', 'blog_heading' => 'textarea']])
                     <button type="submit" class="btn-admin-primary">Update</button>
                 </div>
             </div>

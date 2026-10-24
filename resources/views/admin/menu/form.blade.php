@@ -9,7 +9,7 @@
     </div>
     <div class="col-lg-6 mb-3">
         <label class="label-custom">Label (second language)</label>
-        <input type="text" name="label_sv" value="{{ $val('label_sv') }}" class="form-control-custom">
+        <input type="text" name="label_fa" value="{{ $val('label_fa') }}" class="form-control-custom">
     </div>
 
     <div class="col-lg-6 mb-3">
@@ -94,3 +94,4 @@
         </select>
     </div>
 </div>
+@include('admin.partials.extra-locales', ['table' => 'menu_items', 'item' => $item, 'fields' => ['label' => 'input']])

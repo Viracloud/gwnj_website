@@ -33,14 +33,15 @@
                     <h6 class="fw-semibold mt-4 mb-2">دری (second language)</h6>
                     <div class="mb-3">
                         <label class="label-custom">Question</label>
-                        <input type="text" class="form-control-custom" name="question_sv" dir="rtl">
+                        <input type="text" class="form-control-custom" name="question_fa" dir="rtl">
                     </div>
                     <div class="mb-3">
                         <label class="label-custom">Answer</label>
-                        <textarea class="form-control-custom" name="answer_sv" rows="4" dir="rtl"></textarea>
+                        <textarea class="form-control-custom" name="answer_fa" rows="4" dir="rtl"></textarea>
                     </div>
 
                     <div class="mb-3">
+                        @include('admin.partials.extra-locales', ['table' => 'event_faqs', 'item' => null, 'fields' => ['question' => 'input', 'answer' => 'textarea']])
                         <button type="submit" class="btn-admin-primary">Submit</button>
                     </div>
                 </form>
@@ -96,14 +97,15 @@
                                 <h6 class="fw-semibold mt-4 mb-2">دری (second language)</h6>
                                 <div class="mb-3">
                                     <label class="label-custom">Question</label>
-                                    <input type="text" class="form-control-custom" name="question_sv" value="{{ $item->question_sv }}" dir="rtl">
+                                    <input type="text" class="form-control-custom" name="question_fa" value="{{ $item->question_fa }}" dir="rtl">
                                 </div>
                                 <div class="mb-3">
                                     <label class="label-custom">Answer</label>
-                                    <textarea class="form-control-custom" name="answer_sv" rows="4" dir="rtl">{{ $item->answer_sv }}</textarea>
+                                    <textarea class="form-control-custom" name="answer_fa" rows="4" dir="rtl">{{ $item->answer_fa }}</textarea>
                                 </div>
 
                                 <div class="mb-3">
+                                    @include('admin.partials.extra-locales', ['table' => 'event_faqs', 'item' => ($item ?? null), 'fields' => ['question' => 'input', 'answer' => 'textarea']])
                                     <button type="submit" class="btn-admin-primary">Update</button>
                                 </div>
                             </form>

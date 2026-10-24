@@ -36,15 +36,15 @@
                 <h6 class="cus-heading">دری (second language)</h6>
                 <div class="mb-3">
                     <label class="label-custom">Page Title</label>
-                    <input type="text" dir="rtl" name="page_title_sv" value="{{ $page_data->page_title_sv }}" class="form-control-custom">
+                    <input type="text" dir="rtl" name="page_title_fa" value="{{ $page_data->page_title_fa }}" class="form-control-custom">
                 </div>
                 <div class="mb-3">
                     <label class="label-custom">Heading</label>
-                    <input type="text" dir="rtl" name="heading_sv" value="{{ $page_data->heading_sv }}" class="form-control-custom">
+                    <input type="text" dir="rtl" name="heading_fa" value="{{ $page_data->heading_fa }}" class="form-control-custom">
                 </div>
                 <div class="mb-3">
                     <label class="label-custom">Description</label>
-                    <textarea dir="rtl" name="description_sv" class="form-control-custom" rows="5">{{ $page_data->description_sv }}</textarea>
+                    <textarea dir="rtl" name="description_fa" class="form-control-custom" rows="5">{{ $page_data->description_fa }}</textarea>
                 </div>
             </div>
 
@@ -62,6 +62,7 @@
 
             <div class="card-custom-p mb-4">
                 <div>
+                    @include('admin.partials.extra-locales', ['table' => 'page_donate_items', 'item' => ($page_data ?? null), 'fields' => ['page_title' => 'input', 'heading' => 'input', 'description' => 'textarea']])
                     <button type="submit" class="btn-admin-primary">Update</button>
                 </div>
             </div>

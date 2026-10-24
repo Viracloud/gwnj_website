@@ -111,12 +111,15 @@ class AdminController extends Controller
             'email' => 'required|email',
         ]);
 
+        $sent_message = 'If an admin account exists for this email, we have sent a password reset link to it. Please check your inbox and your spam folder.';
+
+        // Same answer whether or not the account exists, so the form can't be used to discover admin emails.
         $admin = Admin::where('email',$request->email)->first();
         if(!$admin) {
-            return redirect()->back()->with('error','Email is not found');
+            return redirect()->back()->with('success', $sent_message);
         }
 
-        $token = hash('sha256',time());
+        $token = secure_token(60);
         $admin->token = $token;
         $admin->update();
 
@@ -127,14 +130,14 @@ class AdminController extends Controller
 
         \safe_mail($request->email, $subject, $message);
 
-        return redirect()->back()->with('success','We have sent a password reset link to your email. Please check your email. If you do not find the email in your inbox, please check your spam folder.');
+        return redirect()->back()->with('success', $sent_message);
     }
 
     public function reset_password($token,$email)
     {
         $admin = Admin::where('email',$email)->where('token',$token)->first();
-        if(!$admin) {
-            return redirect()->route('admin_login')->with('error','Token or email is not correct');
+        if(!$admin || token_expired($token)) {
+            return redirect()->route('admin_login')->with('error','This password reset link is invalid or has expired. Please request a new one.');
         }
         return view('admin.reset-password', compact('token','email'));
     }
@@ -142,11 +145,14 @@ class AdminController extends Controller
     public function reset_password_submit(Request $request, $token, $email)
     {
         $request->validate([
-            'password' => ['required'],
+            'password' => ['required','min:8'],
             'confirm_password' => ['required','same:password'],
         ]);
 
-        $admin = Admin::where('email',$request->email)->where('token',$request->token)->first();
+        $admin = Admin::where('email',$email)->where('token',$token)->first();
+        if(!$admin || token_expired($token)) {
+            return redirect()->route('admin_login')->with('error','This password reset link is invalid or has expired. Please request a new one.');
+        }
         $admin->password = Hash::make($request->password);
         $admin->token = "";
         $admin->update();
@@ -163,7 +169,7 @@ class AdminController extends Controller
     {
         $request->validate([
             'name' => 'required',
-            'email' => 'required|email',
+            'email' => 'required|email|unique:admins,email,'.Auth::guard('admin')->user()->id,
         ]);
 
         $admin = Admin::where('id', Auth::guard('admin')->user()->id)->first();
@@ -173,7 +179,7 @@ class AdminController extends Controller
                 'photo' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
             ]);
 
-            $final_name = 'admin_'.time().'.'.$request->photo->getClientOriginalExtension();
+            $final_name = 'admin_'.time().'.'.$request->photo->extension();
 
             if($admin->photo != null && file_exists(public_path('uploads/'.$admin->photo))) {
                 unlink(public_path('uploads/'.$admin->photo));
@@ -185,7 +191,7 @@ class AdminController extends Controller
 
         if($request->password != null) {
             $request->validate([
-                'password' => ['required'],
+                'password' => ['required','min:8'],
                 'confirm_password' => ['required','same:password'],
             ]);
             $admin->password = Hash::make($request->password);

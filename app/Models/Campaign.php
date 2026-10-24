@@ -6,17 +6,24 @@ use Illuminate\Database\Eloquent\Model;
 
 class Campaign extends Model
 {
+    use \App\Models\Concerns\SavesExtraLocales;
+
     protected $fillable = [
-        'image', 'title', 'title_sv', 'slug', 'slug_sv',
-        'excerpt', 'excerpt_sv', 'content', 'content_sv',
-        'status', 'goal', 'goal_sv', 'cta_text', 'cta_text_sv', 'cta_link',
-        'stat_number', 'stat_label', 'stat_label_sv',
-        'countries', 'countries_sv', 'published_date', 'sort_order', 'show_on_home',
-        'seo_title', 'seo_title_sv', 'seo_meta_description', 'seo_meta_description_sv',
+        'campaign_category_id', 'image', 'title', 'title_fa', 'slug', 'slug_fa',
+        'excerpt', 'excerpt_fa', 'content', 'content_fa',
+        'status', 'goal', 'goal_fa', 'cta_text', 'cta_text_fa', 'cta_link',
+        'stat_number', 'stat_label', 'stat_label_fa',
+        'countries', 'countries_fa', 'published_date', 'sort_order', 'show_on_home',
+        'seo_title', 'seo_title_fa', 'seo_meta_description', 'seo_meta_description_fa',
     ];
 
     protected $casts = [
         'published_date' => 'date',
         'show_on_home' => 'boolean',
     ];
+
+    public function category()
+    {
+        return $this->belongsTo(CampaignCategory::class, 'campaign_category_id');
+    }
 }

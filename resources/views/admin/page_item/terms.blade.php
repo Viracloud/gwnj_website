@@ -23,11 +23,11 @@
                 <h6 class="cus-heading">دری (second language)</h6>
                 <div class="mb-3">
                     <label class="label-custom">Page Title</label>
-                    <input type="text" dir="rtl" name="page_title_sv" value="{{ $page_data->page_title_sv }}" class="form-control-custom">
+                    <input type="text" dir="rtl" name="page_title_fa" value="{{ $page_data->page_title_fa }}" class="form-control-custom">
                 </div>
                 <div class="mb-3">
                     <label class="label-custom">Page Content</label>
-                    <textarea id="terms_page_content_sv" dir="rtl" name="page_content_sv" class="form-control-custom tinymce-editor" rows="10">{{ $page_data->page_content_sv }}</textarea>
+                    <textarea id="terms_page_content_fa" dir="rtl" name="page_content_fa" class="form-control-custom tinymce-editor" rows="10">{{ $page_data->page_content_fa }}</textarea>
                 </div>
             </div>
 
@@ -45,6 +45,7 @@
             
             <div class="card-custom-p mb-4">
                 <div>
+                    @include('admin.partials.extra-locales', ['table' => 'page_terms_items', 'item' => ($page_data ?? null), 'fields' => ['page_title' => 'input', 'page_content' => 'editor']])
                     <button type="submit" class="btn-admin-primary">Update</button>
                 </div>
             </div>

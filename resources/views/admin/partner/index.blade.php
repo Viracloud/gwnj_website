@@ -31,7 +31,7 @@
                     </div>
                     <div class="mb-3">
                         <label class="label-custom">Name (Dari)</label>
-                        <input type="text" class="form-control-custom" name="name_sv" dir="rtl">
+                        <input type="text" class="form-control-custom" name="name_fa" dir="rtl">
                     </div>
                     <div class="mb-3">
                         <label class="label-custom">Website <small>- the logo links here, e.g. https://example.org</small></label>
@@ -49,6 +49,7 @@
                         </select>
                     </div>
                     <div class="mb-3">
+                        @include('admin.partials.extra-locales', ['table' => 'partners', 'item' => null, 'fields' => ['name' => 'input']])
                         <button type="submit" class="btn-admin-primary">Submit</button>
                     </div>
                 </form>
@@ -118,7 +119,7 @@
                                 </div>
                                 <div class="mb-3">
                                     <label class="label-custom">Name (Dari)</label>
-                                    <input type="text" class="form-control-custom" name="name_sv" value="{{ $partner->name_sv }}" dir="rtl">
+                                    <input type="text" class="form-control-custom" name="name_fa" value="{{ $partner->name_fa }}" dir="rtl">
                                 </div>
                                 <div class="mb-3">
                                     <label class="label-custom">Website</label>
@@ -136,6 +137,7 @@
                                     </select>
                                 </div>
                                 <div class="mb-3">
+                                    @include('admin.partials.extra-locales', ['table' => 'partners', 'item' => ($partner ?? null), 'fields' => ['name' => 'input']])
                                     <button type="submit" class="btn-admin-primary">Update</button>
                                 </div>
                             </form>

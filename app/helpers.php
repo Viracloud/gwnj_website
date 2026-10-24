@@ -2,53 +2,232 @@
 
 use App\Models\Setting;
 
-if (!function_exists('site_locale')) {
-    /**
-     * The active front-end locale: the visitor's own session choice
-     * (set via the header language switcher) if they made one, otherwise
-     * the admin's site-wide default (Setting::layout_direction).
-     */
-    function site_locale(): string
+/* =====================================================================
+   LANGUAGES
+   Languages are configured in config/locales.php and switched on with
+   SITE_LOCALES in .env. Every public page lives under /{locale}/...
+   ===================================================================== */
+
+if (!function_exists('enabled_locales')) {
+    /** Codes of the switched-on languages, e.g. ['en', 'fa']. */
+    function enabled_locales(): array
     {
-        static $locale = null;
-        if ($locale === null) {
-            if (session()->has('site_lang') && in_array(session('site_lang'), ['en', 'fa'])) {
-                $locale = session('site_lang');
+        return config('locales.enabled', ['en']);
+    }
+}
+
+if (!function_exists('extra_locales')) {
+    /**
+     * Languages edited with the generic "other languages" fields in the admin panel:
+     * switched-on or in-preparation languages other than English and Dari
+     * (Dari keeps its own dedicated fields in every form).
+     */
+    function extra_locales(): array
+    {
+        $codes = array_unique(array_merge(config('locales.enabled', []), config('locales.prepare', [])));
+        return array_values(array_filter($codes, fn ($c) => !in_array($c, ['en', 'fa'], true)
+            && array_key_exists($c, config('locales.supported'))));
+    }
+}
+
+if (!function_exists('locale_meta')) {
+    /** Settings of one language (name, native name, dir, hreflang ...). */
+    function locale_meta(?string $code = null): array
+    {
+        $code ??= site_locale();
+        return config('locales.supported.'.$code, config('locales.supported.en'));
+    }
+}
+
+if (!function_exists('base_locale')) {
+    /** The language stored in the plain columns (title, content ...). */
+    function base_locale(): string
+    {
+        return config('locales.base', 'en');
+    }
+}
+
+if (!function_exists('default_locale')) {
+    /** Language for "/" when the visitor has no preference: SITE_DEFAULT_LOCALE, else the admin's direction setting. */
+    function default_locale(): string
+    {
+        static $default = null;
+        if ($default === null) {
+            $configured = config('locales.default');
+            if ($configured && in_array($configured, enabled_locales(), true)) {
+                $default = $configured;
             } else {
-                $setting = Setting::where('id', 1)->first();
-                $locale = ($setting && $setting->layout_direction == 'rtl') ? 'fa' : 'en';
+                try {
+                    $setting = Setting::where('id', 1)->first();
+                } catch (\Throwable $e) {
+                    $setting = null;
+                }
+                $default = ($setting && $setting->layout_direction == 'rtl' && in_array('fa', enabled_locales(), true)) ? 'fa' : base_locale();
             }
         }
-        return $locale;
+        return $default;
+    }
+}
+
+if (!function_exists('preferred_locale')) {
+    /** The visitor's last chosen language (if still switched on), else the default. */
+    function preferred_locale($request = null): string
+    {
+        $request ??= request();
+        $saved = $request->hasSession() ? $request->session()->get('site_lang') : null;
+        return in_array($saved, enabled_locales(), true) ? $saved : default_locale();
+    }
+}
+
+if (!function_exists('site_locale')) {
+    /** The active front-end language (set from the URL by the SetLocale middleware). */
+    function site_locale(): string
+    {
+        $l = app()->getLocale();
+        return in_array($l, enabled_locales(), true) ? $l : default_locale();
     }
 }
 
 if (!function_exists('is_rtl')) {
+    /** Right-to-left layout for the active language (Dari). */
     function is_rtl(): bool
     {
-        return site_locale() === 'fa';
+        return (locale_meta()['dir'] ?? 'ltr') === 'rtl';
     }
 }
 
 if (!function_exists('tf')) {
     /**
-     * Return the Dari (_sv) value of a field when the site is in RTL mode
-     * and that value is filled in, otherwise fall back to the base field.
+     * A translatable field in the active language: "<field>_<locale>" when it is
+     * filled in, otherwise the base (English) field.
      */
-    function tf($model, string $field): ?string
+    function tf($model, string $field, ?string $locale = null): ?string
     {
         if (!$model) {
             return null;
         }
-
-        if (is_rtl()) {
-            $sv = $model->{$field . '_sv'} ?? null;
-            if ($sv !== null && trim($sv) !== '') {
-                return $sv;
+        $locale ??= site_locale();
+        if ($locale !== base_locale()) {
+            $v = $model->{$field.'_'.$locale} ?? null;
+            if ($v !== null && trim((string) $v) !== '') {
+                return $v;
             }
         }
-
         return $model->{$field} ?? null;
+    }
+}
+
+if (!function_exists('slug_for')) {
+    /** URL slug for a language: "slug_<locale>" when set, else the English slug. */
+    function slug_for($model, ?string $locale = null): ?string
+    {
+        if (!$model) {
+            return null;
+        }
+        $locale ??= site_locale();
+        if ($locale !== base_locale()) {
+            $s = trim((string) ($model->{'slug_'.$locale} ?? ''));
+            if ($s !== '') {
+                return $s;
+            }
+        }
+        return $model->slug;
+    }
+}
+
+if (!function_exists('slug_columns')) {
+    /** Slug columns that exist on a table: slug, slug_fa, slug_fr ... (cached). */
+    function slug_columns(string $table): array
+    {
+        static $cache = [];
+        if (!isset($cache[$table])) {
+            $cols = ['slug'];
+            foreach (array_keys(config('locales.supported')) as $code) {
+                if ($code !== base_locale() && \Illuminate\Support\Facades\Schema::hasColumn($table, 'slug_'.$code)) {
+                    $cols[] = 'slug_'.$code;
+                }
+            }
+            $cache[$table] = $cols;
+        }
+        return $cache[$table];
+    }
+}
+
+if (!function_exists('where_slug')) {
+    /** Add "matches the slug in any language" to a query. */
+    function where_slug($query, string $slug)
+    {
+        $table = $query->getModel()->getTable();
+        return $query->where(function ($q) use ($table, $slug) {
+            foreach (slug_columns($table) as $col) {
+                $q->orWhere($col, $slug);
+            }
+        });
+    }
+}
+
+if (!function_exists('localized_url')) {
+    /** The current page (or a given URL) in another language: swaps the /{locale}/ prefix. */
+    function localized_url(string $locale, ?string $url = null): string
+    {
+        $url ??= request()->fullUrl();
+        $base = rtrim(url('/'), '/');
+        $rest = substr($url, strlen($base));
+        $rest = preg_replace('#^/('.implode('|', array_map('preg_quote', array_keys(config('locales.supported')))).')(?=/|\?|$)#', '', $rest);
+        return $base.'/'.$locale.$rest;
+    }
+}
+
+if (!function_exists('set_alternates')) {
+    /**
+     * Pages whose address differs per language (translated slugs) register their
+     * exact address in each language here, for the language switcher and hreflang.
+     */
+    function set_alternates(array $map): void
+    {
+        app()->instance('page.alternates', $map);
+    }
+}
+
+if (!function_exists('set_model_alternates')) {
+    /** set_alternates() for a model page: route name + the model's slug in each language. */
+    function set_model_alternates(string $route, $model, string $param = 'slug'): void
+    {
+        $map = [];
+        foreach (enabled_locales() as $l) {
+            $map[$l] = route($route, ['locale' => $l, $param => slug_for($model, $l)]);
+        }
+        set_alternates($map);
+    }
+}
+
+if (!function_exists('alternate_urls')) {
+    /** This page's address in every switched-on language (used for hreflang and the switcher). */
+    function alternate_urls(): array
+    {
+        $registered = app()->bound('page.alternates') ? app('page.alternates') : [];
+        $map = [];
+        foreach (enabled_locales() as $l) {
+            $map[$l] = $registered[$l] ?? localized_url($l, url()->current());
+        }
+        return $map;
+    }
+}
+
+if (!function_exists('fa_digits')) {
+    /** Western digits → Persian digits (used for Dari). */
+    function fa_digits($value): string
+    {
+        return strtr((string) $value, ['0' => '۰', '1' => '۱', '2' => '۲', '3' => '۳', '4' => '۴',
+            '5' => '۵', '6' => '۶', '7' => '۷', '8' => '۸', '9' => '۹']);
+    }
+}
+
+if (!function_exists('local_digits')) {
+    /** Digits in the active language's script. */
+    function local_digits($value): string
+    {
+        return site_locale() === 'fa' ? fa_digits($value) : (string) $value;
     }
 }
 
@@ -71,19 +250,6 @@ if (!function_exists('persian_slug')) {
     }
 }
 
-if (!function_exists('slug_for')) {
-    /** URL slug for the active language: Dari slug in Dari mode when set, else the English one. */
-    function slug_for($model): ?string
-    {
-        if (!$model) {
-            return null;
-        }
-        if (is_rtl() && trim((string) ($model->slug_sv ?? '')) !== '') {
-            return $model->slug_sv;
-        }
-        return $model->slug;
-    }
-}
 
 if (!function_exists('to_jalali')) {
     /** Gregorian -> Solar Hijri [year, month, day]. */
@@ -126,8 +292,13 @@ if (!function_exists('fdate')) {
         $c = $date instanceof \Carbon\Carbon || $date instanceof \Carbon\CarbonImmutable
             ? $date : \Carbon\Carbon::parse($date);
 
-        if (!is_rtl()) {
+        $calendar = locale_meta()['date'] ?? 'en';
+        if ($calendar === 'en') {
             return $c->format($format);
+        }
+        if ($calendar !== 'jalali') {
+            // French / German month and day names.
+            return $c->copy()->locale($calendar)->translatedFormat($format);
         }
 
         [$jy, $jm, $jd] = to_jalali((int) $c->format('Y'), (int) $c->format('n'), (int) $c->format('j'));
@@ -147,14 +318,14 @@ if (!function_exists('fdate')) {
     }
 }
 
-if (!function_exists('resolve_slug_sv')) {
+if (!function_exists('resolve_slug_fa')) {
     /**
      * Dari slug for saving: the typed one, else the existing one, else generated
-     * from the Dari title. Always unique within the table (against slug and slug_sv).
+     * from the Dari title. Always unique within the table (against slug and slug_fa).
      */
-    function resolve_slug_sv(string $table, ?string $typed, ?string $source, $id = null): ?string
+    function resolve_slug_fa(string $table, ?string $typed, ?string $source, $id = null): ?string
     {
-        $existing = $id ? \Illuminate\Support\Facades\DB::table($table)->where('id', $id)->value('slug_sv') : null;
+        $existing = $id ? \Illuminate\Support\Facades\DB::table($table)->where('id', $id)->value('slug_fa') : null;
         $slug = persian_slug($typed) ?: ($existing ?: persian_slug($source));
         if ($slug === '') {
             return null;
@@ -162,7 +333,7 @@ if (!function_exists('resolve_slug_sv')) {
         $base = $slug;
         $i = 2;
         while (\Illuminate\Support\Facades\DB::table($table)
-            ->where(fn ($q) => $q->where('slug', $slug)->orWhere('slug_sv', $slug))
+            ->where(function ($q) use ($table, $slug) { foreach (slug_columns($table) as $col) { $q->orWhere($col, $slug); } })
             ->when($id, fn ($q) => $q->where('id', '!=', $id))
             ->exists()) {
             $slug = $base . '-' . $i++;
@@ -177,7 +348,7 @@ if (!function_exists('resolve_slug')) {
      * from the English title. Admins no longer have to type a slug by hand - it's
      * derived from the title automatically, same as the Dari slug already is; the
      * field stays editable only for when a specific custom URL is wanted.
-     * Always unique within the table (against slug and slug_sv).
+     * Always unique within the table (against slug and slug_fa).
      */
     function resolve_slug(string $table, ?string $typed, ?string $source, $id = null): ?string
     {
@@ -189,7 +360,7 @@ if (!function_exists('resolve_slug')) {
         $base = $slug;
         $i = 2;
         while (\Illuminate\Support\Facades\DB::table($table)
-            ->where(fn ($q) => $q->where('slug', $slug)->orWhere('slug_sv', $slug))
+            ->where(function ($q) use ($table, $slug) { foreach (slug_columns($table) as $col) { $q->orWhere($col, $slug); } })
             ->when($id, fn ($q) => $q->where('id', '!=', $id))
             ->exists()) {
             $slug = $base . '-' . $i++;
@@ -253,9 +424,17 @@ if (!function_exists('hc')) {
             return ($v !== null && trim($v) !== '') ? $v : ($def['en'] ?? '');
         }
 
-        if (is_rtl()) {
-            $v = $row->value_sv ?? null;
-            return ($v !== null && trim($v) !== '') ? $v : ($def['fa'] ?? ($def['en'] ?? ''));
+        // Active language: admin text, then the built-in default for that language,
+        // then the English admin text, then the English default.
+        $locale = site_locale();
+        if ($locale !== base_locale()) {
+            $v = $row->{'value_'.$locale} ?? null;
+            if ($v !== null && trim($v) !== '') {
+                return $v;
+            }
+            if (!empty($def[$locale])) {
+                return $def[$locale];
+            }
         }
         $v = $row->value ?? null;
         return ($v !== null && trim($v) !== '') ? $v : ($def['en'] ?? '');
@@ -321,7 +500,7 @@ if (!function_exists('resolve_seo')) {
 
         $item_resolvers = [
             'event' => function ($slug) {
-                $event = \App\Models\Event::where('slug', $slug)->orWhere('slug_sv', $slug)->first();
+                $event = where_slug(\App\Models\Event::query(), $slug)->first();
                 if (!$event) return null;
                 return [
                     'title' => tf($event, 'title'),
@@ -330,7 +509,7 @@ if (!function_exists('resolve_seo')) {
                 ];
             },
             'post' => function ($slug) {
-                $post = \App\Models\Post::where('slug', $slug)->orWhere('slug_sv', $slug)->first();
+                $post = where_slug(\App\Models\Post::query(), $slug)->first();
                 if (!$post) return null;
                 return [
                     'title' => tf($post, 'seo_title') ?: tf($post, 'title'),
@@ -339,7 +518,7 @@ if (!function_exists('resolve_seo')) {
                 ];
             },
             'campaign' => function ($slug) {
-                $campaign = \App\Models\Campaign::where('slug', $slug)->orWhere('slug_sv', $slug)->first();
+                $campaign = where_slug(\App\Models\Campaign::query(), $slug)->first();
                 if (!$campaign) return null;
                 return [
                     'title' => tf($campaign, 'seo_title') ?: tf($campaign, 'title'),
@@ -348,7 +527,7 @@ if (!function_exists('resolve_seo')) {
                 ];
             },
             'member' => function ($slug) {
-                $member = \App\Models\Member::where('slug', $slug)->orWhere('slug_sv', $slug)->first();
+                $member = where_slug(\App\Models\Member::query(), $slug)->first();
                 if (!$member) return null;
                 return [
                     'title' => tf($member, 'name') . ($member->designation ? ' — ' . tf($member, 'designation') : ''),
@@ -357,7 +536,7 @@ if (!function_exists('resolve_seo')) {
                 ];
             },
             'custom_page' => function ($slug) {
-                $page = \App\Models\CustomPage::where('slug', $slug)->orWhere('slug_sv', $slug)->first();
+                $page = where_slug(\App\Models\CustomPage::query(), $slug)->first();
                 if (!$page) return null;
                 return [
                     'title' => tf($page, 'seo_title') ?: tf($page, 'title'),
@@ -407,12 +586,12 @@ if (!function_exists('resolve_seo')) {
 
         if (!$title) {
             $fallback_titles = [
-                'campaigns' => is_rtl() ? 'کمپین‌ها' : 'Campaigns',
-                'publications' => is_rtl() ? 'گزارش‌ها و انتشارات' : 'Reports and publications',
-                'search' => is_rtl() ? 'جستجو' : 'Search',
-                'category' => is_rtl() ? 'دسته‌بندی' : 'Category',
-                'archive' => is_rtl() ? 'بایگانی' : 'Archive',
-                'tag' => is_rtl() ? 'برچسب' : 'Tag',
+                'campaigns' => __('Campaigns'),
+                'publications' => __('Reports and publications'),
+                'search' => __('Search'),
+                'category' => __('Category'),
+                'archive' => __('Archive'),
+                'tag' => __('Tag'),
             ];
             $title = $fallback_titles[$name] ?? null;
         }
@@ -434,7 +613,7 @@ if (!function_exists('resolve_seo')) {
             'title' => $title,
             'description' => plain_excerpt($description, 300),
             'image' => $image ? asset('uploads/' . $image) : null,
-            'canonical' => url()->current(),
+            'canonical' => alternate_urls()[site_locale()] ?? url()->current(),
             'noindex' => !($setting?->seo_robots_indexable),
         ];
     }
@@ -472,56 +651,293 @@ if (!function_exists('sitemap_entries')) {
      */
     function sitemap_entries(?Setting $setting): \Illuminate\Support\Collection
     {
-        $urls = collect([
-            ['type' => 'Homepage', 'loc' => url('/'), 'priority' => '1.0', 'lastmod' => null],
-        ]);
+        // One entry per page *per switched-on language*, each listing all its language
+        // versions (hreflang), so Google indexes every language separately.
+        $urls = collect();
+        $locales = enabled_locales();
+
+        $add = function (string $type, string $priority, $lastmod, \Closure $urlFor) use (&$urls, $locales) {
+            $alternates = [];
+            foreach ($locales as $l) {
+                $alternates[$l] = $urlFor($l);
+            }
+            foreach ($alternates as $l => $loc) {
+                $urls->push(['type' => $type, 'lang' => $l, 'loc' => $loc, 'priority' => $priority,
+                             'lastmod' => $lastmod, 'alternates' => $alternates]);
+            }
+        };
+
+        $add('Homepage', '1.0', null, fn ($l) => route('home', ['locale' => $l]));
 
         if (!$setting || $setting->sitemap_include_static) {
             $priority = $setting->sitemap_priority_static ?? '0.7';
-            $static_routes = [
-                'about', 'gallery', 'faq', 'publications', 'events', 'campaigns',
-                'team-members', 'blog', 'terms-of-use', 'privacy-policy', 'contact', 'donate',
-            ];
-            foreach ($static_routes as $path) {
-                $urls->push(['type' => 'Static', 'loc' => url('/' . $path), 'priority' => $priority, 'lastmod' => null]);
+            foreach (['about', 'gallery', 'faq', 'publications', 'events', 'campaigns', 'members', 'blog',
+                      'terms', 'privacy', 'contact', 'donate', 'polls', 'membership_info', 'partners'] as $name) {
+                if (\Illuminate\Support\Facades\Route::has($name)) {
+                    $add('Static', (string) $priority, null, fn ($l) => route($name, ['locale' => $l]));
+                }
             }
         }
 
-        if (!$setting || $setting->sitemap_include_events) {
-            $priority = $setting->sitemap_priority_events ?? '0.6';
-            foreach (\App\Models\Event::all() as $event) {
-                $urls->push(['type' => 'Event', 'loc' => url('/event/' . slug_for($event)), 'lastmod' => $event->updated_at, 'priority' => $priority]);
+        $models = [
+            ['sitemap_include_events', 'sitemap_priority_events', '0.6', 'Event', 'event', fn () => \App\Models\Event::all()],
+            ['sitemap_include_posts', 'sitemap_priority_posts', '0.6', 'Post', 'post', fn () => \App\Models\Post::all()],
+            ['sitemap_include_campaigns', 'sitemap_priority_campaigns', '0.6', 'Campaign', 'campaign', fn () => \App\Models\Campaign::all()],
+            ['sitemap_include_members', 'sitemap_priority_members', '0.5', 'Team member', 'member', fn () => \App\Models\Member::all()],
+            ['sitemap_include_pages', 'sitemap_priority_pages', '0.5', 'Page', 'custom_page', fn () => \App\Models\CustomPage::visible()->get()],
+        ];
+        foreach ($models as [$include, $prio, $default_prio, $type, $route, $query]) {
+            if ($setting && !$setting->{$include}) {
+                continue;
+            }
+            $priority = (string) ($setting->{$prio} ?? $default_prio);
+            foreach ($query() as $item) {
+                $add($type, $priority, $item->updated_at, fn ($l) => route($route, ['locale' => $l, 'slug' => slug_for($item, $l)]));
             }
         }
 
-        if (!$setting || $setting->sitemap_include_posts) {
-            $priority = $setting->sitemap_priority_posts ?? '0.6';
-            foreach (\App\Models\Post::all() as $post) {
-                $urls->push(['type' => 'Post', 'loc' => url('/post/' . slug_for($post)), 'lastmod' => $post->updated_at, 'priority' => $priority]);
-            }
-        }
-
-        if (!$setting || $setting->sitemap_include_campaigns) {
-            $priority = $setting->sitemap_priority_campaigns ?? '0.6';
-            foreach (\App\Models\Campaign::all() as $campaign) {
-                $urls->push(['type' => 'Campaign', 'loc' => url('/campaign/' . slug_for($campaign)), 'lastmod' => $campaign->updated_at, 'priority' => $priority]);
-            }
-        }
-
-        if (!$setting || $setting->sitemap_include_members) {
-            $priority = $setting->sitemap_priority_members ?? '0.5';
-            foreach (\App\Models\Member::all() as $member) {
-                $urls->push(['type' => 'Team member', 'loc' => url('/team-member/' . slug_for($member)), 'lastmod' => $member->updated_at, 'priority' => $priority]);
-            }
-        }
-
-        if (!$setting || $setting->sitemap_include_pages) {
-            $priority = $setting->sitemap_priority_pages ?? '0.5';
-            foreach (\App\Models\CustomPage::all() as $page) {
-                $urls->push(['type' => 'Page', 'loc' => url('/page/' . slug_for($page)), 'lastmod' => $page->updated_at, 'priority' => $priority]);
+        if (\Illuminate\Support\Facades\Schema::hasTable('polls')) {
+            foreach (\App\Models\Poll::published()->get() as $poll) {
+                $add('Poll', '0.5', $poll->updated_at, fn ($l) => route('poll', ['locale' => $l, 'slug' => $poll->slug]));
             }
         }
 
         return $urls;
+    }
+}
+
+
+if (!function_exists('secure_token')) {
+    /**
+     * Unguessable token for email links (verification, password reset).
+     * With $minutes, the expiry time is appended ("<random>.<unix-time>") so
+     * the link can be rejected later without a separate database column.
+     */
+    function secure_token(?int $minutes = null): string
+    {
+        $token = \Illuminate\Support\Str::random(64);
+        return $minutes ? $token.'.'.(time() + $minutes * 60) : $token;
+    }
+}
+
+if (!function_exists('token_expired')) {
+    /** True when a token made by secure_token($minutes) is past its expiry time. */
+    function token_expired(?string $token): bool
+    {
+        if (!$token || !str_contains($token, '.')) {
+            return true;
+        }
+        return (int) substr(strrchr($token, '.'), 1) < time();
+    }
+}
+
+if (!function_exists('clean_html')) {
+    /**
+     * Sanitise rich-text HTML written in the admin editor before it is shown
+     * on the public site: keeps normal formatting, links, images, tables and
+     * video/map embeds from trusted hosts, but removes scripts, event-handler
+     * attributes (onclick=...), javascript: links and other active content.
+     */
+    function clean_html(?string $html): string
+    {
+        if ($html === null || trim($html) === '') {
+            return '';
+        }
+
+        $remove_tags = ['script', 'style', 'object', 'embed', 'applet', 'form', 'input', 'button',
+            'textarea', 'select', 'option', 'meta', 'link', 'base', 'frame', 'frameset', 'svg', 'math', 'template'];
+        $iframe_hosts = ['www.youtube.com', 'youtube.com', 'www.youtube-nocookie.com', 'player.vimeo.com',
+            'www.google.com', 'maps.google.com', 'www.facebook.com', 'www.instagram.com', 'instagram.com',
+            'open.spotify.com', 'w.soundcloud.com'];
+
+        $prev = libxml_use_internal_errors(true);
+        $doc = new \DOMDocument();
+        $doc->loadHTML('<?xml encoding="UTF-8"><div id="__clean_root">'.$html.'</div>',
+            LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD | LIBXML_NONET);
+        libxml_clear_errors();
+        libxml_use_internal_errors($prev);
+
+        $xpath = new \DOMXPath($doc);
+
+        foreach ($remove_tags as $tag) {
+            foreach (iterator_to_array($xpath->query('//'.$tag)) as $node) {
+                $node->parentNode?->removeChild($node);
+            }
+        }
+
+        foreach (iterator_to_array($xpath->query('//iframe')) as $node) {
+            $host = parse_url((string) $node->getAttribute('src'), PHP_URL_HOST);
+            $scheme = parse_url((string) $node->getAttribute('src'), PHP_URL_SCHEME);
+            if ($scheme !== 'https' || !in_array(strtolower((string) $host), $iframe_hosts, true)) {
+                $node->parentNode?->removeChild($node);
+            }
+        }
+
+        foreach (iterator_to_array($xpath->query('//*[@*]')) as $node) {
+            foreach (iterator_to_array($node->attributes) as $attr) {
+                $name = strtolower($attr->name);
+                $value = preg_replace('/[\x00-\x20]+/', '', strtolower(html_entity_decode($attr->value)));
+                if (str_starts_with($name, 'on') || $name === 'formaction' || $name === 'srcdoc') {
+                    $node->removeAttribute($attr->name);
+                } elseif (in_array($name, ['href', 'src', 'action', 'xlink:href', 'data', 'poster', 'background'], true)
+                    && preg_match('/^(javascript|vbscript|data):/', $value)
+                    && !preg_match('#^data:image/(png|jpe?g|gif|webp);#', $value)) {
+                    $node->removeAttribute($attr->name);
+                } elseif ($name === 'style' && preg_match('/expression\s*\(|javascript:|url\s*\(\s*[\'"]?\s*javascript/i', $attr->value)) {
+                    $node->removeAttribute($attr->name);
+                }
+            }
+            // Links that open a new tab must not get access to this page.
+            if (strtolower($node->nodeName) === 'a' && strtolower($node->getAttribute('target')) === '_blank') {
+                $node->setAttribute('rel', 'noopener noreferrer');
+            }
+        }
+
+        // ---- Videos: nothing loads from YouTube / Facebook / Instagram until the visitor clicks ----
+        $facade = function (array $video) use ($doc) {
+            $frag = $doc->createDocumentFragment();
+            $frag->appendXML(video_facade($video, 'vf-block'));
+            return $frag;
+        };
+        // 1. Embedded players (e.g. inserted with the editor's "media" button) become click-to-play boxes.
+        foreach (iterator_to_array($xpath->query('//iframe')) as $node) {
+            if ($video = video_embed($node->getAttribute('src'))) {
+                $node->parentNode?->replaceChild($facade($video), $node);
+            }
+        }
+        // 2. A paragraph that only contains a video link becomes a click-to-play box.
+        foreach (iterator_to_array($xpath->query('//p')) as $p) {
+            $text = trim(preg_replace('/\s+/u', ' ', $p->textContent));
+            $only_link = $xpath->query('.//*[not(self::a) and not(self::br) and not(self::span) and not(self::strong) and not(self::b)]', $p)->length === 0;
+            if ($text !== '' && $only_link && preg_match('#^https?://\S+$#', $text) && ($video = video_embed($text))) {
+                $p->parentNode?->replaceChild($facade($video), $p);
+            }
+        }
+        // 3. Any other link to a video opens the player on the site instead of leaving it.
+        foreach (iterator_to_array($xpath->query('//a[@href]')) as $a) {
+            if ($video = video_embed($a->getAttribute('href'))) {
+                $a->setAttribute('data-video-embed', $video['embed']);
+                $a->setAttribute('data-video-portrait', $video['portrait'] ? '1' : '0');
+                $a->setAttribute('class', trim($a->getAttribute('class').' video-link'));
+            }
+        }
+
+        $root = $doc->getElementById('__clean_root');
+        $out = '';
+        foreach ($root ? $root->childNodes : [] as $child) {
+            $out .= $doc->saveHTML($child);
+        }
+        return $out;
+    }
+}
+
+if (!function_exists('clean_map_embed')) {
+    /** Only allow a Google Maps (or OpenStreetMap) <iframe> in the contact page map field. */
+    function clean_map_embed(?string $code): string
+    {
+        if (!$code || !preg_match('/<iframe[^>]+src=["\']([^"\']+)["\']/i', $code, $m)) {
+            return '';
+        }
+        $src = html_entity_decode($m[1]);
+        $host = strtolower((string) parse_url($src, PHP_URL_HOST));
+        if (parse_url($src, PHP_URL_SCHEME) !== 'https'
+            || !in_array($host, ['www.google.com', 'maps.google.com', 'www.openstreetmap.org'], true)) {
+            return '';
+        }
+        return '<iframe src="'.e($src).'" width="100%" height="450" style="border:0" allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>';
+    }
+}
+
+
+if (!function_exists('video_embed')) {
+    /**
+     * Turn a YouTube / Instagram / Facebook / Vimeo link (or a bare YouTube id) into
+     * the address of that platform's player, so the video can play inside the site.
+     * Returns ['provider', 'label', 'embed', 'portrait'] or null when not recognised.
+     */
+    function video_embed(?string $url): ?array
+    {
+        $url = trim(html_entity_decode((string) $url));
+        if ($url === '') {
+            return null;
+        }
+        // A bare YouTube video id (e.g. from the "Youtube Id" admin field).
+        if (preg_match('/^[A-Za-z0-9_-]{11}$/', $url)) {
+            $url = 'https://www.youtube.com/watch?v='.$url;
+        }
+        $p = parse_url($url);
+        if (!in_array(strtolower($p['scheme'] ?? ''), ['http', 'https'], true)) {
+            return null;
+        }
+        $host = preg_replace('/^(www\.|m\.|mobile\.|web\.)/', '', strtolower($p['host'] ?? ''));
+        $path = $p['path'] ?? '';
+        parse_str($p['query'] ?? '', $q);
+
+        // YouTube (privacy-enhanced player: no cookies until the visitor presses play)
+        if (in_array($host, ['youtube.com', 'youtu.be', 'youtube-nocookie.com', 'music.youtube.com'], true)) {
+            $id = null;
+            $portrait = false;
+            if ($host === 'youtu.be') {
+                $id = trim($path, '/');
+            } elseif (!empty($q['v'])) {
+                $id = $q['v'];
+            } elseif (preg_match('#^/(embed|shorts|live|v)/([A-Za-z0-9_-]{11})#', $path, $m)) {
+                $id = $m[2];
+                $portrait = $m[1] === 'shorts';
+            }
+            if ($id && preg_match('/^[A-Za-z0-9_-]{11}$/', $id)) {
+                return ['provider' => 'youtube', 'label' => 'YouTube', 'portrait' => $portrait,
+                        'embed' => 'https://www.youtube-nocookie.com/embed/'.$id.'?autoplay=1&rel=0'];
+            }
+            return null;
+        }
+
+        // Vimeo
+        if (in_array($host, ['vimeo.com', 'player.vimeo.com'], true) && preg_match('#/(?:video/)?(\d{5,})#', $path, $m)) {
+            return ['provider' => 'vimeo', 'label' => 'Vimeo', 'portrait' => false,
+                    'embed' => 'https://player.vimeo.com/video/'.$m[1].'?autoplay=1&dnt=1'];
+        }
+
+        // Instagram posts, reels and IGTV
+        if ($host === 'instagram.com' && preg_match('#^/(p|reel|reels|tv)/([A-Za-z0-9_-]+)#', $path, $m)) {
+            $kind = $m[1] === 'reels' ? 'reel' : $m[1];
+            return ['provider' => 'instagram', 'label' => 'Instagram', 'portrait' => true,
+                    'embed' => 'https://www.instagram.com/'.$kind.'/'.$m[2].'/embed/'];
+        }
+
+        // Facebook videos, reels and watch links (public videos only — a Facebook limitation)
+        if (in_array($host, ['facebook.com', 'fb.watch', 'fb.com'], true)) {
+            $is_video = $host === 'fb.watch'
+                || preg_match('#/(videos|reel|watch|share/v|share/r)\b#', $path)
+                || !empty($q['v']);
+            if (!$is_video) {
+                return null;
+            }
+            if ($host !== 'fb.watch' && str_starts_with($path, '/plugins/video.php') && !empty($q['href'])) {
+                $url = $q['href'];
+            }
+            $portrait = (bool) preg_match('#/(reel|share/r)\b#', $path);
+            return ['provider' => 'facebook', 'label' => 'Facebook', 'portrait' => $portrait,
+                    'embed' => 'https://www.facebook.com/plugins/video.php?href='.rawurlencode($url).'&show_text=false&autoplay=true'];
+        }
+
+        return null;
+    }
+}
+
+if (!function_exists('video_facade')) {
+    /**
+     * HTML for a click-to-play video box. Nothing is loaded from YouTube / Facebook /
+     * Instagram until the visitor presses play; the player then opens on the site.
+     */
+    function video_facade(array $video, string $class = ''): string
+    {
+        $label = __('Play video');
+        return '<button type="button" class="video-facade vf-'.e($video['provider']).' '.e($class).'"'
+            .' data-video-embed="'.e($video['embed']).'" data-video-portrait="'.($video['portrait'] ? '1' : '0').'"'
+            .' aria-label="'.e($label.' — '.$video['label']).'">'
+            .'<span class="vf-play" aria-hidden="true"></span>'
+            .'<span class="vf-text"><b>'.e($label).'</b><small>'.e($video['label']).'</small></span>'
+            .'</button>';
     }
 }

@@ -6,5 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class HomeText extends Model
 {
-    protected $fillable = ['key', 'value', 'value_sv'];
+    use \App\Models\Concerns\SavesExtraLocales;
+
+    protected $fillable = ['key', 'value', 'value_fa'];
 }

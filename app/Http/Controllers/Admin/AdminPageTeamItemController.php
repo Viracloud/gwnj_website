@@ -19,9 +19,9 @@ class AdminPageTeamItemController extends Controller
         $obj = PageTeamItem::where('id', 1)->first();
 
         $obj->page_title = $request->page_title;
-        $obj->page_title_sv = $request->page_title_sv;
+        $obj->page_title_fa = $request->page_title_fa;
         $obj->intro = $request->intro;
-        $obj->intro_sv = $request->intro_sv;
+        $obj->intro_fa = $request->intro_fa;
         $obj->seo_title = $request->seo_title;
         $obj->seo_meta_description = $request->seo_meta_description;
 

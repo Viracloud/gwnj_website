@@ -5,18 +5,28 @@
 
 @section('content')
 <div class="pagehead"><div class="shell">
-    <span class="kicker">{{ is_rtl() ? 'کار ما' : 'Our Work' }}</span>
-    <h1>{{ is_rtl() ? 'کمپاین‌ها' : 'Campaigns' }}</h1>
-    <p class="lede">{{ is_rtl() ? 'کمپاین‌های بین‌المللی که بسیج عمومی، پیگیری حقوقی و فشار هماهنگ را با هم ترکیب می‌کنند.' : 'International campaigns combining public mobilisation, legal advocacy and coordinated pressure.' }}</p>
+    <span class="kicker">{{ __('Our Work') }}</span>
+    <h1>{{ __('Campaigns') }}</h1>
+    <p class="lede">{{ __('International campaigns combining public mobilisation, legal advocacy and coordinated pressure.') }}</p>
 </div></div>
 
 <section class="shell">
+    @php $cat_q = request('category') ? ['category' => request('category')] : []; $st_q = request('status') ? ['status' => request('status')] : []; @endphp
     <div class="filters">
-        <a href="{{ route('campaigns') }}" class="{{ !request('status') ? 'active' : '' }}">{{ is_rtl() ? 'همه' : 'All' }}</a>
-        <a href="{{ route('campaigns', ['status' => 'active']) }}" class="{{ request('status') == 'active' ? 'active' : '' }}">{{ is_rtl() ? 'در حال اجرا' : 'Active' }}</a>
-        <a href="{{ route('campaigns', ['status' => 'won']) }}" class="{{ request('status') == 'won' ? 'active' : '' }}">{{ is_rtl() ? 'موفق' : 'Won' }}</a>
-        <a href="{{ route('campaigns', ['status' => 'closed']) }}" class="{{ request('status') == 'closed' ? 'active' : '' }}">{{ is_rtl() ? 'بسته‌شده' : 'Closed' }}</a>
+        <a href="{{ route('campaigns', $cat_q) }}" class="{{ !request('status') ? 'active' : '' }}">{{ __('All') }}</a>
+        <a href="{{ route('campaigns', ['status' => 'active'] + $cat_q) }}" class="{{ request('status') == 'active' ? 'active' : '' }}">{{ __('Active') }}</a>
+        <a href="{{ route('campaigns', ['status' => 'won'] + $cat_q) }}" class="{{ request('status') == 'won' ? 'active' : '' }}">{{ __('Won') }}</a>
+        <a href="{{ route('campaigns', ['status' => 'closed'] + $cat_q) }}" class="{{ request('status') == 'closed' ? 'active' : '' }}">{{ __('Closed') }}</a>
     </div>
+    @if($campaign_categories->count())
+    <div class="filters filters-sub">
+        <span class="filters-label">{{ __('Topic:') }}</span>
+        <a href="{{ route('campaigns', $st_q) }}" class="{{ !request('category') ? 'active' : '' }}">{{ __('All') }}</a>
+        @foreach($campaign_categories as $cat)
+        <a href="{{ route('campaigns', ['category' => $cat->slug] + $st_q) }}" class="{{ request('category') == $cat->slug ? 'active' : '' }}">{{ tf($cat,'name') }}</a>
+        @endforeach
+    </div>
+    @endif
 
     @if($campaigns->count())
     <div class="cards">
@@ -26,18 +36,21 @@
             @if($campaign->image)
             <div class="photo"><img src="{{ asset('uploads/'.$campaign->image) }}" alt="{{ tf($campaign,'title') }}"></div>
             @endif
-            <span class="chip {{ $chip }}">
-                {{ $campaign->status === 'active' ? (is_rtl() ? 'در حال اجرا' : 'Active') : ($campaign->status === 'won' ? (is_rtl() ? 'موفق' : 'Won') : (is_rtl() ? 'بسته‌شده' : 'Closed')) }}
-            </span>
+            <div class="card-tags">
+                <span class="chip {{ $chip }}">
+                    {{ $campaign->status === 'active' ? (__('Active')) : ($campaign->status === 'won' ? (__('Won')) : (__('Closed'))) }}
+                </span>
+                @if($campaign->category)<span class="chip plain">{{ tf($campaign->category,'name') }}</span>@endif
+            </div>
             <h3>{{ tf($campaign,'title') }}</h3>
             @if(tf($campaign,'excerpt'))<p>{{ plain_excerpt(tf($campaign,'excerpt'), 120) }}</p>@endif
-            <span class="readmore">{{ is_rtl() ? 'مطالعهٔ کامل' : 'Read more' }}</span>
+            <span class="readmore">{{ __('Read more') }}</span>
         </a>
         @endforeach
     </div>
     {{ $campaigns->links() }}
     @else
-    <p style="color:var(--muted)">{{ is_rtl() ? 'در این دسته کمپاینی وجود ندارد.' : 'No campaigns in this category yet.' }}</p>
+    <p style="color:var(--muted)">{{ __('No campaigns in this category yet.') }}</p>
     @endif
 </section>
 @endsection

@@ -5,7 +5,7 @@
 
 @section('content')
 <div class="pagehead"><div class="shell">
-    <span class="kicker">{{ $menu_parent ? $menu_parent->label() : (is_rtl() ? 'صفحه' : 'Page') }}</span>
+    <span class="kicker">{{ $menu_parent ? $menu_parent->label() : (__('Page')) }}</span>
     <h1>{{ tf($page,'title') }}</h1>
     @if(tf($page,'excerpt'))
     <p class="lede">{{ tf($page,'excerpt') }}</p>
@@ -17,10 +17,10 @@
     <div class="doc">
         <div class="doc-main">
             @if($page->image)
-            <div class="photo plain" style="aspect-ratio:16/8;margin-bottom:var(--s6)"><img src="{{ asset('uploads/'.$page->image) }}" alt="{{ tf($page,'title') }}"></div>
+            <div class="photo plain photo-banner"><img src="{{ asset('uploads/'.$page->image) }}" alt="{{ tf($page,'title') }}"></div>
             @endif
             <div class="rich-content">
-                {!! tf($page,'content') !!}
+                {!! clean_html(tf($page,'content')) !!}
             </div>
             @if($page->images->count())
             <div class="topic-gallery">
@@ -54,10 +54,10 @@
     </div>
     @else
     @if($page->image)
-    <div class="photo plain" style="aspect-ratio:21/8;margin-bottom:var(--s6)"><img src="{{ asset('uploads/'.$page->image) }}" alt="{{ tf($page,'title') }}"></div>
+    <div class="photo plain photo-banner"><img src="{{ asset('uploads/'.$page->image) }}" alt="{{ tf($page,'title') }}"></div>
     @endif
     <div class="rich-content">
-        {!! tf($page,'content') !!}
+        {!! clean_html(tf($page,'content')) !!}
     </div>
     @if($page->images->count())
     <div class="topic-gallery">

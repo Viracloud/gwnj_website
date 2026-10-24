@@ -6,8 +6,8 @@
 @section('content')
 
 <div class="pagehead"><div class="shell">
-    <span class="kicker">{{ is_rtl() ? 'جستجو' : 'Search' }}</span>
-    <h1>{{ is_rtl() ? 'نتایج جستجو برای «'.$search_text.'»' : 'Search results for "'.$search_text.'"' }}</h1>
+    <span class="kicker">{{ __('Search') }}</span>
+    <h1>{{ __('Search results for ":term"', ['term' => $search_text]) }}</h1>
 </div></div>
 
 <section class="shell">
@@ -26,7 +26,7 @@
     {{ $posts->links() }}
     @else
     <p style="text-align:center;color:var(--muted);padding-block:var(--s6)">
-        {{ is_rtl() ? 'هیچ نتیجه‌ای برای «'.$search_text.'» یافت نشد.' : 'No results found for "'.$search_text.'".' }}
+        {{ __('No results found for ":term".', ['term' => $search_text]) }}
     </p>
     @endif
 </section>

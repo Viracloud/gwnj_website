@@ -38,22 +38,22 @@ class AdminEventController extends Controller
         }
         $obj->event_category_id = $request->event_category_id;
         $obj->title = $request->title;
-        $obj->title_sv = $request->title_sv;
+        $obj->title_fa = $request->title_fa;
         $obj->slug = resolve_slug('events', $request->slug, $request->title, $obj->id);
-        $obj->slug_sv = resolve_slug_sv('events', $request->slug_sv, $request->title_sv, $obj->id);
+        $obj->slug_fa = resolve_slug_fa('events', $request->slug_fa, $request->title_fa, $obj->id);
         $obj->description = $request->description;
-        $obj->description_sv = $request->description_sv;
+        $obj->description_fa = $request->description_fa;
         $obj->show_on_home = $request->show_on_home;
         $obj->event_location = $request->event_location;
-        $obj->event_location_sv = $request->event_location_sv;
+        $obj->event_location_fa = $request->event_location_fa;
         $obj->event_location_detail = $request->event_location_detail;
-        $obj->event_location_detail_sv = $request->event_location_detail_sv;
+        $obj->event_location_detail_fa = $request->event_location_detail_fa;
         $obj->event_date = $request->event_date;
         $obj->event_time = $request->event_time;
         $obj->ticket_price = $request->ticket_price;
         $obj->youtube_id = $request->youtube_id;
         $obj->button_text = $request->button_text;
-        $obj->button_text_sv = $request->button_text_sv;
+        $obj->button_text_fa = $request->button_text_fa;
         $obj->button_link = $request->button_link;
         $obj->save();
 
@@ -72,7 +72,7 @@ class AdminEventController extends Controller
             'event_time' => 'required|string',
         ]);
 
-        $obj = Event::where('id', $id)->first();
+        $obj = Event::findOrFail($id);
         if($request->hasFile('image')) {
             $request->validate([
                 'image' => 'mimes:jpeg,png,jpg,gif,svg|max:2048',
@@ -86,22 +86,22 @@ class AdminEventController extends Controller
         }
         $obj->event_category_id = $request->event_category_id;
         $obj->title = $request->title;
-        $obj->title_sv = $request->title_sv;
+        $obj->title_fa = $request->title_fa;
         $obj->slug = resolve_slug('events', $request->slug, $request->title, $obj->id);
-        $obj->slug_sv = resolve_slug_sv('events', $request->slug_sv, $request->title_sv, $obj->id);
+        $obj->slug_fa = resolve_slug_fa('events', $request->slug_fa, $request->title_fa, $obj->id);
         $obj->description = $request->description;
-        $obj->description_sv = $request->description_sv;
+        $obj->description_fa = $request->description_fa;
         $obj->show_on_home = $request->show_on_home;
         $obj->event_location = $request->event_location;
-        $obj->event_location_sv = $request->event_location_sv;
+        $obj->event_location_fa = $request->event_location_fa;
         $obj->event_location_detail = $request->event_location_detail;
-        $obj->event_location_detail_sv = $request->event_location_detail_sv;
+        $obj->event_location_detail_fa = $request->event_location_detail_fa;
         $obj->event_date = $request->event_date;
         $obj->event_time = $request->event_time;
         $obj->ticket_price = $request->ticket_price;
         $obj->youtube_id = $request->youtube_id;
         $obj->button_text = $request->button_text;
-        $obj->button_text_sv = $request->button_text_sv;
+        $obj->button_text_fa = $request->button_text_fa;
         $obj->button_link = $request->button_link;
         $obj->save();
 
@@ -113,7 +113,7 @@ class AdminEventController extends Controller
 
         EventFaq::where('event_id', $id)->delete();
 
-        $obj = Event::where('id', $id)->first();
+        $obj = Event::findOrFail($id);
         if($obj->image && file_exists(public_path('uploads/'.$obj->image))) {
             unlink(public_path('uploads/'.$obj->image));
         }
@@ -124,7 +124,7 @@ class AdminEventController extends Controller
 
     public function faqs($event_id)
     {
-        $event = Event::where('id', $event_id)->first();
+        $event = Event::findOrFail($event_id);
         $event_faqs = EventFaq::where('event_id', $event_id)->get();
         return view('admin.event.faq', compact('event_faqs', 'event'));
     }
@@ -139,9 +139,9 @@ class AdminEventController extends Controller
         $obj = new EventFaq();
         $obj->event_id = $event_id;
         $obj->question = $request->question;
-        $obj->question_sv = $request->question_sv;
+        $obj->question_fa = $request->question_fa;
         $obj->answer = $request->answer;
-        $obj->answer_sv = $request->answer_sv;
+        $obj->answer_fa = $request->answer_fa;
         $obj->save();
 
         return redirect()->back()->with('success', 'Item created successfully.');
@@ -154,11 +154,11 @@ class AdminEventController extends Controller
             'answer' => 'required|string',
         ]);
 
-        $obj = EventFaq::where('id', $faq_id)->first();
+        $obj = EventFaq::findOrFail($faq_id);
         $obj->question = $request->question;
-        $obj->question_sv = $request->question_sv;
+        $obj->question_fa = $request->question_fa;
         $obj->answer = $request->answer;
-        $obj->answer_sv = $request->answer_sv;
+        $obj->answer_fa = $request->answer_fa;
         $obj->save();
 
         return redirect()->back()->with('success', 'Item updated successfully.');
@@ -166,7 +166,7 @@ class AdminEventController extends Controller
 
     public function faq_delete(Request $request, $faq_id)
     {
-        $obj = EventFaq::where('id', $faq_id)->first();
+        $obj = EventFaq::findOrFail($faq_id);
         $obj->delete();
 
         return redirect()->back()->with('success', 'Item deleted successfully.');

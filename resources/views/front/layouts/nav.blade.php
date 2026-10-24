@@ -3,8 +3,8 @@
         <a class="logo" href="{{ route('home') }}">
             <img src="{{ asset('uploads/'.$global_setting->logo_1) }}" alt="{{ config('app.name') }}">
             <span class="wm">
-                <b>{{ is_rtl() ? 'شبکه جهانی عدالت برای زنان' : "Global Women's Justice Network" }}</b>
-                <span>{{ is_rtl() ? 'تحصیل · کار · آزادی' : 'EDUCATION · WORK · FREEDOM' }}</span>
+                <b>{{ __("Global Women's Justice Network") }}</b>
+                <span>{{ __('EDUCATION · WORK · FREEDOM') }}</span>
             </span>
         </a>
 
@@ -18,17 +18,17 @@
                     <li class="dropdown">
                         @if($item_url !== '#')
                         <a href="{{ $item_url }}" class="dropdown-parent-link {{ $item->isActive() ? 'here' : '' }}">{{ $item->label() }}</a>
-                        <button type="button" class="dropdown-toggle dropdown-caret" data-bs-toggle="dropdown" aria-expanded="false" aria-label="{{ is_rtl() ? 'باز کردن زیرمنو' : 'Open submenu' }}"></button>
+                        <button type="button" class="dropdown-toggle dropdown-caret" data-bs-toggle="dropdown" aria-expanded="false" aria-label="{{ __('Open submenu') }}"></button>
                         @else
                         <a href="#" class="dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false">{{ $item->label() }}</a>
                         @endif
                         <ul class="dropdown-menu">
                             @foreach($item->children as $child)
-                                @if($child->children->count())
+                                @if($child->visibleChildren->count())
                                 <li class="dropdown-submenu">
                                     <a class="dropdown-item dropdown-toggle" href="#" data-bs-toggle="dropdown">{{ $child->label() }}</a>
                                     <ul class="dropdown-menu">
-                                        @foreach($child->children as $grandchild)
+                                        @foreach($child->visibleChildren as $grandchild)
                                         <li><a class="dropdown-item" href="{{ $grandchild->resolvedUrl() }}" @if($grandchild->open_new_tab) target="_blank" rel="noopener" @endif>{{ $grandchild->label() }}</a></li>
                                         @endforeach
                                     </ul>

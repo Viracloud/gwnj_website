@@ -1806,3 +1806,18 @@ table.dataTable tbody td {
 .dash-help b{font-size:.85rem;color:var(--gray-900)}
 .dash-help span{font-size:.8rem;color:var(--primary-600)}
 .dash-tip{margin:.9rem 0 0;font-size:.8rem;color:var(--gray-500)}
+
+/* ===== Language tabs in admin forms ===== */
+.lt-wrap{margin:1rem 0 1.25rem}
+.lt-nav{display:flex;flex-wrap:wrap;gap:.25rem;border-bottom:2px solid var(--gray-200);margin-bottom:1rem}
+.lt-tab{display:inline-flex;align-items:center;gap:.4rem;padding:.55rem 1rem;border:0;background:none;
+	font-weight:600;font-size:.875rem;color:var(--gray-500);border-bottom:2px solid transparent;margin-bottom:-2px;cursor:pointer;
+	border-radius:8px 8px 0 0}
+.lt-tab:hover{color:var(--primary-600);background:var(--primary-50)}
+.lt-tab.active{color:var(--primary-700);border-bottom-color:var(--primary-600);background:var(--primary-50)}
+.lt-tab .lt-check{display:none;color:var(--brand-green);font-size:.8rem}
+.lt-tab.filled .lt-check{display:inline}
+.lt-pane{display:none}
+.lt-pane.active{display:block}
+details.xl-box.lt-inline{border:0 !important;background:none !important;padding:0 !important;margin:0 !important}
+details.xl-box.lt-inline > summary{display:none}

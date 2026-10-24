@@ -35,7 +35,7 @@
                 </div>
                 <div class="mb-3">
                     <label class="label-custom">Default description (دری)</label>
-                    <textarea dir="rtl" name="seo_default_description_sv" class="form-control-custom" rows="3">{{ $setting->seo_default_description_sv }}</textarea>
+                    <textarea dir="rtl" name="seo_default_description_fa" class="form-control-custom" rows="3">{{ $setting->seo_default_description_fa }}</textarea>
                 </div>
             </div>
 
@@ -66,6 +66,7 @@
 
             <div class="card-custom-p mb-4">
                 <div>
+                    @include('admin.partials.extra-locales', ['table' => 'settings', 'item' => ($setting ?? null), 'fields' => ['seo_default_description' => 'textarea']])
                     <button type="submit" class="btn-admin-primary">Update</button>
                 </div>
             </div>

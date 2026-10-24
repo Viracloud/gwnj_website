@@ -28,7 +28,7 @@ class AdminPhotoController extends Controller
             $photo->image = $final_name;
         }
         $photo->caption = $request->caption;
-        $photo->caption_sv = $request->caption_sv;
+        $photo->caption_fa = $request->caption_fa;
         $photo->save();
 
         return redirect()->back()->with('success', 'Item created successfully.');
@@ -40,7 +40,7 @@ class AdminPhotoController extends Controller
             'caption' => 'nullable|string|max:255',
         ]);
 
-        $photo = Photo::where('id', $id)->first();
+        $photo = Photo::findOrFail($id);
         if($request->hasFile('image')) {
             $request->validate([
                 'image' => 'mimes:jpeg,png,jpg,gif,svg|max:2048',
@@ -53,7 +53,7 @@ class AdminPhotoController extends Controller
             $photo->image = $final_name;
         }
         $photo->caption = $request->caption;
-        $photo->caption_sv = $request->caption_sv;
+        $photo->caption_fa = $request->caption_fa;
         $photo->save();
 
         return redirect()->back()->with('success', 'Item updated successfully.');
@@ -61,7 +61,7 @@ class AdminPhotoController extends Controller
 
     public function delete($id)
     {
-        $photo = Photo::where('id', $id)->first();
+        $photo = Photo::findOrFail($id);
         if($photo->image && file_exists(public_path('uploads/'.$photo->image))) {
             unlink(public_path('uploads/'.$photo->image));
         }

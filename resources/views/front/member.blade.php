@@ -5,7 +5,7 @@
 
 @section('content')
 <div class="pagehead"><div class="shell">
-    <span class="kicker">{{ $member->category ? tf($member->category,'name') : (is_rtl() ? 'تیم' : 'Team') }}</span>
+    <span class="kicker">{{ $member->category ? tf($member->category,'name') : (__('Team')) }}</span>
     <h1>{{ tf($member,'name') }}</h1>
 </div></div>
 
@@ -18,10 +18,10 @@
             @if(tf($member,'designation'))
             <span class="kicker">{{ tf($member,'designation') }}</span>
             @endif
-            <div>{!! tf($member,'description') ?: nl2br(e(tf($member,'short_description'))) !!}</div>
+            <div>{!! clean_html(tf($member,'description')) ?: nl2br(e(tf($member,'short_description'))) !!}</div>
 
             @if($all_awards->count())
-            <h2>{{ is_rtl() ? 'جوایز و افتخارات' : 'Awards & recognition' }}</h2>
+            <h2>{{ __('Awards & recognition') }}</h2>
             <div class="award-grid">
                 @foreach($all_awards as $award)
                 <div class="award-card">
@@ -37,18 +37,18 @@
             @php $show_pe = $member->show_contact; @endphp
             @if(($show_pe && ($member->phone != '' || $member->email != '')) || $member->experience != '' || $member->facebook != '' || $member->twitter != '' || $member->linkedin != '' || $member->instagram != '')
             <div class="aside-box">
-                <h3>{{ is_rtl() ? 'تماس' : 'Contact' }}</h3>
+                <h3>{{ __('Contact') }}</h3>
                 <div class="in">
                     @if(($show_pe && ($member->phone != '' || $member->email != '')) || $member->experience != '')
                     <ul class="linklist">
                         @if($show_pe && $member->phone != '')
-                        <li><a href="tel:{{ $member->phone }}" dir="ltr" style="unicode-bidi:isolate">{{ $member->phone }}</a><span>{{ is_rtl() ? 'تلفن' : 'Phone' }}</span></li>
+                        <li><a href="tel:{{ $member->phone }}" dir="ltr" style="unicode-bidi:isolate">{{ $member->phone }}</a><span>{{ __('Phone') }}</span></li>
                         @endif
                         @if($show_pe && $member->email != '')
-                        <li><a href="mailto:{{ $member->email }}" dir="ltr" style="unicode-bidi:isolate">{{ $member->email }}</a><span>{{ is_rtl() ? 'ایمیل' : 'Email' }}</span></li>
+                        <li><a href="mailto:{{ $member->email }}" dir="ltr" style="unicode-bidi:isolate">{{ $member->email }}</a><span>{{ __('Email') }}</span></li>
                         @endif
                         @if($member->experience != '')
-                        <li>{{ $member->experience }}<span>{{ is_rtl() ? 'سابقه' : 'Experience' }}</span></li>
+                        <li>{{ $member->experience }}<span>{{ __('Experience') }}</span></li>
                         @endif
                     </ul>
                     @endif

@@ -35,11 +35,11 @@
                 <h6 class="cus-heading">دری (second language)</h6>
                 <div class="mb-3">
                     <label class="label-custom">Page Title</label>
-                    <input type="text" dir="rtl" name="page_title_sv" value="{{ $page_data->page_title_sv }}" class="form-control-custom">
+                    <input type="text" dir="rtl" name="page_title_fa" value="{{ $page_data->page_title_fa }}" class="form-control-custom">
                 </div>
                 <div class="mb-3">
                     <label class="label-custom">Location</label>
-                    <textarea dir="rtl" name="location_sv" class="form-control-custom" rows="3">{{ $page_data->location_sv }}</textarea>
+                    <textarea dir="rtl" name="location_fa" class="form-control-custom" rows="3">{{ $page_data->location_fa }}</textarea>
                 </div>
             </div>
 
@@ -57,6 +57,7 @@
             
             <div class="card-custom-p mb-4">
                 <div>
+                    @include('admin.partials.extra-locales', ['table' => 'page_contact_items', 'item' => ($page_data ?? null), 'fields' => ['page_title' => 'input', 'location' => 'textarea']])
                     <button type="submit" class="btn-admin-primary">Update</button>
                 </div>
             </div>

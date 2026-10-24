@@ -6,13 +6,13 @@
 @section('content')
 @php
     $chip = ['active' => 'urgent', 'won' => 'done', 'closed' => 'plain'][$campaign->status] ?? 'plain';
-    $status_label = $campaign->status === 'active' ? (is_rtl() ? 'در حال اجرا' : 'Active')
-        : ($campaign->status === 'won' ? (is_rtl() ? 'موفق' : 'Won') : (is_rtl() ? 'بسته‌شده' : 'Closed'));
-    $cta_text = tf($campaign,'cta_text') ?: (is_rtl() ? 'مشارکت کنید' : 'Get involved');
+    $status_label = $campaign->status === 'active' ? (__('Active'))
+        : ($campaign->status === 'won' ? (__('Won')) : (__('Closed')));
+    $cta_text = tf($campaign,'cta_text') ?: (__('Get involved'));
     $cta_link = $campaign->cta_link ?: url('/page/get-involved');
 @endphp
 <div class="pagehead"><div class="shell">
-    <span class="kicker">{{ is_rtl() ? 'کمپاین‌ها' : 'Campaigns' }}</span>
+    <span class="kicker">{{ __('Campaigns') }}</span>
     <h1>{{ tf($campaign,'title') }}</h1>
     @if(tf($campaign,'excerpt'))
     <p class="lede">{{ tf($campaign,'excerpt') }}</p>
@@ -23,13 +23,16 @@
     <div class="doc">
         <div class="doc-main">
             @if($campaign->image)
-            <div class="photo" style="aspect-ratio:16/8;margin-bottom:var(--s6)"><img src="{{ asset('uploads/'.$campaign->image) }}" alt="{{ tf($campaign,'title') }}"></div>
+            <div class="photo photo-banner"><img src="{{ asset('uploads/'.$campaign->image) }}" alt="{{ tf($campaign,'title') }}"></div>
             @endif
 
             <div class="doc-meta">
                 <span class="chip {{ $chip }}">{{ $status_label }}</span>
+                @if($campaign->category)
+                <a class="chip plain" href="{{ route('campaigns', ['category' => $campaign->category->slug]) }}" style="text-decoration:none">{{ tf($campaign->category,'name') }}</a>
+                @endif
                 @if(tf($campaign,'countries'))<span>{{ tf($campaign,'countries') }}</span>@endif
-                @if($campaign->published_date)<span>{{ is_rtl() ? 'از' : 'Since' }} {{ fdate($campaign->published_date, 'F Y') }}</span>@endif
+                @if($campaign->published_date)<span>{{ __('Since') }} {{ fdate($campaign->published_date, 'F Y') }}</span>@endif
             </div>
 
             <div style="margin-bottom:var(--s6)">
@@ -38,18 +41,18 @@
 
             @if(tf($campaign,'goal'))
             <div class="callout">
-                <span class="kicker">{{ is_rtl() ? 'هدف کمپاین' : 'Campaign goal' }}</span>
+                <span class="kicker">{{ __('Campaign goal') }}</span>
                 <p>{{ tf($campaign,'goal') }}</p>
             </div>
             @endif
 
             <div class="rich-content">
-                {!! tf($campaign,'content') !!}
+                {!! clean_html(tf($campaign,'content')) !!}
             </div>
 
-            <div class="row" style="margin-top:var(--s6)">
+            <div class="cta-row">
                 <a class="btn btn-signal btn-lg" href="{{ $cta_link }}" @if($campaign->cta_link) target="_blank" rel="noopener" @endif>{{ $cta_text }}</a>
-                <a class="more" href="{{ route('campaigns') }}">{{ is_rtl() ? 'همهٔ کمپاین‌ها' : 'All campaigns' }}</a>
+                <a class="more" href="{{ route('campaigns') }}">{{ __('All campaigns') }}</a>
             </div>
         </div>
 
@@ -65,7 +68,7 @@
 
             @if($other_campaigns->count())
             <div class="aside-box">
-                <h3>{{ is_rtl() ? 'کمپاین‌های دیگر' : 'Other campaigns' }}</h3>
+                <h3>{{ __('Other campaigns') }}</h3>
                 <div class="in">
                     <ul class="linklist">
                         @foreach($other_campaigns as $oc)

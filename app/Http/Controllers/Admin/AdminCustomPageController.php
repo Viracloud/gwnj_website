@@ -186,17 +186,18 @@ class AdminCustomPageController extends Controller
 
         $custom_page = new CustomPage();
         $custom_page->title = $request->title;
-        $custom_page->title_sv = $request->title_sv;
+        $custom_page->status = $request->status === 'Hide' ? 'Hide' : 'Show';
+        $custom_page->title_fa = $request->title_fa;
         $custom_page->slug = resolve_slug('custom_pages', $request->slug, $request->title, $custom_page->id);
-        $custom_page->slug_sv = resolve_slug_sv('custom_pages', $request->slug_sv, $request->title_sv, $custom_page->id);
+        $custom_page->slug_fa = resolve_slug_fa('custom_pages', $request->slug_fa, $request->title_fa, $custom_page->id);
         $custom_page->excerpt = $request->excerpt;
-        $custom_page->excerpt_sv = $request->excerpt_sv;
+        $custom_page->excerpt_fa = $request->excerpt_fa;
         $custom_page->content = $request->content;
-        $custom_page->content_sv = $request->content_sv;
+        $custom_page->content_fa = $request->content_fa;
         $custom_page->seo_title = $request->seo_title;
-        $custom_page->seo_title_sv = $request->seo_title_sv;
+        $custom_page->seo_title_fa = $request->seo_title_fa;
         $custom_page->seo_meta_description = $request->seo_meta_description;
-        $custom_page->seo_meta_description_sv = $request->seo_meta_description_sv;
+        $custom_page->seo_meta_description_fa = $request->seo_meta_description_fa;
 
         if ($request->hasFile('image')) {
             $request->validate(['image' => 'mimes:jpeg,png,jpg,gif|max:2048']);
@@ -225,19 +226,20 @@ class AdminCustomPageController extends Controller
             'content' => 'required|string',
         ]);
 
-        $custom_page = CustomPage::where('id', $id)->first();
+        $custom_page = CustomPage::findOrFail($id);
         $custom_page->title = $request->title;
-        $custom_page->title_sv = $request->title_sv;
+        $custom_page->status = $request->status === 'Hide' ? 'Hide' : 'Show';
+        $custom_page->title_fa = $request->title_fa;
         $custom_page->slug = resolve_slug('custom_pages', $request->slug, $request->title, $custom_page->id);
-        $custom_page->slug_sv = resolve_slug_sv('custom_pages', $request->slug_sv, $request->title_sv, $custom_page->id);
+        $custom_page->slug_fa = resolve_slug_fa('custom_pages', $request->slug_fa, $request->title_fa, $custom_page->id);
         $custom_page->excerpt = $request->excerpt;
-        $custom_page->excerpt_sv = $request->excerpt_sv;
+        $custom_page->excerpt_fa = $request->excerpt_fa;
         $custom_page->content = $request->content;
-        $custom_page->content_sv = $request->content_sv;
+        $custom_page->content_fa = $request->content_fa;
         $custom_page->seo_title = $request->seo_title;
-        $custom_page->seo_title_sv = $request->seo_title_sv;
+        $custom_page->seo_title_fa = $request->seo_title_fa;
         $custom_page->seo_meta_description = $request->seo_meta_description;
-        $custom_page->seo_meta_description_sv = $request->seo_meta_description_sv;
+        $custom_page->seo_meta_description_fa = $request->seo_meta_description_fa;
 
         if ($request->hasFile('image')) {
             $request->validate(['image' => 'mimes:jpeg,png,jpg,gif|max:2048']);
@@ -273,7 +275,7 @@ class AdminCustomPageController extends Controller
 
     public function delete($id)
     {
-        $custom_page = CustomPage::where('id', $id)->first();
+        $custom_page = CustomPage::findOrFail($id);
         if ($custom_page->image && file_exists(public_path('uploads/' . $custom_page->image))) {
             unlink(public_path('uploads/' . $custom_page->image));
         }
@@ -314,7 +316,7 @@ class AdminCustomPageController extends Controller
             'custom_page_id' => $custom_page->id,
             'image' => $name,
             'caption' => $request->caption,
-            'caption_sv' => $request->caption_sv,
+            'caption_fa' => $request->caption_fa,
             'sort_order' => (int) $request->sort_order,
         ]);
 
@@ -336,7 +338,7 @@ class AdminCustomPageController extends Controller
         }
 
         $item->caption = $request->caption;
-        $item->caption_sv = $request->caption_sv;
+        $item->caption_fa = $request->caption_fa;
         $item->sort_order = (int) $request->sort_order;
         $item->save();
 

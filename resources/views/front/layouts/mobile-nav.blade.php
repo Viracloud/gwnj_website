@@ -15,7 +15,7 @@
                         @else
                         <span class="nav-link text-white flex-grow-1">{{ $item->label() }}</span>
                         @endif
-                        <button type="button" class="mobile-caret-btn text-white" data-bs-toggle="collapse" data-bs-target="#mobileSub{{ $item->id }}" aria-expanded="false" aria-label="{{ is_rtl() ? 'باز کردن زیرمنو' : 'Open submenu' }}">
+                        <button type="button" class="mobile-caret-btn text-white" data-bs-toggle="collapse" data-bs-target="#mobileSub{{ $item->id }}" aria-expanded="false" aria-label="{{ __('Open submenu') }}">
                             <i class="fa-solid fa-angle-down small transition-icon"></i>
                         </button>
                     </div>

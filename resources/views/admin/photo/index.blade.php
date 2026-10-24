@@ -30,9 +30,10 @@
                     </div>
                     <div class="mb-3">
                         <label class="label-custom">Caption (دری)</label>
-                        <input type="text" class="form-control-custom" name="caption_sv" dir="rtl">
+                        <input type="text" class="form-control-custom" name="caption_fa" dir="rtl">
                     </div>
                     <div class="mb-3">
+                        @include('admin.partials.extra-locales', ['table' => 'photos', 'item' => null, 'fields' => ['caption' => 'input']])
                         <button type="submit" class="btn-admin-primary">Submit</button>
                     </div>
                 </form>
@@ -95,9 +96,10 @@
                                 </div>
                                 <div class="mb-3">
                                     <label class="label-custom">Caption (دری)</label>
-                                    <input type="text" class="form-control-custom" name="caption_sv" value="{{ $photo->caption_sv }}" dir="rtl">
+                                    <input type="text" class="form-control-custom" name="caption_fa" value="{{ $photo->caption_fa }}" dir="rtl">
                                 </div>
                                 <div class="mb-3">
+                                    @include('admin.partials.extra-locales', ['table' => 'photos', 'item' => ($photo ?? null), 'fields' => ['caption' => 'input']])
                                     <button type="submit" class="btn-admin-primary">Update</button>
                                 </div>
                             </form>

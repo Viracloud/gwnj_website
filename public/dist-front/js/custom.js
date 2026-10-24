@@ -135,3 +135,125 @@ function fallbackCopy(text, done) {
     }, { threshold: 0.5 });
     nums.forEach(function (el) { io.observe(el); });
 })();
+
+/* About slideshow: cross-fades the about photos every 5 seconds; dots jump to a photo.
+   Pauses while the pointer is over it and when the tab is hidden. */
+(function () {
+    document.querySelectorAll('[data-slideshow]').forEach(function (box) {
+        var imgs = box.querySelectorAll('img');
+        var dots = box.querySelectorAll('.about-dots button');
+        if (imgs.length < 2) return;
+        var i = 0, timer = null, paused = false;
+        var show = function (n) {
+            imgs[i].classList.remove('is-active'); if (dots[i]) dots[i].classList.remove('is-active');
+            i = (n + imgs.length) % imgs.length;
+            imgs[i].classList.add('is-active'); if (dots[i]) dots[i].classList.add('is-active');
+        };
+        var start = function () { stop(); timer = setInterval(function () { if (!paused && !document.hidden) show(i + 1); }, 5000); };
+        var stop = function () { if (timer) clearInterval(timer); };
+        dots.forEach(function (d, n) { d.addEventListener('click', function () { show(n); start(); }); });
+        box.addEventListener('mouseenter', function () { paused = true; });
+        box.addEventListener('mouseleave', function () { paused = false; });
+        if (!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches)) start();
+    });
+})();
+
+/* Video player window.
+   Anything with data-video-embed (YouTube / Instagram / Facebook / Vimeo player address) or
+   data-video-file (uploaded video) opens in a window on this site when clicked. Nothing is
+   loaded from those platforms before the click, and the player is removed again on close. */
+(function () {
+    var modal, box, lastFocus;
+    var rtl = document.documentElement.getAttribute('dir') === 'rtl';
+
+    function build() {
+        modal = document.createElement('div');
+        modal.className = 'vmodal';
+        modal.setAttribute('role', 'dialog');
+        modal.setAttribute('aria-modal', 'true');
+        modal.setAttribute('aria-label', rtl ? 'پخش ویدیو' : 'Video player');
+        modal.innerHTML = '<div class="vmodal-box"><button type="button" class="vmodal-close" aria-label="' +
+            (rtl ? 'بستن' : 'Close') + '">&times;</button><div class="vmodal-frame"></div></div>';
+        document.body.appendChild(modal);
+        box = modal.querySelector('.vmodal-box');
+        modal.addEventListener('click', function (e) {
+            if (e.target === modal || e.target.closest('.vmodal-close')) close();
+        });
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape' && modal.classList.contains('is-open')) close();
+        });
+    }
+
+    function open(el) {
+        if (!modal) build();
+        lastFocus = el;
+        var frame = modal.querySelector('.vmodal-frame');
+        var embed = el.getAttribute('data-video-embed');
+        var file = el.getAttribute('data-video-file');
+        box.classList.toggle('is-portrait', el.getAttribute('data-video-portrait') === '1');
+        frame.innerHTML = '';
+        if (embed) {
+            var f = document.createElement('iframe');
+            f.src = embed;
+            f.setAttribute('allow', 'autoplay; encrypted-media; picture-in-picture; fullscreen');
+            f.setAttribute('allowfullscreen', '');
+            f.setAttribute('referrerpolicy', 'strict-origin-when-cross-origin');
+            f.setAttribute('title', rtl ? 'ویدیو' : 'Video');
+            frame.appendChild(f);
+        } else if (file) {
+            var v = document.createElement('video');
+            v.src = file;
+            v.controls = true;
+            v.autoplay = true;
+            v.setAttribute('playsinline', '');
+            frame.appendChild(v);
+        }
+        modal.classList.add('is-open');
+        document.documentElement.classList.add('vmodal-lock');
+        modal.querySelector('.vmodal-close').focus();
+    }
+
+    function close() {
+        modal.classList.remove('is-open');
+        document.documentElement.classList.remove('vmodal-lock');
+        modal.querySelector('.vmodal-frame').innerHTML = ''; // stops playback and unloads the platform's player
+        if (lastFocus) lastFocus.focus();
+    }
+
+    document.addEventListener('click', function (e) {
+        var el = e.target.closest('[data-video-embed],[data-video-file]');
+        if (!el) return;
+        e.preventDefault();
+        open(el);
+    });
+})();
+
+/* Poll form: mark answered questions and show progress next to the submit button. */
+(function () {
+    var form = document.querySelector('.poll-form');
+    if (!form) return;
+    var questions = form.querySelectorAll('.poll-q');
+    var done = form.querySelector('[data-poll-done]');
+    var bar = form.querySelector('[data-poll-bar]');
+    var faDigits = form.getAttribute('data-digits') === 'fa';
+
+    function digits(n) {
+        return faDigits ? String(n).replace(/\d/g, function (d) { return '۰۱۲۳۴۵۶۷۸۹'[d]; }) : String(n);
+    }
+
+    function update() {
+        var answered = 0;
+        questions.forEach(function (q) {
+            var text = q.querySelector('textarea');
+            var isDone = !!q.querySelector('input:checked') || (text && text.value.trim() !== '');
+            q.classList.toggle('is-done', isDone);
+            if (isDone) answered++;
+        });
+        if (done) done.textContent = digits(answered);
+        if (bar) bar.style.width = (questions.length ? answered / questions.length * 100 : 0) + '%';
+    }
+
+    form.addEventListener('change', update);
+    form.addEventListener('input', update);
+    update();
+})();

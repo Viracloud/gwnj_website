@@ -51,7 +51,7 @@
             </div>
             <div class="col-lg-4 mb-3">
                 <label class="label-custom">Label (second language)</label>
-                <input type="text" name="menu_login_name_sv" value="{{ $menu->menu_login_name_sv }}" class="form-control-custom">
+                <input type="text" name="menu_login_name_fa" value="{{ $menu->menu_login_name_fa }}" class="form-control-custom">
             </div>
             <div class="col-lg-4 mb-3">
                 <label class="label-custom">Status</label>
@@ -61,6 +61,7 @@
                 </select>
             </div>
         </div>
+        @include('admin.partials.extra-locales', ['table' => 'menus', 'item' => ($menu ?? null), 'fields' => ['menu_login_name' => 'input']])
         <button type="submit" class="btn-admin-primary">Update</button>
     </form>
 </div>

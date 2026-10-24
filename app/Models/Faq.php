@@ -6,5 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Faq extends Model
 {
+    use \App\Models\Concerns\SavesExtraLocales;
+
     //
 }

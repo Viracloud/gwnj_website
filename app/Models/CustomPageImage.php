@@ -6,7 +6,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class CustomPageImage extends Model
 {
-    protected $fillable = ['custom_page_id', 'image', 'caption', 'caption_sv', 'sort_order'];
+    use \App\Models\Concerns\SavesExtraLocales;
+
+    protected $fillable = ['custom_page_id', 'image', 'caption', 'caption_fa', 'sort_order'];
 
     public function customPage()
     {

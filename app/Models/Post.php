@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class Post extends Model
 {
+    use \App\Models\Concerns\SavesExtraLocales;
+
     protected $casts = ['published_at' => 'datetime'];
 
     public function post_category()

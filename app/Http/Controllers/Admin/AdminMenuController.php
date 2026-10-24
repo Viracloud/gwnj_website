@@ -27,7 +27,7 @@ class AdminMenuController extends Controller
     {
         $obj = Menu::where('id', 1)->first();
         $obj->menu_login_name = $request->menu_login_name;
-        $obj->menu_login_name_sv = $request->menu_login_name_sv;
+        $obj->menu_login_name_fa = $request->menu_login_name_fa;
         $obj->menu_login_status = $request->menu_login_status;
         $obj->save();
 
@@ -38,7 +38,7 @@ class AdminMenuController extends Controller
     {
         $data = $request->validate([
             'label' => 'required|string|max:255',
-            'label_sv' => 'nullable|string|max:255',
+            'label_fa' => 'nullable|string|max:255',
             'parent_id' => 'nullable|exists:menu_items,id',
             'link_type' => 'required|in:route,custom_page,url',
             'route_name' => 'nullable|string',

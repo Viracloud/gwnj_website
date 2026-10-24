@@ -6,7 +6,7 @@
 @section('content')
 
 <div class="pagehead"><div class="shell">
-    <span class="kicker">{{ is_rtl() ? 'برچسب' : 'Tag' }}</span>
+    <span class="kicker">{{ __('Tag') }}</span>
     <h1>{{ $tag }}</h1>
 </div></div>
 
@@ -25,7 +25,7 @@
     </div>
     {{ $posts->links() }}
     @else
-    <p style="text-align:center;color:var(--muted)">{{ is_rtl() ? 'با این برچسب خبری یافت نشد.' : 'No posts found with this tag.' }}</p>
+    <p style="text-align:center;color:var(--muted)">{{ __('No posts found with this tag.') }}</p>
     @endif
 </section>
 

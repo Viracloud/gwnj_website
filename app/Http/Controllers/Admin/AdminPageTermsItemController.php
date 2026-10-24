@@ -19,9 +19,9 @@ class AdminPageTermsItemController extends Controller
         $obj = PageTermsItem::where('id', 1)->first();
 
         $obj->page_title = $request->page_title;
-        $obj->page_title_sv = $request->page_title_sv;
+        $obj->page_title_fa = $request->page_title_fa;
         $obj->page_content = $request->page_content;
-        $obj->page_content_sv = $request->page_content_sv;
+        $obj->page_content_fa = $request->page_content_fa;
         $obj->seo_title = $request->seo_title;
         $obj->seo_meta_description = $request->seo_meta_description;
 

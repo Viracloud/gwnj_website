@@ -24,11 +24,11 @@ class AdminPostCategoryController extends Controller
 
         $obj = new PostCategory();
         $obj->name = $request->name;
-        $obj->name_sv = $request->name_sv;
+        $obj->name_fa = $request->name_fa;
         $obj->slug = resolve_slug('post_categories', $request->slug, $request->name, $obj->id);
-        $obj->slug_sv = resolve_slug_sv('post_categories', $request->slug_sv, $request->name_sv, $obj->id);
+        $obj->slug_fa = resolve_slug_fa('post_categories', $request->slug_fa, $request->name_fa, $obj->id);
         $obj->menu_label = $request->menu_label;
-        $obj->menu_label_sv = $request->menu_label_sv;
+        $obj->menu_label_fa = $request->menu_label_fa;
         $obj->save();
 
         return redirect()->back()->with('success', 'Item created successfully.');
@@ -41,13 +41,13 @@ class AdminPostCategoryController extends Controller
             'slug' => 'nullable|alpha_dash|max:255',
         ]);
 
-        $obj = PostCategory::where('id', $id)->first();
+        $obj = PostCategory::findOrFail($id);
         $obj->name = $request->name;
-        $obj->name_sv = $request->name_sv;
+        $obj->name_fa = $request->name_fa;
         $obj->slug = resolve_slug('post_categories', $request->slug, $request->name, $obj->id);
-        $obj->slug_sv = resolve_slug_sv('post_categories', $request->slug_sv, $request->name_sv, $obj->id);
+        $obj->slug_fa = resolve_slug_fa('post_categories', $request->slug_fa, $request->name_fa, $obj->id);
         $obj->menu_label = $request->menu_label;
-        $obj->menu_label_sv = $request->menu_label_sv;
+        $obj->menu_label_fa = $request->menu_label_fa;
         $obj->save();
 
         return redirect()->back()->with('success', 'Item updated successfully.');
@@ -61,7 +61,7 @@ class AdminPostCategoryController extends Controller
             return redirect()->back()->with('error', 'Cannot delete category with associated posts.');
         }
 
-        $obj = PostCategory::where('id', $id)->first();
+        $obj = PostCategory::findOrFail($id);
         $obj->delete();
 
         return redirect()->back()->with('success', 'Item deleted successfully.');

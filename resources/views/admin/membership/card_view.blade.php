@@ -1,14 +1,14 @@
 <!DOCTYPE html>
-<html class="no-js" lang="{{ is_rtl() ? 'fa' : 'en' }}" @if(is_rtl()) dir="rtl" @endif>
+<html class="no-js" lang="{{ locale_meta()['hreflang'] }}" dir="{{ locale_meta()['dir'] }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>{{ is_rtl() ? 'کارت عضویت' : 'Membership card' }} - {{ $user->fullName() }}</title>
+    <title>{{ __('Membership card') }} - {{ $user->fullName() }}</title>
     <link rel="icon" type="image/png" href="{{ asset('uploads/'.$global_setting->favicon) }}">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,300;1,6..72,400&family=Vazirmatn:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Vazirmatn:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
     @include('front.layouts.styles')
 
@@ -25,8 +25,8 @@
 </head>
 <body>
     <div class="admin-card-bar no-print">
-        <a class="more" href="{{ route('admin_membership_members') }}">&larr; {{ is_rtl() ? 'بازگشت به فهرست اعضا' : 'Back to Members' }}</a>
-        <button type="button" class="btn btn-brand" onclick="window.print()">{{ is_rtl() ? 'چاپ کارت' : 'Print card' }}</button>
+        <a class="more" href="{{ route('admin_membership_members') }}">&larr; {{ __('Back to Members') }}</a>
+        <button type="button" class="btn btn-brand" onclick="window.print()">{{ __('Print card') }}</button>
     </div>
 
     <div style="max-width:800px;margin:0 auto">

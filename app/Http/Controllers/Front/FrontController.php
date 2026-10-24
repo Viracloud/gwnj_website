@@ -15,6 +15,8 @@ use App\Models\Faq;
 use App\Models\AboutItem;
 use App\Models\Event;
 use App\Models\EventFaq;
+use App\Models\EventCategory;
+use App\Models\CampaignCategory;
 use App\Models\Member;
 use App\Models\MemberAward;
 use App\Models\Post;
@@ -47,12 +49,16 @@ use Srmklive\PayPal\Services\PayPal as PayPalClient;
 
 class FrontController extends Controller
 {
+    /** Old-style language switch (/lang/xx): go to the same page in that language. */
     public function switch_lang($locale)
     {
-        if (in_array($locale, ['en', 'fa'])) {
-            session()->put('site_lang', $locale);
+        if (!in_array($locale, enabled_locales(), true)) {
+            return redirect('/');
         }
-        return redirect()->back();
+        session()->put('site_lang', $locale);
+        $back = url()->previous();
+        $base = rtrim(url('/'), '/');
+        return redirect(str_starts_with($back, $base) && !str_contains($back, '/admin') ? localized_url($locale, $back) : url($locale));
     }
 
     public function home()
@@ -151,7 +157,7 @@ class FrontController extends Controller
         $request->validate([
             'name' => 'required',
             'email' => 'required|email|unique:users',
-            'password' => 'required',
+            'password' => 'required|min:8',
             'confirm_password' => 'required|same:password',
             'membership_type' => 'required|in:regular,founding,honorary,affiliate,organizational',
             'agree_bylaws' => 'required',
@@ -162,7 +168,7 @@ class FrontController extends Controller
         $user->email = $request->email;
         $user->password = Hash::make($request->password);
         $user->membership_type = $request->membership_type;
-        $token = hash('sha256',time());
+        $token = secure_token();
         $user->remember_token = $token;
         $user->save();
 
@@ -183,9 +189,7 @@ class FrontController extends Controller
             $user->membership_applied_at = now();
             $user->save();
 
-            return redirect()->route('login')->with('success', is_rtl()
-                ? 'درخواست عضویت شما ثبت شد. اکنون می‌توانید وارد شوید.'
-                : 'Your membership application has been submitted. You can log in now.');
+            return redirect()->route('login')->with('success', __('Your membership application has been submitted. You can log in now.'));
         }
 
         return redirect()->back()->with('success','Your registration is completed. Please check your email for verification. If you do not find the email in your inbox, please check your spam folder.');
@@ -224,12 +228,15 @@ class FrontController extends Controller
             'email' => 'required|email',
         ]);
 
+        $sent_message = 'If an account exists for this email, we have sent a password reset link to it. Please check your inbox and your spam folder.';
+
+        // Same answer whether or not the account exists, so the form can't be used to discover members' emails.
         $user = User::where('email',$request->email)->first();
         if(!$user) {
-            return redirect()->back()->with('error','Email is not found');
+            return redirect()->back()->with('success', $sent_message);
         }
 
-        $token = hash('sha256',time());
+        $token = secure_token(60);
         $user->remember_token = $token;
         $user->update();
 
@@ -240,14 +247,14 @@ class FrontController extends Controller
 
         \safe_mail($request->email, $subject, $message);
 
-        return redirect()->back()->with('success','We have sent a password reset link to your email. Please check your email. If you do not find the email in your inbox, please check your spam folder.');
+        return redirect()->back()->with('success', $sent_message);
     }
 
     public function reset_password($token,$email)
     {
         $user = User::where('email',$email)->where('remember_token',$token)->first();
-        if(!$user) {
-            return redirect()->route('login')->with('error','Token or email is not correct');
+        if(!$user || token_expired($token)) {
+            return redirect()->route('login')->with('error','This password reset link is invalid or has expired. Please request a new one.');
         }
         $page_data = PageLoginItem::where('id',1)->first();
         return view('front.reset-password', compact('token','email','page_data'));
@@ -256,11 +263,14 @@ class FrontController extends Controller
     public function reset_password_submit(Request $request, $token, $email)
     {
         $request->validate([
-            'password' => 'required',
+            'password' => 'required|min:8',
             'confirm_password' => 'required|same:password',
         ]);
 
-        $user = User::where('email',$request->email)->where('remember_token',$request->token)->first();
+        $user = User::where('email',$email)->where('remember_token',$token)->first();
+        if(!$user || token_expired($token)) {
+            return redirect()->route('login')->with('error','This password reset link is invalid or has expired. Please request a new one.');
+        }
         $user->password = Hash::make($request->password);
         $user->remember_token = "";
         $user->update();
@@ -282,22 +292,38 @@ class FrontController extends Controller
         return view('front.faq', compact('faqs', 'page_data'));
     }
 
-    public function events()
+    public function events(Request $request)
     {
-        $events = Event::orderBy('id','asc')->paginate(6);
+        // Only categories that actually have events appear as filters.
+        $event_categories = EventCategory::whereHas('events')->orderBy('name')->get();
+
+        // Upcoming events first (soonest first), then past events (most recent first).
+        $today = now()->toDateString();
+        $query = Event::with('category')
+            ->orderByRaw('CASE WHEN event_date >= ? THEN 0 ELSE 1 END', [$today])
+            ->orderByRaw('CASE WHEN event_date >= ? THEN event_date END ASC', [$today])
+            ->orderBy('event_date', 'desc');
+        if ($request->category) {
+            $category = EventCategory::where('slug', $request->category)->first();
+            if ($category) {
+                $query->where('event_category_id', $category->id);
+            }
+        }
+        $events = $query->paginate(6)->withQueryString();
         $page_data = PageEventItem::where('id',1)->first();
-        return view('front.events', compact('events', 'page_data'));
+        return view('front.events', compact('events', 'page_data', 'event_categories'));
     }
 
     public function event($slug)
     {
-        $event = Event::where('slug',$slug)->orWhere('slug_sv',$slug)->first();
+        $event = where_slug(Event::query(), $slug)->first();
         if(!$event) {
             return redirect()->route('events');
         }
         if (slug_for($event) !== $slug) {
-            return redirect()->route('event', slug_for($event));
+            return redirect()->route('event', slug_for($event), 301);
         }
+        set_model_alternates('event', $event);
         $all_faqs = EventFaq::where('event_id',$event->id)->orderBy('id','asc')->get();
         $page_data = PageEventItem::where('id',1)->first();
         return view('front.event', compact('event', 'all_faqs', 'page_data'));
@@ -305,24 +331,33 @@ class FrontController extends Controller
 
     public function campaigns(Request $request)
     {
-        $query = Campaign::orderBy('sort_order')->orderBy('id','desc');
+        $query = Campaign::with('category')->orderBy('sort_order')->orderBy('id','desc');
         if ($request->status && in_array($request->status, ['active','won','closed'])) {
             $query->where('status', $request->status);
         }
+        if ($request->category) {
+            $category = CampaignCategory::where('slug', $request->category)->first();
+            if ($category) {
+                $query->where('campaign_category_id', $category->id);
+            }
+        }
         $campaigns = $query->paginate(9)->withQueryString();
+        // Only categories that actually have campaigns appear as filters.
+        $campaign_categories = CampaignCategory::whereHas('campaigns')->orderBy('name')->get();
 
-        return view('front.campaigns', compact('campaigns'));
+        return view('front.campaigns', compact('campaigns', 'campaign_categories'));
     }
 
     public function campaign($slug)
     {
-        $campaign = Campaign::where('slug',$slug)->orWhere('slug_sv',$slug)->first();
+        $campaign = where_slug(Campaign::query(), $slug)->first();
         if (!$campaign) {
             return redirect()->route('campaigns');
         }
         if (slug_for($campaign) !== $slug) {
-            return redirect()->route('campaign', slug_for($campaign));
+            return redirect()->route('campaign', slug_for($campaign), 301);
         }
+        set_model_alternates('campaign', $campaign);
         $other_campaigns = Campaign::where('id','!=',$campaign->id)->orderBy('sort_order')->take(3)->get();
         return view('front.campaign', compact('campaign', 'other_campaigns'));
     }
@@ -338,13 +373,14 @@ class FrontController extends Controller
 
     public function member($slug)
     {
-        $member = Member::where('slug',$slug)->orWhere('slug_sv',$slug)->first();
+        $member = where_slug(Member::query(), $slug)->first();
         if(!$member) {
             return redirect()->route('members');
         }
         if (slug_for($member) !== $slug) {
-            return redirect()->route('member', slug_for($member));
+            return redirect()->route('member', slug_for($member), 301);
         }
+        set_model_alternates('member', $member);
         $all_awards = MemberAward::where('member_id',$member->id)->orderBy('id','asc')->get();
         $page_data = PageTeamItem::where('id',1)->first();
         return view('front.member', compact('member', 'all_awards', 'page_data'));
@@ -359,13 +395,14 @@ class FrontController extends Controller
 
     public function post($slug)
     {
-        $post = Post::where('slug',$slug)->orWhere('slug_sv',$slug)->first();
+        $post = where_slug(Post::query(), $slug)->first();
         if(!$post) {
             return redirect()->route('blog');
         }
         if (slug_for($post) !== $slug) {
-            return redirect()->route('post', slug_for($post));
+            return redirect()->route('post', slug_for($post), 301);
         }
+        set_model_alternates('post', $post);
         $recent_posts = Post::orderBy('id', 'desc')->take(3)->get();
         $post_categopries = PostCategory::withCount('posts')->orderBy('name', 'asc')->get();
         $total_approved_comments = Comment::where('post_id', $post->id)->where('status', 'Approved')->count();
@@ -376,13 +413,14 @@ class FrontController extends Controller
 
     public function category($slug)
     {
-        $category = PostCategory::where('slug', $slug)->orWhere('slug_sv', $slug)->first();
+        $category = where_slug(PostCategory::query(), $slug)->first();
         if(!$category) {
             return redirect()->route('blog');
         }
         if (slug_for($category) !== $slug) {
-            return redirect()->route('category', slug_for($category));
+            return redirect()->route('category', slug_for($category), 301);
         }
+        set_model_alternates('category', $category);
         $posts = Post::where('post_category_id', $category->id)->orderBy('id', 'desc')->paginate(6);
         return view('front.category', compact('category', 'posts'));
     }
@@ -432,10 +470,10 @@ class FrontController extends Controller
         $post_title = Post::where('id', $request->post_id)->first()->title;
 
         $subject = "New Comment Submitted";
-        $message = "<b>Post Title:</b><br>".$post_title."<br><br>";
-        $message .= "<b>Name:</b><br>".$request->name."<br><br>";
-        $message .= "<b>Email:</b><br>".$request->email."<br><br>";
-        $message .= "<b>Comment:</b><br>".nl2br($request->comment)."<br><br>";
+        $message = "<b>Post Title:</b><br>".e($post_title)."<br><br>";
+        $message .= "<b>Name:</b><br>".e($request->name)."<br><br>";
+        $message .= "<b>Email:</b><br>".e($request->email)."<br><br>";
+        $message .= "<b>Comment:</b><br>".nl2br(e($request->comment))."<br><br>";
 
         \safe_mail($admin_email, $subject, $message);
 
@@ -467,10 +505,10 @@ class FrontController extends Controller
         $post_title = Post::where('id', $request->post_id)->first()->title;
 
         $subject = "New Reply Submitted";
-        $message = "<b>Post Title:</b><br>".$post_title."<br><br>";
-        $message .= "<b>Name:</b><br>".$request->name."<br><br>";
-        $message .= "<b>Email:</b><br>".$request->email."<br><br>";
-        $message .= "<b>Reply:</b><br>".nl2br($request->reply)."<br><br>";
+        $message = "<b>Post Title:</b><br>".e($post_title)."<br><br>";
+        $message .= "<b>Name:</b><br>".e($request->name)."<br><br>";
+        $message .= "<b>Email:</b><br>".e($request->email)."<br><br>";
+        $message .= "<b>Reply:</b><br>".nl2br(e($request->reply))."<br><br>";
 
         \safe_mail($admin_email, $subject, $message);
 
@@ -502,9 +540,9 @@ class FrontController extends Controller
         ]);
 
         $subject = "New Contact Message";
-        $message = "<b>Name:</b><br>".$request->name."<br><br>";
-        $message .= "<b>Email:</b><br>".$request->email."<br><br>";
-        $message .= "<b>Message:</b><br>".$request->message."<br><br>";
+        $message = "<b>Name:</b><br>".e($request->name)."<br><br>";
+        $message .= "<b>Email:</b><br>".e($request->email)."<br><br>";
+        $message .= "<b>Message:</b><br>".nl2br(e($request->message))."<br><br>";
 
         $admin_data = Admin::where('id',1)->first();
         $admin_email = $admin_data->email;
@@ -570,6 +608,7 @@ class FrontController extends Controller
                     session()->put('donate_name', $request->name);
                     session()->put('donate_email', $request->email);
                     session()->put('donate_message', $request->message);
+                    session()->put('donate_order_id', $response['id']);
                     return redirect()->away($link['href']);
                 }
             }
@@ -580,7 +619,9 @@ class FrontController extends Controller
 
     public function donate_success(Request $request)
     {
-        if(!$request->has('token')) {
+        // Only complete the PayPal order this visitor started on the donate page.
+        $expected_order = session()->pull('donate_order_id');
+        if(!$request->has('token') || !$expected_order || !hash_equals((string) $expected_order, (string) $request->token)) {
             return redirect()->route('donate_cancel');
         }
 
@@ -615,8 +656,8 @@ class FrontController extends Controller
             $admin = Admin::where('id',1)->first();
             if($admin) {
                 $subject = "New Donation Received";
-                $body = "<b>Donor:</b><br>".$donation->donor_name."<br><br>";
-                $body .= "<b>Email:</b><br>".$donation->donor_email."<br><br>";
+                $body = "<b>Donor:</b><br>".e($donation->donor_name)."<br><br>";
+                $body .= "<b>Email:</b><br>".e($donation->donor_email)."<br><br>";
                 $body .= "<b>Amount:</b><br>".$donation->currency." ".$donation->amount."<br><br>";
                 $body .= "<b>Message:</b><br>".nl2br(e($donation->message))."<br><br>";
                 \safe_mail($admin->email, $subject, $body);
@@ -658,7 +699,7 @@ class FrontController extends Controller
             return response()->json(['code'=>0,'error_message'=>$validator->errors()->toArray()]);
         } else {
 
-            $token = hash('sha256', time());
+            $token = secure_token();
 
             $obj = new Subscriber();
             $obj->email = $request->email;
@@ -700,13 +741,17 @@ class FrontController extends Controller
 
     public function custom_page($slug)
     {
-        $page = CustomPage::where('slug', $slug)->orWhere('slug_sv', $slug)->first();
+        $page = where_slug(CustomPage::query(), $slug)->first();
         if(!$page) {
             return redirect()->route('home');
         }
-        if (slug_for($page) !== $slug) {
-            return redirect()->route('custom_page', slug_for($page));
+        if(!$page->isVisible()) {
+            abort(404);
         }
+        if (slug_for($page) !== $slug) {
+            return redirect()->route('custom_page', slug_for($page), 301);
+        }
+        set_model_alternates('custom_page', $page);
 
         $menu_item = \App\Models\MenuItem::where('link_type', 'custom_page')
             ->where('custom_page_id', $page->id)

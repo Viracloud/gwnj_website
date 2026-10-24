@@ -42,10 +42,11 @@
                     <h6 class="fw-semibold mt-4 mb-2">دری (second language)</h6>
                     <div class="mb-3">
                         <label class="label-custom">Caption</label>
-                        <input type="text" class="form-control-custom" name="caption_sv" dir="rtl">
+                        <input type="text" class="form-control-custom" name="caption_fa" dir="rtl">
                     </div>
 
                     <div class="mb-3">
+                        @include('admin.partials.extra-locales', ['table' => 'custom_page_images', 'item' => null, 'fields' => ['caption' => 'input']])
                         <button type="submit" class="btn-admin-primary">Submit</button>
                     </div>
                 </form>
@@ -116,10 +117,11 @@
                                 <h6 class="fw-semibold mt-4 mb-2">دری (second language)</h6>
                                 <div class="mb-3">
                                     <label class="label-custom">Caption</label>
-                                    <input type="text" class="form-control-custom" name="caption_sv" value="{{ $item->caption_sv }}" dir="rtl">
+                                    <input type="text" class="form-control-custom" name="caption_fa" value="{{ $item->caption_fa }}" dir="rtl">
                                 </div>
 
                                 <div class="mb-3">
+                                    @include('admin.partials.extra-locales', ['table' => 'custom_page_images', 'item' => ($item ?? null), 'fields' => ['caption' => 'input']])
                                     <button type="submit" class="btn-admin-primary">Update</button>
                                 </div>
                             </form>

@@ -37,11 +37,11 @@
     <h6 class="fw-semibold mt-2 mb-2">دری (second language)</h6>
     <div class="col-lg-12 mb-3">
         <label class="label-custom">Title</label>
-        <input type="text" name="title_sv" value="{{ $val('title_sv') }}" class="form-control-custom" dir="rtl">
+        <input type="text" name="title_fa" value="{{ $val('title_fa') }}" class="form-control-custom" dir="rtl">
     </div>
     <div class="col-lg-12 mb-3">
         <label class="label-custom">Description</label>
-        <textarea class="form-control-custom" name="description_sv" rows="3" dir="rtl">{{ $val('description_sv') }}</textarea>
+        <textarea class="form-control-custom" name="description_fa" rows="3" dir="rtl">{{ $val('description_fa') }}</textarea>
     </div>
 
     <div class="col-lg-6 mb-3">
@@ -59,6 +59,24 @@
         @endif
     </div>
 
+    <div class="col-12"><h6 class="fw-semibold mt-2 mb-2">Video (optional)</h6></div>
+    <div class="col-lg-6 mb-3">
+        <label class="label-custom">Video link</label>
+        <input type="url" name="video_url" value="{{ $val('video_url') }}" class="form-control-custom" placeholder="https://www.youtube.com/watch?v=...">
+        <small class="text-muted d-block mt-1">YouTube, Vimeo or Facebook link. Recommended for long videos.</small>
+    </div>
+    <div class="col-lg-6 mb-3">
+        <label class="label-custom">Or upload a video file</label>
+        <input type="file" name="video_file" class="form-control-custom" accept="video/mp4,video/webm,video/quicktime">
+        <small class="text-muted d-block mt-1">MP4 / WebM / MOV, up to 100 MB (the host may allow less). If both are set, the uploaded file is shown.</small>
+        @if($pub && $pub->video_file)
+        <small class="d-block mt-1">Current: <a href="{{ asset('uploads/'.$pub->video_file) }}" target="_blank">{{ $pub->video_file }}</a></small>
+        <label class="d-flex align-items-center gap-2 mt-1" style="font-size:.85rem">
+            <input type="checkbox" name="remove_video_file" value="1"> Remove this video file
+        </label>
+        @endif
+    </div>
+
     <div class="col-lg-6 mb-3">
         <label class="label-custom">Status</label>
         <select name="status" class="form-control-custom">
@@ -67,3 +85,4 @@
         </select>
     </div>
 </div>
+@include('admin.partials.extra-locales', ['table' => 'publications', 'item' => $pub, 'fields' => ['title' => 'input', 'description' => 'textarea']])

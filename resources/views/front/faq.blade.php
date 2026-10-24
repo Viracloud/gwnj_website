@@ -5,7 +5,7 @@
 
 @section('content')
 <div class="pagehead"><div class="shell">
-    <span class="kicker">{{ is_rtl() ? 'سوالات متداول' : 'FAQ' }}</span>
+    <span class="kicker">{{ __('FAQ') }}</span>
     <h1>{{ tf($page_data,'page_title') }}</h1>
 </div></div>
 
@@ -35,7 +35,7 @@
         {{ $faqs->links() }}
     </div>
     @else
-    <p style="color:var(--muted)">{{ is_rtl() ? 'هنوز سوالی ثبت نشده است.' : 'No questions have been added yet.' }}</p>
+    <p style="color:var(--muted)">{{ __('No questions have been added yet.') }}</p>
     @endif
 </section>
 @endsection

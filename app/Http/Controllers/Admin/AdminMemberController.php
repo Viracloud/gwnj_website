@@ -38,17 +38,17 @@ class AdminMemberController extends Controller
         }
         $obj->name = $request->name;
         $obj->slug = resolve_slug('members', $request->slug, $request->name, $obj->id);
-        $obj->slug_sv = resolve_slug_sv('members', $request->slug_sv, $request->name_sv, $obj->id);
-        $obj->name_sv = $request->name_sv;
+        $obj->slug_fa = resolve_slug_fa('members', $request->slug_fa, $request->name_fa, $obj->id);
+        $obj->name_fa = $request->name_fa;
         $obj->member_category_id = $request->member_category_id;
         $obj->sort_order = (int) $request->sort_order;
         $obj->show_contact = $request->boolean('show_contact');
         $obj->designation = $request->designation;
-        $obj->designation_sv = $request->designation_sv;
+        $obj->designation_fa = $request->designation_fa;
         $obj->short_description = $request->short_description;
-        $obj->short_description_sv = $request->short_description_sv;
+        $obj->short_description_fa = $request->short_description_fa;
         $obj->description = $request->description;
-        $obj->description_sv = $request->description_sv;
+        $obj->description_fa = $request->description_fa;
         $obj->show_on_home = $request->show_on_home;
         $obj->phone = $request->phone;
         $obj->email = $request->email;
@@ -74,7 +74,7 @@ class AdminMemberController extends Controller
             'description' => 'nullable|string',
         ]);
 
-        $obj = Member::where('id', $id)->first();
+        $obj = Member::findOrFail($id);
         if($request->hasFile('image')) {
             $request->validate([
                 'image' => 'mimes:jpeg,png,jpg,gif,svg|max:2048',
@@ -88,17 +88,17 @@ class AdminMemberController extends Controller
         }
         $obj->name = $request->name;
         $obj->slug = resolve_slug('members', $request->slug, $request->name, $obj->id);
-        $obj->slug_sv = resolve_slug_sv('members', $request->slug_sv, $request->name_sv, $obj->id);
-        $obj->name_sv = $request->name_sv;
+        $obj->slug_fa = resolve_slug_fa('members', $request->slug_fa, $request->name_fa, $obj->id);
+        $obj->name_fa = $request->name_fa;
         $obj->member_category_id = $request->member_category_id;
         $obj->sort_order = (int) $request->sort_order;
         $obj->show_contact = $request->boolean('show_contact');
         $obj->designation = $request->designation;
-        $obj->designation_sv = $request->designation_sv;
+        $obj->designation_fa = $request->designation_fa;
         $obj->short_description = $request->short_description;
-        $obj->short_description_sv = $request->short_description_sv;
+        $obj->short_description_fa = $request->short_description_fa;
         $obj->description = $request->description;
-        $obj->description_sv = $request->description_sv;
+        $obj->description_fa = $request->description_fa;
         $obj->show_on_home = $request->show_on_home;
         $obj->phone = $request->phone;
         $obj->email = $request->email;
@@ -123,7 +123,7 @@ class AdminMemberController extends Controller
         }
         MemberAward::where('member_id', $id)->delete();
 
-        $obj = Member::where('id', $id)->first();
+        $obj = Member::findOrFail($id);
         if($obj->image && file_exists(public_path('uploads/'.$obj->image))) {
             unlink(public_path('uploads/'.$obj->image));
         }
@@ -134,7 +134,7 @@ class AdminMemberController extends Controller
 
     public function awards($member_id)
     {
-        $member = Member::where('id', $member_id)->first();
+        $member = Member::findOrFail($member_id);
         $member_awards = MemberAward::where('member_id', $member_id)->get();
         return view('admin.member.award', compact('member_awards', 'member'));
     }
@@ -156,7 +156,7 @@ class AdminMemberController extends Controller
 
         $obj->member_id = $member_id;
         $obj->name = $request->name;
-        $obj->name_sv = $request->name_sv;
+        $obj->name_fa = $request->name_fa;
         $obj->save();
 
         return redirect()->back()->with('success', 'Item created successfully.');
@@ -168,7 +168,7 @@ class AdminMemberController extends Controller
             'name' => 'required|string',
         ]);
 
-        $obj = MemberAward::where('id', $award_id)->first();
+        $obj = MemberAward::findOrFail($award_id);
 
         if($request->hasFile('photo')) {
             $request->validate([
@@ -183,7 +183,7 @@ class AdminMemberController extends Controller
         }
 
         $obj->name = $request->name;
-        $obj->name_sv = $request->name_sv;
+        $obj->name_fa = $request->name_fa;
         $obj->save();
 
         return redirect()->back()->with('success', 'Item updated successfully.');
@@ -191,7 +191,7 @@ class AdminMemberController extends Controller
 
     public function award_delete(Request $request, $award_id)
     {
-        $obj = MemberAward::where('id', $award_id)->first();
+        $obj = MemberAward::findOrFail($award_id);
         if($obj->photo && file_exists(public_path('uploads/'.$obj->photo))) {
             unlink(public_path('uploads/'.$obj->photo));
         }

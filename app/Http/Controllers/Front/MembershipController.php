@@ -34,7 +34,7 @@ class MembershipController extends Controller
 
         $request->validate([
             'name' => 'required|string|max:255',
-            'password' => 'required|min:6',
+            'password' => 'required|min:8',
             'confirm_password' => 'required|same:password',
             'membership_type' => 'required|in:regular,founding,honorary,affiliate,organizational',
             'agree_bylaws' => 'required',
@@ -59,34 +59,28 @@ class MembershipController extends Controller
         $invitation->status = 'used';
         $invitation->save();
 
-        return redirect()->route('login')->with('success', is_rtl()
-            ? 'حساب شما ساخته شد. اکنون وارد شوید.'
-            : 'Your account has been created. You can log in now.');
+        return redirect()->route('login')->with('success', __('Your account has been created. You can log in now.'));
     }
 
     public function card_request(Request $request)
     {
         $user = Auth::guard('web')->user();
 
-        if (!$user->isApprovedMember() || !$user->profileIsComplete() || $user->card_status !== 'not_requested') {
-            return redirect()->route('dashboard')->with('error', is_rtl()
-                ? 'درخواست کارت در حال حاضر ممکن نیست.'
-                : 'A card request is not available right now.');
+        // New card, or renewal of a card that has expired (cards are valid for one year).
+        $renewal = $user->cardIsExpired();
+        if (!$user->isApprovedMember() || !$user->profileIsComplete() || ($user->card_status !== 'not_requested' && !$renewal)) {
+            return redirect()->route('dashboard')->with('error', __('A card request is not available right now.'));
         }
 
-        if (!$user->canReceiveCard()) {
-            return redirect()->route('dashboard')->with('error', is_rtl()
-                ? 'برای درخواست کارت عضویت، ابتدا حق عضویت سالانه را پرداخت کنید.'
-                : 'Please pay your annual membership dues before requesting a card.');
+        if ($renewal ? !$user->duesPaidForRenewal() : !$user->canReceiveCard()) {
+            return redirect()->route('dashboard')->with('error', __('Please pay your annual membership dues before requesting a card.'));
         }
 
         $user->card_status = 'requested';
         $user->card_requested_at = now();
         $user->save();
 
-        return redirect()->route('dashboard')->with('success', is_rtl()
-            ? 'درخواست کارت عضویت شما ثبت شد و در انتظار تأیید مدیر است.'
-            : 'Your membership card request has been submitted and is awaiting admin approval.');
+        return redirect()->route('dashboard')->with('success', __('Your membership card request has been submitted and is awaiting admin approval.'));
     }
 
     public function card()
@@ -96,6 +90,13 @@ class MembershipController extends Controller
             return redirect()->route('dashboard');
         }
         return view('front.membership-card-page', compact('user'));
+    }
+
+    /** Public page: how to become a member and how membership cards work. */
+    public function info()
+    {
+        $setting = Setting::where('id', 1)->first();
+        return view('front.membership', compact('setting'));
     }
 
     public function verify($token)
@@ -109,13 +110,13 @@ class MembershipController extends Controller
         $user = Auth::guard('web')->user();
         $setting = Setting::where('id', 1)->first();
 
-        if (!$user->isApprovedMember() || $user->dues_paid || !$setting->membership_dues_amount) {
+        // Already paid - unless the card has expired and this year's dues are still due (renewal).
+        $renewal_due = $user->cardIsExpired() && !$user->duesPaidForRenewal();
+        if (!$user->isApprovedMember() || ($user->dues_paid && !$renewal_due) || !$setting->membership_dues_amount) {
             return redirect()->route('dashboard');
         }
         if (!$setting->paypal_client_id || !$setting->paypal_client_secret) {
-            return redirect()->route('dashboard')->with('error', is_rtl()
-                ? 'پرداخت آنلاین در حال حاضر در دسترس نیست.'
-                : 'Online payment is not available right now.');
+            return redirect()->route('dashboard')->with('error', __('Online payment is not available right now.'));
         }
 
         $this->configure_paypal($setting);
@@ -144,14 +145,15 @@ class MembershipController extends Controller
                 ],
             ]);
         } catch (\Throwable $e) {
-            return redirect()->route('dashboard')->with('error', is_rtl()
-                ? 'اتصال به پی‌پل ممکن نشد. لطفاً بعداً دوباره تلاش کنید.'
-                : 'We could not reach PayPal. Please try again later.');
+            return redirect()->route('dashboard')->with('error', __('We could not reach PayPal. Please try again later.'));
         }
 
         if (isset($response['id']) && $response['id'] !== null) {
             foreach ($response['links'] as $link) {
                 if ($link['rel'] === 'approve') {
+                    // Remember which PayPal order is the dues payment, so dues_success
+                    // can't be completed with some other (e.g. a $1 donation) order.
+                    session()->put('dues_order_id', $response['id']);
                     return redirect()->away($link['href']);
                 }
             }
@@ -163,7 +165,8 @@ class MembershipController extends Controller
     public function dues_success(Request $request)
     {
         $user = Auth::guard('web')->user();
-        if (!$request->has('token')) {
+        $expected_order = session()->pull('dues_order_id');
+        if (!$request->has('token') || !$expected_order || !hash_equals((string) $expected_order, (string) $request->token)) {
             return redirect()->route('membership_dues_cancel');
         }
 
@@ -182,6 +185,12 @@ class MembershipController extends Controller
         if (isset($response['status']) && $response['status'] === 'COMPLETED') {
             $capture = $response['purchase_units'][0]['payments']['captures'][0] ?? [];
 
+            // The captured amount must cover the dues (PayPal already took the money,
+            // so a short payment is recorded but does not mark the dues as paid).
+            $paid = (float) ($capture['amount']['value'] ?? 0);
+            $dues_covered = $paid + 0.001 >= (float) $setting->membership_dues_amount
+                && ($capture['amount']['currency_code'] ?? '') === ($setting->paypal_currency ?: 'USD');
+
             $donation = new Donation();
             $donation->donor_name = $user->name;
             $donation->donor_email = $user->email;
@@ -193,12 +202,14 @@ class MembershipController extends Controller
             $donation->status = 'Completed';
             $donation->save();
 
+            if (!$dues_covered) {
+                return redirect()->route('dashboard')->with('error', __('The amount paid does not match the membership dues. Please contact us.'));
+            }
+
             $user->dues_paid = true;
             $user->save();
 
-            return redirect()->route('dashboard')->with('success', is_rtl()
-                ? 'حق عضویت شما با موفقیت پرداخت شد. سپاسگزاریم!'
-                : 'Your membership dues were paid successfully. Thank you!');
+            return redirect()->route('dashboard')->with('success', __('Your membership dues were paid successfully. Thank you!'));
         }
 
         return redirect()->route('membership_dues_cancel');
@@ -206,9 +217,7 @@ class MembershipController extends Controller
 
     public function dues_cancel()
     {
-        return redirect()->route('dashboard')->with('error', is_rtl()
-            ? 'پرداخت حق عضویت تکمیل نشد.'
-            : 'Your dues payment was not completed.');
+        return redirect()->route('dashboard')->with('error', __('Your dues payment was not completed.'));
     }
 
     private function configure_paypal($setting)

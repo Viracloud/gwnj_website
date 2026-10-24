@@ -14,7 +14,7 @@
 @section('content')
 
 <div class="pagehead"><div class="shell">
-    <span class="kicker">{{ is_rtl() ? 'بایگانی' : 'Archive' }}</span>
+    <span class="kicker">{{ __('Archive') }}</span>
     <h1>{{ $month_label }}</h1>
 </div></div>
 
@@ -33,7 +33,7 @@
     </div>
     {{ $posts->links() }}
     @else
-    <p style="text-align:center;color:var(--muted)">{{ is_rtl() ? 'برای این ماه خبری یافت نشد.' : 'No posts found for this month.' }}</p>
+    <p style="text-align:center;color:var(--muted)">{{ __('No posts found for this month.') }}</p>
     @endif
 </section>
 

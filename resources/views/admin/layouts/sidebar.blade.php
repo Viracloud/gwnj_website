@@ -47,10 +47,17 @@
             </div>
         </div>
 
-        <a href="{{ route('admin_campaign_index') }}" class="nav-link {{ Request::is('admin/campaign/*') ? 'active' : '' }}">
-            <i class="fa-solid fa-bullhorn"></i>
-            <span class="sidebar-label">Campaigns</span>
-        </a>
+        <div class="nav-dropdown">
+            <a href="javascript:void(0)" class="nav-link nav-dropdown-toggle">
+                <i class="fa-solid fa-bullhorn"></i>
+                <span class="sidebar-label">Campaigns</span>
+                <i class="fa-solid fa-chevron-right nav-arrow sidebar-label"></i>
+            </a>
+            <div class="nav-dropdown-menu">
+                <a href="{{ route('admin_campaign_index') }}" class="nav-link nav-sub-link {{ Request::is('admin/campaign/*') ? 'active' : '' }}">All Campaigns</a>
+                <a href="{{ route('admin_campaign_category_index') }}" class="nav-link nav-sub-link {{ Request::is('admin/campaign-category/*') ? 'active' : '' }}">Campaign Categories</a>
+            </div>
+        </div>
 
         <div class="nav-dropdown">
             <a href="javascript:void(0)" class="nav-link nav-dropdown-toggle">
@@ -67,6 +74,11 @@
         <a href="{{ route('admin_photo_index') }}" class="nav-link {{ Request::is('admin/photo/*') ? 'active' : '' }}">
             <i class="fa-solid fa-images"></i>
             <span class="sidebar-label">Photo Gallery</span>
+        </a>
+
+        <a href="{{ route('admin_poll_index') }}" class="nav-link {{ Request::is('admin/poll/*') ? 'active' : '' }}">
+            <i class="fa-solid fa-square-poll-vertical"></i>
+            <span class="sidebar-label">Polls &amp; Surveys</span>
         </a>
 
         {{-- ================= 2. Organisation ================= --}}
@@ -217,6 +229,7 @@
                 <a href="{{ route('admin_setting_paypal') }}" class="nav-link nav-sub-link {{ Request::is('admin/setting/paypal*') ? 'active' : '' }}">Online Payments (PayPal)</a>
                 <a href="{{ route('admin_setting_seo') }}" class="nav-link nav-sub-link {{ Request::is('admin/setting/seo*') ? 'active' : '' }}">Google &amp; SEO</a>
                 <a href="{{ route('admin_setting_sitemap') }}" class="nav-link nav-sub-link {{ Request::is('admin/setting/sitemap*') ? 'active' : '' }}">Sitemap</a>
+                <a href="{{ route('admin_setting_languages') }}" class="nav-link nav-sub-link {{ Request::is('admin/setting/languages*') ? 'active' : '' }}">Languages</a>
             </div>
         </div>
 

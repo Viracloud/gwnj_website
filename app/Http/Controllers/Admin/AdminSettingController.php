@@ -110,7 +110,7 @@ class AdminSettingController extends Controller
         $setting->top_bar_email = $request->top_bar_email;
         $setting->top_bar_phone = $request->top_bar_phone;
         $setting->top_bar_address = $request->top_bar_address;
-        $setting->top_bar_address_sv = $request->top_bar_address_sv;
+        $setting->top_bar_address_fa = $request->top_bar_address_fa;
         $setting->top_bar_facebook = $request->top_bar_facebook;
         $setting->top_bar_twitter = $request->top_bar_twitter;
         $setting->top_bar_linkedin = $request->top_bar_linkedin;
@@ -138,9 +138,9 @@ class AdminSettingController extends Controller
         $setting->footer_email = $request->footer_email;
         $setting->footer_website = $request->footer_website;
         $setting->footer_copyright = $request->footer_copyright;
-        $setting->footer_copyright_sv = $request->footer_copyright_sv;
+        $setting->footer_copyright_fa = $request->footer_copyright_fa;
         $setting->footer_about_text = $request->footer_about_text;
-        $setting->footer_about_text_sv = $request->footer_about_text_sv;
+        $setting->footer_about_text_fa = $request->footer_about_text_fa;
 
         $setting->save();
         return redirect()->back()->with('success', 'Item updated successfully.');
@@ -222,7 +222,7 @@ class AdminSettingController extends Controller
 
         $setting->seo_title_template = $request->seo_title_template;
         $setting->seo_default_description = $request->seo_default_description;
-        $setting->seo_default_description_sv = $request->seo_default_description_sv;
+        $setting->seo_default_description_fa = $request->seo_default_description_fa;
         $setting->seo_google_verification = $request->seo_google_verification;
         $setting->seo_analytics_id = $request->seo_analytics_id;
         $setting->seo_robots_indexable = $request->has('seo_robots_indexable');

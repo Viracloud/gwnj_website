@@ -19,11 +19,11 @@ class AdminPageContactItemController extends Controller
         $obj = PageContactItem::where('id', 1)->first();
 
         $obj->page_title = $request->page_title;
-        $obj->page_title_sv = $request->page_title_sv;
+        $obj->page_title_fa = $request->page_title_fa;
         $obj->phone_number = $request->phone_number;
         $obj->email_address = $request->email_address;
         $obj->location = $request->location;
-        $obj->location_sv = $request->location_sv;
+        $obj->location_fa = $request->location_fa;
         $obj->map_iframe_code = $request->map_iframe_code;
         $obj->seo_title = $request->seo_title;
         $obj->seo_meta_description = $request->seo_meta_description;

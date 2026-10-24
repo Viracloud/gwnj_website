@@ -20,14 +20,40 @@ class AdminPublicationController extends Controller
     {
         return $request->validate([
             'title' => 'required|string|max:255',
-            'title_sv' => 'nullable|string|max:255',
+            'title_fa' => 'nullable|string|max:255',
             'slug' => 'required|string|max:255|unique:publications,slug,' . $ignoreId,
             'publication_category_id' => 'required|exists:publication_categories,id',
             'description' => 'nullable|string',
-            'description_sv' => 'nullable|string',
+            'description_fa' => 'nullable|string',
             'published_date' => 'nullable|date',
             'status' => 'required|in:Show,Hide',
+            'video_url' => ['nullable', 'url:https', 'max:500'],
         ]);
+    }
+
+    /**
+     * Save an uploaded video file (mp4 / webm / mov), or remove the current one
+     * when "remove video file" is ticked. Max size also depends on the host's
+     * PHP upload_max_filesize / post_max_size.
+     */
+    private function handleVideo(Request $request, Publication $publication): void
+    {
+        $removeOld = function () use ($publication) {
+            if ($publication->video_file && file_exists(public_path('uploads/' . $publication->video_file))) {
+                unlink(public_path('uploads/' . $publication->video_file));
+            }
+            $publication->video_file = null;
+        };
+
+        if ($request->hasFile('video_file')) {
+            $request->validate(['video_file' => 'mimetypes:video/mp4,video/webm,video/quicktime|max:102400']);
+            $removeOld();
+            $name = 'publication_video_' . time() . '_' . uniqid() . '.' . $request->video_file->extension();
+            $request->video_file->move(public_path('uploads'), $name);
+            $publication->video_file = $name;
+        } elseif ($request->boolean('remove_video_file')) {
+            $removeOld();
+        }
     }
 
     public function store(Request $request)
@@ -50,6 +76,7 @@ class AdminPublicationController extends Controller
             $publication->file = $name;
         }
 
+        $this->handleVideo($request, $publication);
         $publication->save();
 
         return redirect()->back()->with('success', 'Publication created successfully.');
@@ -81,6 +108,7 @@ class AdminPublicationController extends Controller
             $publication->file = $name;
         }
 
+        $this->handleVideo($request, $publication);
         $publication->save();
 
         return redirect()->back()->with('success', 'Publication updated successfully.');
@@ -95,6 +123,9 @@ class AdminPublicationController extends Controller
         }
         if ($publication->file && file_exists(public_path('uploads/' . $publication->file))) {
             unlink(public_path('uploads/' . $publication->file));
+        }
+        if ($publication->video_file && file_exists(public_path('uploads/' . $publication->video_file))) {
+            unlink(public_path('uploads/' . $publication->video_file));
         }
 
         $publication->delete();
