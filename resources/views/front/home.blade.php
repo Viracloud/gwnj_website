@@ -314,7 +314,7 @@
 @endif
 
 @if($page_data->blog_status == 'Show' && $posts->count())
-<section class="shell">
+<section class="news-dark"><div class="shell">
     <div class="sec-head">
         <div class="txt">
             <span class="kicker">{{ hc('news_kicker') }}</span>
@@ -325,7 +325,10 @@
     <div class="cards">
         @foreach($posts as $post)
         <a class="card" href="{{ route('post', slug_for($post)) }}">
-            <div class="photo"><img src="{{ asset('uploads/'.$post->image) }}" alt="{{ $post->title }}"></div>
+            <div class="photo">
+                <img src="{{ asset('uploads/'.$post->image) }}" alt="{{ $post->title }}">
+                <span class="card-go" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M8 7h9v9"/></svg></span>
+            </div>
             @include('front.partials.post-meta')
             <h3>{{ tf($post,'title') }}</h3>
             @if(tf($post,'excerpt'))<p>{{ plain_excerpt(tf($post,'excerpt'), 110) }}</p>@endif
@@ -333,7 +336,7 @@
         </a>
         @endforeach
     </div>
-</section>
+</div></section>
 @endif
 
 @if(hc_on('show_paths'))
@@ -362,28 +365,26 @@
 @php
     $home_polls = \Illuminate\Support\Facades\Schema::hasTable('polls')
         ? \App\Models\Poll::published()->where('show_on_home', true)
-            ->orderByRaw("CASE WHEN status = 'open' THEN 0 ELSE 1 END")->orderBy('sort_order')->orderBy('id', 'desc')->take(3)->get()
+            ->orderByRaw("CASE WHEN status = 'open' THEN 0 ELSE 1 END")->orderBy('sort_order')->orderBy('id', 'desc')->take(10)->get()
         : collect();
 @endphp
 @if($home_polls->count())
-<section class="shell">
+@php $tones = ['navy', 'orange', 'green', 'sand']; $rtl = is_rtl(); @endphp
+<section class="shell" data-ptrack>
     <div class="sec-head">
         <div class="txt">
             <span class="kicker">{{ __('Have your say') }}</span>
             <h2>{{ __('Polls & surveys') }}</h2>
         </div>
         <a class="more" href="{{ route('polls') }}">{{ __('All polls') }}</a>
+        <div class="ptrack-nav">
+            <button type="button" class="ptrack-btn" data-ptrack-prev aria-label="{{ __('Previous') }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="{{ $rtl ? 'M9 6l6 6-6 6' : 'M15 6l-6 6 6 6' }}"/></svg></button>
+            <button type="button" class="ptrack-btn" data-ptrack-next aria-label="{{ __('Next') }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="{{ $rtl ? 'M15 6l-6 6 6 6' : 'M9 6l6 6-6 6' }}"/></svg></button>
+        </div>
     </div>
-    <div class="poll-list">
+    <div class="ptrack">
         @foreach($home_polls as $poll)
-        <a class="poll-card" href="{{ route('poll', $poll->slug) }}">
-            <div class="poll-card-top">
-                <span class="chip {{ $poll->isOpen() ? 'done' : 'plain' }}">{{ $poll->isOpen() ? (__('Open')) : (__('Closed')) }}</span>
-            </div>
-            <h3>{{ tf($poll, 'title') }}</h3>
-            @if(tf($poll, 'description'))<p>{{ \Illuminate\Support\Str::limit(tf($poll, 'description'), 130) }}</p>@endif
-            <span class="readmore">{{ $poll->isOpen() ? (__('Take part')) : (__('See results')) }}</span>
-        </a>
+        @include('front.partials.poll-tile', ['tone' => $loop->last ? 'brand' : $tones[$loop->index % 4]])
         @endforeach
     </div>
 </section>

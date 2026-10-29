@@ -198,6 +198,47 @@ if (!function_exists('set_model_alternates')) {
             $map[$l] = route($route, ['locale' => $l, $param => slug_for($model, $l)]);
         }
         set_alternates($map);
+        // Only languages the item is actually translated into are announced to search engines.
+        app()->instance('page.translated', array_values(array_filter(enabled_locales(), fn ($l) => is_translated($model, $l))));
+    }
+}
+
+if (!function_exists('is_translated')) {
+    /**
+     * Whether a content item has its own text in a language (English always counts).
+     * Untranslated items still open in that language - showing the English text - but
+     * are not offered to Google as a separate language version (no duplicate content).
+     */
+    function is_translated($model, string $locale): bool
+    {
+        if ($locale === base_locale()) {
+            return true;
+        }
+        $attributes = $model->getAttributes();
+        $field = array_key_exists('title', $attributes) ? 'title' : (array_key_exists('name', $attributes) ? 'name' : null);
+        return $field === null || trim((string) ($attributes[$field.'_'.$locale] ?? '')) !== '';
+    }
+}
+
+if (!function_exists('hreflang_urls')) {
+    /** The language versions of this page that are announced to search engines (hreflang). */
+    function hreflang_urls(): array
+    {
+        $all = alternate_urls();
+        if (!app()->bound('page.translated')) {
+            return $all;
+        }
+        return array_intersect_key($all, array_flip(app('page.translated')));
+    }
+}
+
+if (!function_exists('canonical_url')) {
+    /** This page's canonical address: itself, or the English version when it has no translation here. */
+    function canonical_url(): string
+    {
+        $all = alternate_urls();
+        $versions = hreflang_urls();
+        return $versions[site_locale()] ?? $all[base_locale()] ?? url()->current();
     }
 }
 
@@ -613,7 +654,7 @@ if (!function_exists('resolve_seo')) {
             'title' => $title,
             'description' => plain_excerpt($description, 300),
             'image' => $image ? asset('uploads/' . $image) : null,
-            'canonical' => alternate_urls()[site_locale()] ?? url()->current(),
+            'canonical' => canonical_url(),
             'noindex' => !($setting?->seo_robots_indexable),
         ];
     }
@@ -656,10 +697,12 @@ if (!function_exists('sitemap_entries')) {
         $urls = collect();
         $locales = enabled_locales();
 
-        $add = function (string $type, string $priority, $lastmod, \Closure $urlFor) use (&$urls, $locales) {
+        $add = function (string $type, string $priority, $lastmod, \Closure $urlFor, $model = null) use (&$urls, $locales) {
             $alternates = [];
             foreach ($locales as $l) {
-                $alternates[$l] = $urlFor($l);
+                if ($model === null || is_translated($model, $l)) {
+                    $alternates[$l] = $urlFor($l);
+                }
             }
             foreach ($alternates as $l => $loc) {
                 $urls->push(['type' => $type, 'lang' => $l, 'loc' => $loc, 'priority' => $priority,
@@ -692,13 +735,13 @@ if (!function_exists('sitemap_entries')) {
             }
             $priority = (string) ($setting->{$prio} ?? $default_prio);
             foreach ($query() as $item) {
-                $add($type, $priority, $item->updated_at, fn ($l) => route($route, ['locale' => $l, 'slug' => slug_for($item, $l)]));
+                $add($type, $priority, $item->updated_at, fn ($l) => route($route, ['locale' => $l, 'slug' => slug_for($item, $l)]), $item);
             }
         }
 
         if (\Illuminate\Support\Facades\Schema::hasTable('polls')) {
             foreach (\App\Models\Poll::published()->get() as $poll) {
-                $add('Poll', '0.5', $poll->updated_at, fn ($l) => route('poll', ['locale' => $l, 'slug' => $poll->slug]));
+                $add('Poll', '0.5', $poll->updated_at, fn ($l) => route('poll', ['locale' => $l, 'slug' => $poll->slug]), $poll);
             }
         }
 

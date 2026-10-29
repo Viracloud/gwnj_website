@@ -9,7 +9,7 @@
     <meta name="description" content="{{ $seo['description'] }}">
     <link rel="canonical" href="{{ $seo['canonical'] }}">
     {{-- Every language version of this page, so Google indexes and serves each one --}}
-    @php $alternates = alternate_urls(); @endphp
+    @php $alternates = hreflang_urls(); @endphp
     @foreach($alternates as $alt_locale => $alt_url)
     <link rel="alternate" hreflang="{{ locale_meta($alt_locale)['hreflang'] }}" href="{{ $alt_url }}">
     @endforeach

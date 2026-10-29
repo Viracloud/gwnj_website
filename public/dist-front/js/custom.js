@@ -257,3 +257,64 @@ function fallbackCopy(text, done) {
     form.addEventListener('input', update);
     update();
 })();
+
+/* Home polls slider: arrow buttons + hide them when everything fits. */
+(function () {
+    document.querySelectorAll('[data-ptrack]').forEach(function (wrap) {
+        var track = wrap.querySelector('.ptrack');
+        var prev = wrap.querySelector('[data-ptrack-prev]');
+        var next = wrap.querySelector('[data-ptrack-next]');
+        if (!track) return;
+        var rtl = getComputedStyle(track).direction === 'rtl';
+
+        function step() {
+            var card = track.firstElementChild;
+            var gap = parseFloat(getComputedStyle(track).columnGap) || 0;
+            return card ? card.getBoundingClientRect().width + gap : track.clientWidth;
+        }
+
+        function update() {
+            var max = track.scrollWidth - track.clientWidth;
+            var pos = Math.abs(track.scrollLeft); // RTL scrollLeft is negative
+            wrap.classList.toggle('has-overflow', max > 2);
+            if (prev) prev.disabled = pos <= 2;
+            if (next) next.disabled = pos >= max - 2;
+        }
+
+        function go(dir) {
+            track.scrollBy({ left: dir * step() * (rtl ? -1 : 1) });
+        }
+
+        // Desktop hover: the pointed card becomes square (width = height) and the other
+        // cards on screen shrink to make room, so the row keeps its width.
+        var hoverMq = window.matchMedia('(hover: hover) and (min-width: 992px)');
+        function resetSizes() {
+            track.classList.remove('is-hovering');
+            Array.prototype.forEach.call(track.children, function (c) { c.style.flexBasis = ''; });
+        }
+        Array.prototype.forEach.call(track.children, function (card) {
+            card.addEventListener('mouseenter', function () {
+                if (!hoverMq.matches) return;
+                var box = track.getBoundingClientRect();
+                var visible = Array.prototype.filter.call(track.children, function (c) {
+                    var r = c.getBoundingClientRect();
+                    return r.right > box.left + 2 && r.left < box.right - 2;
+                });
+                if (visible.length < 2 || visible.indexOf(card) === -1) return;
+                var gap = parseFloat(getComputedStyle(track).columnGap) || 0;
+                var square = card.getBoundingClientRect().height;
+                var rest = (track.clientWidth - gap * (visible.length - 1) - square) / (visible.length - 1);
+                if (rest < 140) return; // not enough room: leave the layout as it is
+                track.classList.add('is-hovering');
+                visible.forEach(function (c) { c.style.flexBasis = (c === card ? square : rest) + 'px'; });
+            });
+        });
+        track.addEventListener('mouseleave', resetSizes);
+        hoverMq.addEventListener && hoverMq.addEventListener('change', resetSizes);
+        if (prev) prev.addEventListener('click', function () { go(-1); });
+        if (next) next.addEventListener('click', function () { go(1); });
+        track.addEventListener('scroll', update, { passive: true });
+        window.addEventListener('resize', update);
+        update();
+    });
+})();

@@ -22,7 +22,17 @@ class RedirectToLocalizedUrl
             return null;
         }
         $path = trim($request->path(), '/');
-        $first = explode('/', $path)[0] ?? '';
+        $segments = explode('/', $path);
+        $first = $segments[0] ?? '';
+
+        // The admin panel has no language prefix: /en/admin/login -> /admin/login
+        if (array_key_exists($first, config('locales.supported')) && ($segments[1] ?? '') === 'admin') {
+            $target = url(implode('/', array_slice($segments, 1)));
+            if ($qs = $request->getQueryString()) {
+                $target .= '?'.$qs;
+            }
+            return redirect($target, 301);
+        }
 
         if (array_key_exists($first, config('locales.supported')) || $first === 'admin') {
             return null; // a language that is switched off, or a wrong admin URL: a real 404

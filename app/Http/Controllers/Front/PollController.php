@@ -32,6 +32,8 @@ class PollController extends Controller
         $voted = $poll->hasVoted($request->cookie(self::VOTER_COOKIE));
         $show_results = $poll->resultsVisible($voted);
         $results = $show_results ? $poll->results() : null;
+        // Announce only the languages the poll is translated into (same slug in every language).
+        app()->instance("page.translated", array_values(array_filter(enabled_locales(), fn ($l) => is_translated($poll, $l))));
 
         return view('front.poll', compact('poll', 'voted', 'show_results', 'results'));
     }
