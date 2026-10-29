@@ -6,7 +6,7 @@
         <span class="sp"></span>
         <div class="lang-switch dropdown">
             <button type="button" class="lang-switch-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-                <i class="bi bi-globe2" aria-hidden="true"></i>
+                <i class="fa-solid fa-globe" aria-hidden="true"></i>
                 <span>{{ locale_meta()['native'] }}</span>
                 <i class="fa-solid fa-chevron-down" aria-hidden="true" style="font-size:.6rem"></i>
             </button>

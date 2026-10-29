@@ -13,7 +13,7 @@
 @if($errors->any())
     <script>
         iziToast.error({
-            message: '{{ $errors->first() }}',
+            message: @json($errors->first()),
             position: 'topRight'
         });
     </script>
@@ -22,7 +22,7 @@
 @if(session('success'))
     <script>
         iziToast.success({
-            message: '{{ session('success') }}',
+            message: @json(session('success')),
             position: 'topRight'
         });
     </script>
@@ -31,7 +31,7 @@
 @if(session('error'))
     <script>
         iziToast.error({
-            message: '{{ session('error') }}',
+            message: @json(session('error')),
             position: 'topRight'
         });
     </script>
