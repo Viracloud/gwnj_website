@@ -322,20 +322,34 @@
         </div>
         <a class="more" href="{{ route('blog') }}">{{ hc('news_more') }}</a>
     </div>
-    <div class="cards">
-        @foreach($posts as $post)
-        <a class="card" href="{{ route('post', slug_for($post)) }}">
-            <div class="photo">
-                <img src="{{ asset('uploads/'.$post->image) }}" alt="{{ $post->title }}">
-                <span class="card-go" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M8 7h9v9"/></svg></span>
-            </div>
-            @include('front.partials.post-meta')
-            <h3>{{ tf($post,'title') }}</h3>
-            @if(tf($post,'excerpt'))<p>{{ plain_excerpt(tf($post,'excerpt'), 110) }}</p>@endif
-            <span class="readmore">{{ hc('news_readmore') }}</span>
+    @php $lead = $posts->first(); $rest = $posts->slice(1); @endphp
+    <div class="news-grid {{ $rest->count() ? '' : 'solo' }}">
+        @php $post = $lead; @endphp
+        <a class="news-lead" href="{{ route('post', slug_for($post)) }}">
+            <img src="{{ asset('uploads/'.$post->image) }}" alt="{{ $post->title }}">
+            <span class="news-lead-body">
+                @include('front.partials.post-meta')
+                <h3>{{ tf($post,'title') }}</h3>
+                @if(tf($post,'excerpt'))<p>{{ plain_excerpt(tf($post,'excerpt'), 150) }}</p>@endif
+                <span class="readmore">{{ hc('news_readmore') }}</span>
+            </span>
         </a>
-        @endforeach
-    </div>
+        @if($rest->count())
+        <div class="news-side">
+            @foreach($rest as $post)
+            <a class="news-item" href="{{ route('post', slug_for($post)) }}">
+                <span class="news-thumb"><img src="{{ asset('uploads/'.$post->image) }}" alt="{{ $post->title }}"></span>
+                <span class="news-text">
+                    @include('front.partials.post-meta')
+                    <h3>{{ tf($post,'title') }}</h3>
+                    @if(tf($post,'excerpt'))<p>{{ plain_excerpt(tf($post,'excerpt'), 95) }}</p>@endif
+                    <span class="readmore">{{ hc('news_readmore') }}</span>
+                </span>
+            </a>
+            @endforeach
+        </div>
+        @endif
+</div>
 </div></section>
 @endif
 

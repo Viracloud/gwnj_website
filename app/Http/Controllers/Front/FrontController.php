@@ -120,8 +120,8 @@ class FrontController extends Controller
     public function login_submit(Request $request)
     {
         $request->validate([
-            'email' => 'required|email',
-            'password' => 'required',
+            'email' => 'required|email|max:150',
+            'password' => 'required|string|max:200',
         ]);
 
         // Check if email and password are correct
@@ -155,9 +155,9 @@ class FrontController extends Controller
     public function register_submit(Request $request)
     {
         $request->validate([
-            'name' => 'required',
-            'email' => 'required|email|unique:users',
-            'password' => 'required|min:8',
+            'name' => 'required|string|max:100',
+            'email' => 'required|email|max:150|unique:users',
+            'password' => 'required|min:8|max:200',
             'confirm_password' => 'required|same:password',
             'membership_type' => 'required|in:regular,founding,honorary,affiliate,organizational',
             'agree_bylaws' => 'required',
@@ -225,7 +225,7 @@ class FrontController extends Controller
     public function forget_password_submit(Request $request)
     {
         $request->validate([
-            'email' => 'required|email',
+            'email' => 'required|email|max:150',
         ]);
 
         $sent_message = 'If an account exists for this email, we have sent a password reset link to it. Please check your inbox and your spam folder.';
@@ -263,7 +263,7 @@ class FrontController extends Controller
     public function reset_password_submit(Request $request, $token, $email)
     {
         $request->validate([
-            'password' => 'required|min:8',
+            'password' => 'required|min:8|max:200',
             'confirm_password' => 'required|same:password',
         ]);
 
@@ -450,9 +450,10 @@ class FrontController extends Controller
     public function comment_store(Request $request)
     {
         $validated = $request->validate([
-            'name' => 'required',
-            'email' => 'required|email',
-            'comment' => 'required',
+            'post_id' => 'required|integer|exists:posts,id',
+            'name' => 'required|string|max:100',
+            'email' => 'required|email|max:150',
+            'comment' => 'required|string|max:3000',
         ]);
 
         $obj = new Comment();
@@ -464,8 +465,7 @@ class FrontController extends Controller
         $obj->save();
 
         // Send email to admin as notification
-        $admin_data = Admin::where('id',1)->first();
-        $admin_email = $admin_data->email;
+        $admin_email = optional(Admin::orderBy('id')->first())->email;
 
         $post_title = Post::where('id', $request->post_id)->first()->title;
 
@@ -475,7 +475,9 @@ class FrontController extends Controller
         $message .= "<b>Email:</b><br>".e($request->email)."<br><br>";
         $message .= "<b>Comment:</b><br>".nl2br(e($request->comment))."<br><br>";
 
-        \safe_mail($admin_email, $subject, $message);
+        if ($admin_email) {
+            \safe_mail($admin_email, $subject, $message);
+        }
 
         return redirect()->back()->with('success', 'Comment submitted successfully and is pending for the admin approval.');
     }
@@ -483,9 +485,11 @@ class FrontController extends Controller
     public function reply_store(Request $request)
     {
         $validated = $request->validate([
-            'name' => 'required',
-            'email' => 'required|email',
-            'reply' => 'required',
+            'post_id' => 'required|integer|exists:posts,id',
+            'comment_id' => 'required|integer|exists:comments,id',
+            'name' => 'required|string|max:100',
+            'email' => 'required|email|max:150',
+            'reply' => 'required|string|max:3000',
         ]);
 
         $obj = new Reply();
@@ -499,8 +503,7 @@ class FrontController extends Controller
         $obj->save();
 
         // Send email to admin as notification
-        $admin_data = Admin::where('id',1)->first();
-        $admin_email = $admin_data->email;
+        $admin_email = optional(Admin::orderBy('id')->first())->email;
 
         $post_title = Post::where('id', $request->post_id)->first()->title;
 
@@ -510,7 +513,9 @@ class FrontController extends Controller
         $message .= "<b>Email:</b><br>".e($request->email)."<br><br>";
         $message .= "<b>Reply:</b><br>".nl2br(e($request->reply))."<br><br>";
 
-        \safe_mail($admin_email, $subject, $message);
+        if ($admin_email) {
+            \safe_mail($admin_email, $subject, $message);
+        }
 
         return redirect()->back()->with('success', 'Reply submitted successfully and is pending for the admin approval.');
     }
@@ -534,9 +539,9 @@ class FrontController extends Controller
     public function contact_submit(Request $request)
     {
         $request->validate([
-            'name' => 'required',
-            'email' => 'required|email',
-            'message' => 'required',
+            'name' => 'required|string|max:100',
+            'email' => 'required|email|max:150',
+            'message' => 'required|string|max:3000',
         ]);
 
         $subject = "New Contact Message";
@@ -544,10 +549,11 @@ class FrontController extends Controller
         $message .= "<b>Email:</b><br>".e($request->email)."<br><br>";
         $message .= "<b>Message:</b><br>".nl2br(e($request->message))."<br><br>";
 
-        $admin_data = Admin::where('id',1)->first();
-        $admin_email = $admin_data->email;
+        $admin_email = optional(Admin::orderBy('id')->first())->email;
 
-        \safe_mail($admin_email, $subject, $message);
+        if ($admin_email) {
+            \safe_mail($admin_email, $subject, $message);
+        }
 
         return redirect()->back()->with('success','Your message is sent successfully. We will contact you soon.');
     }
@@ -562,9 +568,9 @@ class FrontController extends Controller
     public function donate_submit(Request $request)
     {
         $request->validate([
-            'name' => 'required',
-            'email' => 'required|email',
-            'amount' => 'required|numeric|min:1',
+            'name' => 'required|string|max:100',
+            'email' => 'required|email|max:150',
+            'amount' => 'required|numeric|min:1|max:1000000',
         ]);
 
         $setting = Setting::where('id',1)->first();
@@ -692,7 +698,7 @@ class FrontController extends Controller
     public function subscriber_send_email(Request $request)
     {
         $validator = Validator::make($request->all(),[
-            'email' => 'required|email|unique:subscribers,email'
+            'email' => 'required|email|max:150|unique:subscribers,email'
         ]);
 
         if(!$validator->passes()) {

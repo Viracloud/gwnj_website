@@ -36,15 +36,15 @@ class UserController extends Controller
     public function profile_update(Request $request)
     {
         $request->validate([
-            'name' => 'required',
-            'surname' => 'required',
+            'name' => 'required|string|max:100',
+            'surname' => 'required|string|max:100',
             'email' => 'required|email|unique:users,email,'.Auth::guard('web')->user()->id,
-            'phone' => 'required',
-            'address' => 'required',
-            'country' => 'required',
-            'state' => 'required',
-            'city' => 'required',
-            'zip' => 'required',
+            'phone' => 'required|string|max:40',
+            'address' => 'required|string|max:255',
+            'country' => 'required|string|max:100',
+            'state' => 'required|string|max:100',
+            'city' => 'required|string|max:100',
+            'zip' => 'required|string|max:20',
         ]);
 
         $user = User::where('id', Auth::guard('web')->user()->id)->first();
