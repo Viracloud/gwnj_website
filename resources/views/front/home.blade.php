@@ -301,30 +301,33 @@
     <div class="news-grid {{ $rest->count() ? '' : 'solo' }}">
         @php $post = $lead; @endphp
         <a class="news-lead" href="{{ route('post', slug_for($post)) }}">
-            <img src="{{ asset('uploads/'.$post->image) }}" alt="{{ $post->title }}">
-            <span class="news-lead-body">
-                @include('front.partials.post-meta')
-                <h3>{{ tf($post,'title') }}</h3>
-                @if(tf($post,'excerpt'))<p>{{ plain_excerpt(tf($post,'excerpt'), 150) }}</p>@endif
-                <span class="readmore">{{ hc('news_readmore') }}</span>
+            <span class="news-shot"><img src="{{ asset('uploads/'.$post->image) }}" alt="{{ $post->title }}"></span>
+            <span class="news-meta">
+                <time datetime="{{ ($post->published_at ?? $post->created_at)->format('Y-m-d') }}">{{ fdate($post->published_at ?? $post->created_at, 'j F Y') }}</time>
+                @if($post->post_category)<span class="news-cat">{{ tf($post->post_category,'name') }}</span>@endif
             </span>
+            <h3>{{ tf($post,'title') }}</h3>
+            @if(tf($post,'excerpt'))<span class="news-sum">{{ plain_excerpt(tf($post,'excerpt'), 170) }}</span>@endif
+            <span class="news-go">{{ hc('news_readmore') }}</span>
         </a>
         @if($rest->count())
-        <div class="news-side">
+        <ol class="news-list">
             @foreach($rest as $post)
-            <a class="news-item" href="{{ route('post', slug_for($post)) }}">
-                <span class="news-thumb"><img src="{{ asset('uploads/'.$post->image) }}" alt="{{ $post->title }}"></span>
-                <span class="news-text">
-                    @include('front.partials.post-meta')
+            <li>
+                <a href="{{ route('post', slug_for($post)) }}">
+                    <span class="news-meta">
+                        <time datetime="{{ ($post->published_at ?? $post->created_at)->format('Y-m-d') }}">{{ fdate($post->published_at ?? $post->created_at, 'j F Y') }}</time>
+                        @if($post->post_category)<span class="news-cat">{{ tf($post->post_category,'name') }}</span>@endif
+                    </span>
                     <h3>{{ tf($post,'title') }}</h3>
-                    @if(tf($post,'excerpt'))<p>{{ plain_excerpt(tf($post,'excerpt'), 95) }}</p>@endif
-                    <span class="readmore">{{ hc('news_readmore') }}</span>
-                </span>
-            </a>
+                    @if(tf($post,'excerpt'))<span class="news-sum">{{ plain_excerpt(tf($post,'excerpt'), 110) }}</span>@endif
+                    <span class="news-thumb"><img src="{{ asset('uploads/'.$post->image) }}" alt="" loading="lazy"></span>
+                </a>
+            </li>
             @endforeach
-        </div>
+        </ol>
         @endif
-</div>
+    </div>
 </div></section>
 @endif
 
