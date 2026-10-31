@@ -12,7 +12,6 @@
 @endphp
 
 <div class="pagehead"><div class="shell">
-    <span class="kicker">{{ __('Donate') }}</span>
     <h1>{{ tf($page_data,'page_title') ?: tf($page_data,'heading') }}</h1>
 </div></div>
 

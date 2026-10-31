@@ -3,27 +3,22 @@
 @section('banner')
 @endsection
 
+{{-- the header floats over the hero photograph until the page is scrolled --}}
+@section('body_class', 'float-head')
+
 @section('content')
 @php
     $slide = $sliders->first();
-    // Hero side collage: other slider images first, then gallery, post and event photos (max 3, no repeats).
-    $hero_collage = $sliders->skip(1)->pluck('image')
-        ->merge($photos->pluck('image'))
-        ->merge($posts->pluck('image'))
-        ->merge($events->pluck('image'))
-        ->filter()->reject(fn($img) => $slide && $img === $slide->image)
-        ->unique()->take(3)->values();
     $hero_event = $events->first(fn($e) => $e->event_date && \Carbon\Carbon::parse($e->event_date)->endOfDay()->isFuture());
-    $hero_side = $hero_collage->count() || $hero_event;
 @endphp
 
-<div class="hero{{ $hero_side ? ' has-side' : '' }}">
+<div class="hero">
     @if($slide && $slide->image)
     <div class="hero-photo"><img src="{{ asset('uploads/'.$slide->image) }}" alt=""></div>
     @endif
-    <div class="shell"><div class="hero-grid">
+    <div class="shell">
     <div class="inner">
-        <span class="org">{{ preg_replace('/[\s·•|\-–—]+$/u', '', hc('hero_org')) }}</span>
+        @if(hc('hero_org'))<span class="org">{{ preg_replace('/[\s·•|\-–—]+$/u', '', hc('hero_org')) }}</span>@endif
         <h1>{{ $slide ? tf($slide, 'heading') : (hc('hero_heading')) }}</h1>
         <p class="lede">{{ $slide ? tf($slide, 'text') : (hc('hero_text')) }}</p>
         <div class="hero-actions">
@@ -39,35 +34,15 @@
             <a class="btn btn-ghost btn-lg" href="{{ route('about') }}">{{ hc('hero_btn3') }}</a>
             @endif
         </div>
-    </div>
-    @if($hero_side)
-    <div class="hero-side{{ $hero_collage->count() ? '' : ' no-photos' }}">
-        @if($hero_collage->count())
-        <div class="hc-stack">
-            @foreach($hero_collage as $i => $img)
-            <figure class="hc-ph hc-{{ $i + 1 }}"><img src="{{ asset('uploads/'.$img) }}" alt="" loading="lazy"></figure>
-            @endforeach
-        </div>
-        @if(hc_on('show_stats') && hc('stats_1_num'))
-        <div class="hc-badge"><b>{{ hc('stats_1_num') }}</b><span>{{ hc('stats_1_label') }}</span></div>
-        @endif
-        @endif
         @if($hero_event)
-        <a class="hc-event" href="{{ route('event', slug_for($hero_event)) }}">
-            <span class="hc-date">
-                <b>{{ fdate($hero_event->event_date, 'd') }}</b>
-                <small>{{ fdate($hero_event->event_date, 'M') }}</small>
-            </span>
-            <span class="hc-info">
-                <span class="hc-kicker">{{ hc('next_chip') }}</span>
-                <strong>{{ tf($hero_event,'title') }}</strong>
-                @if(tf($hero_event,'event_location'))<small>{{ tf($hero_event,'event_location') }}</small>@endif
-            </span>
+        <a class="hero-next" href="{{ route('event', slug_for($hero_event)) }}">
+            <span class="hero-next-tag">{{ hc('next_chip') }}</span>
+            <span class="hero-next-date">{{ fdate($hero_event->event_date, 'j M') }}</span>
+            <span class="hero-next-title">{{ tf($hero_event,'title') }}</span>
         </a>
         @endif
     </div>
-    @endif
-    </div></div>
+    </div>
 </div>
 
 @if(hc_on('show_stats'))
@@ -196,7 +171,7 @@
 <section class="shell">
     <div class="sec-head">
         <div class="txt">
-            <span class="kicker">{{ hc('work_kicker') }}</span>
+            @if(hc('work_kicker'))<span class="kicker">{{ hc('work_kicker') }}</span>@endif
             <h2>{{ hc('work_heading') }}</h2>
             <p>{{ hc('work_desc') }}</p>
         </div>
@@ -227,7 +202,7 @@
 <section class="cream"><div class="shell">
     <div class="sec-head">
         <div class="txt">
-            <span class="kicker">{{ hc('team_kicker') }}</span>
+            @if(hc('team_kicker'))<span class="kicker">{{ hc('team_kicker') }}</span>@endif
             <h2>{{ tf($page_data,'team_heading') ?: (hc('team_heading')) }}</h2>
         </div>
         @if($global_menu->menu_team_member_status == 'Show')
@@ -250,7 +225,7 @@
 <section class="{{ ($page_data->team_status == 'Show' && $members->count()) ? '' : 'cream' }}"><div class="shell">
     <div class="sec-head">
         <div class="txt">
-            <span class="kicker">{{ hc('events_kicker') }}</span>
+            @if(hc('events_kicker'))<span class="kicker">{{ hc('events_kicker') }}</span>@endif
             <h2>{{ tf($page_data,'event_heading') ?: (hc('events_heading')) }}</h2>
         </div>
         <a class="more" href="{{ route('events') }}">{{ hc('events_more') }}</a>
@@ -267,7 +242,7 @@
 <section class="shell">
     <div class="sec-head">
         <div class="txt">
-            <span class="kicker">{{ hc('gallery_kicker') }}</span>
+            @if(hc('gallery_kicker'))<span class="kicker">{{ hc('gallery_kicker') }}</span>@endif
             <h2>{{ hc('gallery_heading') }}</h2>
         </div>
         <a class="more" href="{{ route('gallery') }}">{{ hc('gallery_more') }}</a>
@@ -286,7 +261,7 @@
 <section class="cream"><div class="shell">
     <div class="sec-head">
         <div class="txt">
-            <span class="kicker">{{ hc('pubs_kicker') }}</span>
+            @if(hc('pubs_kicker'))<span class="kicker">{{ hc('pubs_kicker') }}</span>@endif
             <h2>{{ hc('pubs_heading') }}</h2>
         </div>
         <a class="more" href="{{ route('publications') }}">{{ hc('pubs_more') }}</a>
@@ -317,7 +292,7 @@
 <section class="news-dark"><div class="shell">
     <div class="sec-head">
         <div class="txt">
-            <span class="kicker">{{ hc('news_kicker') }}</span>
+            @if(hc('news_kicker'))<span class="kicker">{{ hc('news_kicker') }}</span>@endif
             <h2>{{ tf($page_data,'blog_heading') ?: (hc('news_heading')) }}</h2>
         </div>
         <a class="more" href="{{ route('blog') }}">{{ hc('news_more') }}</a>
@@ -356,7 +331,7 @@
 @if(hc_on('show_paths'))
 <section class="shell">
     <div class="sec-head"><div class="txt">
-        <span class="kicker">{{ hc('paths_kicker') }}</span>
+        @if(hc('paths_kicker'))<span class="kicker">{{ hc('paths_kicker') }}</span>@endif
         <h2>{{ hc('paths_heading') }}</h2>
     </div></div>
     <div class="paths">
@@ -387,7 +362,6 @@
 <section class="shell" data-ptrack>
     <div class="sec-head">
         <div class="txt">
-            <span class="kicker">{{ __('Have your say') }}</span>
             <h2>{{ __('Polls & surveys') }}</h2>
         </div>
         <a class="more" href="{{ route('polls') }}">{{ __('All polls') }}</a>
@@ -413,7 +387,7 @@
 <section class="shell">
     <div class="sec-head">
         <div class="txt">
-            <span class="kicker">{{ hc('partners_kicker') }}</span>
+            @if(hc('partners_kicker'))<span class="kicker">{{ hc('partners_kicker') }}</span>@endif
             <h2>{{ hc('partners_heading') }}</h2>
             <p>{{ hc('partners_desc') }}</p>
         </div>

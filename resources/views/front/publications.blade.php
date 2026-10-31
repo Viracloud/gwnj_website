@@ -5,7 +5,6 @@
 
 @section('content')
 <div class="pagehead"><div class="shell">
-    <span class="kicker">{{ __('Publications') }}</span>
     <h1>{{ __('Reports and publications') }}</h1>
 </div></div>
 

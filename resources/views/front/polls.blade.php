@@ -7,7 +7,6 @@
 
 @section('content')
 <div class="pagehead"><div class="shell">
-    <span class="kicker">{{ __('Have your say') }}</span>
     <h1>{{ __('Polls & surveys') }}</h1>
     <p class="lede">{{ __('Take part in the network’s polls and see the overall results. Votes are anonymous.') }}</p>
 </div></div>

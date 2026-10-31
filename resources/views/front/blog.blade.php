@@ -6,7 +6,6 @@
 @section('content')
 
 <div class="pagehead"><div class="shell">
-    <span class="kicker">{{ __('News') }}</span>
     <h1>{{ tf($page_data,'page_title') }}</h1>
 </div></div>
 

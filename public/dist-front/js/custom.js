@@ -318,3 +318,25 @@ function fallbackCopy(text, done) {
         update();
     });
 })();
+
+/* Header over a hero photograph: transparent at the top of the page, solid once scrolled.
+   The hero is pulled up under the bar, so the bar's height has to be measured. */
+(function () {
+    var body = document.body;
+    if (!body.classList.contains('float-head') || body.classList.contains('no-float')) return;
+    var head = document.querySelector('.masthead');
+    if (!head) return;
+
+    function measure() {
+        document.documentElement.style.setProperty('--masthead-h', head.offsetHeight + 'px');
+    }
+    function onScroll() {
+        head.classList.toggle('is-solid', window.scrollY > 20);
+    }
+
+    measure();
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', measure);
+    if (document.fonts && document.fonts.ready) { document.fonts.ready.then(measure); }
+})();

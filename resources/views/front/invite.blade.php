@@ -1,5 +1,8 @@
 @extends('front.layouts.master')
 
+{{-- opens on a light surface, so the header keeps its solid background --}}
+@section('body_class', 'no-float')
+
 @section('banner')
 @endsection
 

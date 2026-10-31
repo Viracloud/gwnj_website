@@ -14,7 +14,7 @@
 
             @php($donate_item = $global_nav->firstWhere('route_name', 'donate'))
             <div>
-                <h4>{{ __('ABOUT') }}</h4>
+                <h4>{{ __('About') }}</h4>
                 <ul>
                     @foreach($global_footer_items->where('footer_column', 'about') as $item)
                     <li><a href="{{ $item->resolvedUrl() }}" @if($item->open_new_tab) target="_blank" rel="noopener" @endif>{{ $item->label() }}</a></li>
@@ -23,7 +23,7 @@
             </div>
 
             <div>
-                <h4>{{ __('OUR WORK') }}</h4>
+                <h4>{{ __('Our work') }}</h4>
                 <ul>
                     @foreach($global_footer_items->where('footer_column', 'work') as $item)
                     <li><a href="{{ $item->resolvedUrl() }}" @if($item->open_new_tab) target="_blank" rel="noopener" @endif>{{ $item->label() }}</a></li>
@@ -32,7 +32,7 @@
             </div>
 
             <div>
-                <h4>{{ __('GET INVOLVED') }}</h4>
+                <h4>{{ __('Get involved') }}</h4>
                 <ul>
                     @if($global_menu->menu_login_status == 'Show')<li><a href="{{ route('register') }}">{{ __('Become a member') }}</a></li>@endif
                     @if($donate_item)<li><a href="{{ $donate_item->resolvedUrl() }}">{{ $donate_item->label() }}</a></li>@endif
@@ -42,7 +42,7 @@
 
             @php($transparency_item = \App\Models\MenuItem::where('label', 'Transparency & Accountability')->first())
             <div>
-                <h4>{{ __('ACCOUNTABILITY') }}</h4>
+                <h4>{{ __('Accountability') }}</h4>
                 <ul>
                     @if($transparency_item)<li><a href="{{ $transparency_item->resolvedUrl() }}">{{ $transparency_item->label() }}</a></li>@endif
                     <li><a href="{{ route('terms') }}">{{ __('Terms') }}</a></li>
@@ -54,7 +54,7 @@
         </div>
 
         <div style="max-width:420px;margin-top:var(--s7)">
-            <h4>{{ __('SUBSCRIBE') }}</h4>
+            <h4>{{ __('Subscribe') }}</h4>
             <form action="{{ route('subscriber_send_email') }}" class="footer-subscribe form_subscribe_ajax" method="post">
                 @csrf
                 <input name="email" type="email" required placeholder="{{ __('Your email address') }}">

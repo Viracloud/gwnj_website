@@ -69,7 +69,12 @@
 
     @include('front.layouts.styles')
 
-    @php $page_cover = $global_setting->banner && file_exists(public_path('uploads/'.$global_setting->banner)); @endphp
+    @php
+        $page_cover = $global_setting->banner && file_exists(public_path('uploads/'.$global_setting->banner));
+        // The header floats over a dark banner. Pages that open on a light surface
+        // (sign-in and the like) switch it off with @section('body_class', 'no-float').
+        $float_head = $page_cover;
+    @endphp
 
     <style>
         :root{
@@ -82,7 +87,13 @@
     </style>
 
 </head>
-<body class="gwjn{{ $page_cover ? ' has-page-cover' : '' }}">
+@php
+        $body_classes = array_unique(array_filter(array_merge(
+            ['gwjn', $page_cover ? 'has-page-cover' : '', $float_head ? 'float-head' : ''],
+            preg_split('/\s+/', trim($__env->yieldContent('body_class')))
+        )));
+    @endphp
+<body class="{{ implode(' ', $body_classes) }}">
     @include('front.layouts.top')
     @include('front.layouts.nav')
     @include('front.layouts.mobile-nav')

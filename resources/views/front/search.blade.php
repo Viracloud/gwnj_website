@@ -6,7 +6,6 @@
 @section('content')
 
 <div class="pagehead"><div class="shell">
-    <span class="kicker">{{ __('Search') }}</span>
     <h1>{{ __('Search results for ":term"', ['term' => $search_text]) }}</h1>
 </div></div>
 

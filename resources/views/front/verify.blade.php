@@ -5,7 +5,6 @@
 
 @section('content')
 <div class="pagehead"><div class="shell">
-    <span class="kicker">{{ __('Membership Verification') }}</span>
     <h1>{{ __('Membership card status') }}</h1>
 </div></div>
 

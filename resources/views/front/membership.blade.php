@@ -34,7 +34,6 @@
 
 @section('content')
 <div class="pagehead"><div class="shell">
-    <span class="kicker">{{ __('Membership') }}</span>
     <h1>{{ __('How to become a member') }}</h1>
     <p class="lede">
         {{ __('Membership is open to everyone committed to justice, equality and freedom for women. Follow the steps below.') }}

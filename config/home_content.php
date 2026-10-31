@@ -13,8 +13,8 @@ return [
             'title' => 'Top banner (slider)',
             'help' => 'The big photo, heading, paragraph and main button are edited in Home Page → Hero Slider. The texts below are the small line above the heading and the two secondary buttons.',
             'fields' => [
-                'hero_org' => ['label' => 'Small line above the heading', 'type' => 'text',
-                    'en' => "GLOBAL WOMEN'S JUSTICE NETWORK · EST. 2021", 'fa' => 'شبکه جهانی عدالت برای زنان · تأسیس ۲۰۲۱'],
+                'hero_org' => ['label' => 'Small line above the heading (optional; the logo already names the network)', 'type' => 'text',
+                    'en' => '', 'fa' => ''],
                 'hero_heading' => ['label' => 'Heading (only used when no slider exists)', 'type' => 'text',
                     'en' => 'Advocating for justice, equality, freedom and the rights of women.', 'fa' => 'دفاع از عدالت، برابری، آزادی و حقوق زنان.'],
                 'hero_text' => ['label' => 'Paragraph (only used when no slider exists)', 'type' => 'textarea',
@@ -86,7 +86,7 @@ return [
             'help' => 'The cards come from the menu (Our Work / News & Media sub-items).',
             'toggle' => 'show_work',
             'fields' => [
-                'work_kicker' => ['label' => 'Small label', 'type' => 'text', 'en' => 'What we do', 'fa' => 'کار ما'],
+                'work_kicker' => ['label' => 'Small label above the heading (optional)', 'type' => 'text', 'en' => '', 'fa' => ''],
                 'work_heading' => ['label' => 'Heading', 'type' => 'text', 'en' => 'Areas of work', 'fa' => 'حوزه‌های کاری ما'],
                 'work_desc' => ['label' => 'Short description', 'type' => 'textarea',
                     'en' => 'Each area combines documentation, public mobilisation and advocacy before international bodies.',
@@ -100,7 +100,7 @@ return [
             'title' => 'Team section',
             'help' => 'Members come from Team Members. The heading and show/hide are in Home Page → Home Page Settings (if left empty there, the heading below is used).',
             'fields' => [
-                'team_kicker' => ['label' => 'Small label', 'type' => 'text', 'en' => 'Our people', 'fa' => 'تیم ما'],
+                'team_kicker' => ['label' => 'Small label above the heading (optional)', 'type' => 'text', 'en' => '', 'fa' => ''],
                 'team_heading' => ['label' => 'Heading (fallback)', 'type' => 'text', 'en' => 'Network coordinators', 'fa' => 'هماهنگ‌کنندگان شبکه'],
                 'team_more' => ['label' => 'Link on the right', 'type' => 'text', 'en' => 'All members', 'fa' => 'همهٔ اعضا'],
             ],
@@ -110,7 +110,7 @@ return [
             'title' => 'Events section',
             'help' => 'Events come from Events. The heading can also be set in Home Page → Home Page Settings (if left empty there, the heading below is used).',
             'fields' => [
-                'events_kicker' => ['label' => 'Small label', 'type' => 'text', 'en' => 'Events', 'fa' => 'رویدادها'],
+                'events_kicker' => ['label' => 'Small label above the heading (optional)', 'type' => 'text', 'en' => '', 'fa' => ''],
                 'events_heading' => ['label' => 'Heading (fallback)', 'type' => 'text', 'en' => 'Protests, conferences and meetings', 'fa' => 'اعتراضات، کنفرانس‌ها و نشست‌ها'],
                 'events_more' => ['label' => 'Link on the right', 'type' => 'text', 'en' => 'Full events calendar', 'fa' => 'تقویم کامل رویدادها'],
                 'events_details' => ['label' => 'Button on each event', 'type' => 'text', 'en' => 'Details', 'fa' => 'جزئیات', 'scope' => '*'],
@@ -122,7 +122,7 @@ return [
             'help' => 'Photos come from Gallery.',
             'toggle' => 'show_gallery',
             'fields' => [
-                'gallery_kicker' => ['label' => 'Small label', 'type' => 'text', 'en' => 'Gallery', 'fa' => 'گالری'],
+                'gallery_kicker' => ['label' => 'Small label above the heading (optional)', 'type' => 'text', 'en' => '', 'fa' => ''],
                 'gallery_heading' => ['label' => 'Heading', 'type' => 'text', 'en' => 'Recent activities', 'fa' => 'فعالیت‌های اخیر'],
                 'gallery_more' => ['label' => 'Link on the right', 'type' => 'text', 'en' => 'Photos & videos', 'fa' => 'عکس‌ها و ویدیوها'],
             ],
@@ -133,7 +133,7 @@ return [
             'help' => 'Reports come from Publications.',
             'toggle' => 'show_pubs',
             'fields' => [
-                'pubs_kicker' => ['label' => 'Small label', 'type' => 'text', 'en' => 'Publications', 'fa' => 'انتشارات'],
+                'pubs_kicker' => ['label' => 'Small label above the heading (optional)', 'type' => 'text', 'en' => '', 'fa' => ''],
                 'pubs_heading' => ['label' => 'Heading', 'type' => 'text', 'en' => 'Recently published reports', 'fa' => 'گزارش‌های اخیر'],
                 'pubs_more' => ['label' => 'Link on the right', 'type' => 'text', 'en' => 'All publications', 'fa' => 'همهٔ گزارش‌ها'],
                 'pubs_download' => ['label' => 'Download button', 'type' => 'text', 'en' => 'Download PDF', 'fa' => 'دانلود PDF', 'scope' => '*'],
@@ -144,7 +144,7 @@ return [
             'title' => 'News section',
             'help' => 'Posts come from Blog → Posts. The heading can also be set in Home Page → Home Page Settings (if left empty there, the heading below is used).',
             'fields' => [
-                'news_kicker' => ['label' => 'Small label', 'type' => 'text', 'en' => 'News & updates', 'fa' => 'اخبار و به‌روزرسانی‌ها'],
+                'news_kicker' => ['label' => 'Small label above the heading (optional)', 'type' => 'text', 'en' => '', 'fa' => ''],
                 'news_heading' => ['label' => 'Heading (fallback)', 'type' => 'text', 'en' => 'Latest from the network', 'fa' => 'تازه‌ترین‌های شبکه'],
                 'news_more' => ['label' => 'Link on the right', 'type' => 'text', 'en' => 'All news', 'fa' => 'همهٔ اخبار'],
                 'news_readmore' => ['label' => 'Button at the bottom of each news card (all pages)', 'type' => 'text', 'en' => 'Read more', 'fa' => 'ادامه مطلب', 'scope' => '*'],
@@ -156,7 +156,7 @@ return [
             'help' => 'Leave a link empty to use the default page.',
             'toggle' => 'show_paths',
             'fields' => [
-                'paths_kicker' => ['label' => 'Small label', 'type' => 'text', 'en' => 'Get involved', 'fa' => 'مشارکت'],
+                'paths_kicker' => ['label' => 'Small label above the heading (optional)', 'type' => 'text', 'en' => '', 'fa' => ''],
                 'paths_heading' => ['label' => 'Heading', 'type' => 'text', 'en' => 'Three ways to take part', 'fa' => 'سه راه برای مشارکت'],
                 'paths_1_title' => ['label' => 'Box 1 - title', 'type' => 'text', 'en' => 'Become a member', 'fa' => 'عضویت در شبکه'],
                 'paths_1_text' => ['label' => 'Box 1 - text', 'type' => 'textarea',
@@ -184,7 +184,7 @@ return [
             'help' => 'The partner tiles come from the menu (Partnerships sub-items).',
             'toggle' => 'show_partners',
             'fields' => [
-                'partners_kicker' => ['label' => 'Small label', 'type' => 'text', 'en' => 'Partnerships', 'fa' => 'همکاری‌ها'],
+                'partners_kicker' => ['label' => 'Small label above the heading (optional)', 'type' => 'text', 'en' => '', 'fa' => ''],
                 'partners_heading' => ['label' => 'Heading', 'type' => 'text', 'en' => 'We work with organisations and institutions', 'fa' => 'همکاری با سازمان‌ها و نهادها'],
                 'partners_desc' => ['label' => 'Short description', 'type' => 'textarea',
                     'en' => 'We partner with different kinds of organisations, from human rights groups to international bodies.',
