@@ -319,8 +319,8 @@ function fallbackCopy(text, done) {
     });
 })();
 
-/* Header over a hero photograph: transparent at the top of the page, solid once scrolled.
-   The hero is pulled up under the bar, so the bar's height has to be measured. */
+/* Header over a dark banner: cleared while the page is at the top, solid once scrolled.
+   The banner is pulled up under the bar, so the bar's height has to be measured. */
 (function () {
     var body = document.body;
     if (!body.classList.contains('float-head') || body.classList.contains('no-float')) return;
@@ -331,7 +331,7 @@ function fallbackCopy(text, done) {
         document.documentElement.style.setProperty('--masthead-h', head.offsetHeight + 'px');
     }
     function onScroll() {
-        head.classList.toggle('is-solid', window.scrollY > 20);
+        head.classList.toggle('is-clear', window.scrollY <= 20);
     }
 
     measure();

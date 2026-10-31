@@ -48,6 +48,19 @@
   --measure:66ch; --shell:1220px;
   --r:8px; --r-btn:10px; --r-lg:14px; --r-card:20px; --r-pill:100px;
 
+  /* Card tones, shared by the poll tiles and the "ways to take part" cards, so the
+     same colour is the same paint in both. Each is a lit corner over a diagonal. */
+  --tone-brand:radial-gradient(120% 85% at 88% 6%,color-mix(in srgb,var(--brand) 62%,white),transparent 60%),
+               linear-gradient(160deg,var(--brand),color-mix(in srgb,var(--brand) 55%,black));
+  --tone-signal:radial-gradient(120% 85% at 88% 6%,color-mix(in srgb,var(--signal) 62%,white),transparent 60%),
+                linear-gradient(160deg,var(--signal),color-mix(in srgb,var(--signal) 55%,black));
+  --tone-hope:radial-gradient(120% 85% at 88% 6%,color-mix(in srgb,var(--hope) 55%,white),transparent 60%),
+              linear-gradient(160deg,var(--hope),color-mix(in srgb,var(--hope) 52%,black));
+  --tone-navy:radial-gradient(120% 85% at 88% 6%,#2f5494,transparent 60%),
+              linear-gradient(160deg,#1c3463,#0b1733);
+  --tone-sand:radial-gradient(120% 85% at 88% 6%,#fdfaf4,transparent 60%),
+              linear-gradient(160deg,#f3ecdf,#ddceb5);
+
   /* buttons: a tight two-layer shadow reads as a real control, not a glowing sticker */
   --btn-shadow:0 1px 1px color-mix(in srgb, var(--ink) 9%, transparent),
                0 3px 8px -4px color-mix(in srgb, var(--ink) 24%, transparent);
@@ -202,7 +215,8 @@ nav.main{margin-inline-start:auto;display:flex;align-items:center;gap:var(--s5)}
 nav.main > ul{display:flex;gap:var(--s5);list-style:none;margin:0;padding:0}
 nav.main li.dropdown{position:relative;list-style:none;display:inline-flex;align-items:center}
 nav.main a{font-family:var(--font-ui);font-size:var(--t-sm);font-weight:600;
-  text-decoration:none;padding-block:.45rem;border-bottom:2px solid transparent;transition:all .2s;color:var(--ink)}
+  text-decoration:none;padding-block:.45rem;border-bottom:2px solid transparent;color:var(--ink);
+  transition:color .2s var(--ease),border-color .2s var(--ease)}
 nav.main a:hover,nav.main a.here,nav.main a.active{border-bottom-color:var(--glow);color:var(--brand)}
 nav.main .dropdown-menu{border:1px solid var(--rule);border-radius:var(--r);box-shadow:var(--shadow-sm);padding:.4rem;
   list-style:none;margin:.4rem 0 0;min-width:200px}
@@ -507,9 +521,9 @@ html[dir="rtl"] .sig-count b{letter-spacing:0}
 .paths{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--s5)}
 .path{border-radius:var(--r-lg);padding:var(--s6);color:#fff;display:flex;flex-direction:column;
   position:relative;overflow:hidden}
-.path:nth-child(1){background:linear-gradient(140deg,var(--brand),var(--glow))}
-.path:nth-child(2){background:linear-gradient(140deg,color-mix(in srgb, var(--signal) 85%, black),var(--signal))}
-.path:nth-child(3){background:linear-gradient(140deg,color-mix(in srgb, var(--hope) 70%, black),var(--hope))}
+.path:nth-child(1){background:var(--tone-brand)}
+.path:nth-child(2){background:var(--tone-signal)}
+.path:nth-child(3){background:var(--tone-hope)}
 .path h3{font-size:var(--t-lg);margin-bottom:var(--s3);color:#fff}
 .path p{font-size:var(--t-sm);opacity:.93;margin-bottom:var(--s5);flex:1;color:#fff}
 .path .btn{align-self:flex-start;background:#fff;color:var(--ink)}
@@ -1291,78 +1305,70 @@ html[dir="rtl"] .video-link::before{content:'\25C0'}
 html.vmodal-lock{overflow:hidden}
 
 /* ===== Home: latest news =====
-   A register of dispatches, not a row of cards: the band is the surface, hairlines
-   divide the entries, and the date leads each one. Nothing is boxed, so the only
-   things competing for attention are the photograph and the headlines. */
-.news-dark{position:relative;overflow:hidden;color:#fff;
-  margin-inline:clamp(12px,3vw,48px);border-radius:clamp(22px,3vw,40px);
-  background:radial-gradient(1100px 520px at 50% 122%,color-mix(in srgb,var(--brand) 88%,white),transparent 72%),
-             radial-gradient(820px 460px at 2% -12%,color-mix(in srgb,var(--brand) 58%,transparent),transparent 70%),
-             linear-gradient(180deg,color-mix(in srgb,var(--brand) 20%,#150c26) 0%,color-mix(in srgb,var(--brand) 58%,#150c26) 100%)}
-.news-dark .sec-head{align-items:baseline;padding-bottom:var(--s5);
-  border-bottom:1px solid rgba(255,255,255,.18);margin-bottom:var(--s6)}
-.news-dark .sec-head h2{color:#fff}
-.news-dark .more{color:#fff;border-bottom-color:rgba(255,255,255,.45)}
-.news-dark .more:hover{color:#fff;border-bottom-color:#fff}
+   A register of dispatches on the page itself. No panel, no band: a rule opens the
+   block, hairlines divide the entries, the date leads each one, and the photograph
+   is the only thing carrying colour. */
+.news-block{background:var(--paper);border-top:1px solid var(--rule)}
+.news-block .sec-head{align-items:baseline;padding-bottom:var(--s5);
+  border-bottom:1px solid var(--rule);margin-bottom:var(--s6)}
 
 .news-grid{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(0,1fr);gap:var(--s7)}
 .news-grid.solo{grid-template-columns:minmax(0,1fr)}
 
-/* shared: the line that opens every entry */
+/* the line that opens every entry */
 .news-meta{display:flex;flex-wrap:wrap;align-items:center;gap:.35rem 1rem;
-  font-family:var(--font-ui);font-size:var(--t-xs);color:rgba(255,255,255,.62)}
-.news-cat{color:color-mix(in srgb,var(--brand) 32%,white);font-weight:600}
+  font-family:var(--font-ui);font-size:var(--t-xs);color:var(--muted)}
+.news-cat{color:var(--brand);font-weight:600}
 
 /* the lead story: photograph, then the words under it */
-.news-lead{display:block;text-decoration:none;color:#fff}
+.news-lead{display:block;text-decoration:none;color:var(--ink)}
 .news-shot{display:block;aspect-ratio:16/10;overflow:hidden;border-radius:var(--r-lg);margin-bottom:var(--s4)}
 .news-shot img{width:100%;height:100%;object-fit:cover;
   transition:transform .8s cubic-bezier(.2,.8,.2,1)}
 .news-lead:hover .news-shot img{transform:scale(1.03)}
-.news-lead h3{margin:.55rem 0 0;color:#fff;font-family:var(--font-display);
+.news-lead h3{margin:.55rem 0 0;color:var(--ink);font-family:var(--font-display);
   font-size:clamp(1.5rem,2.3vw,2rem);font-weight:500;line-height:1.22;letter-spacing:-.015em;
   text-wrap:balance}
 html[dir="rtl"] .news-lead h3{font-weight:700;line-height:1.5;letter-spacing:0}
 .news-lead .news-sum{display:block;margin-top:var(--s3);max-width:54ch;
-  font-size:var(--t-sm);line-height:1.7;color:rgba(255,255,255,.76)}
+  font-size:var(--t-sm);line-height:1.7;color:var(--muted)}
 
 /* the rest: a ruled list down the narrow column */
-.news-list{list-style:none;margin:0;padding:0;counter-reset:none}
-.news-list li + li{border-top:1px solid rgba(255,255,255,.16)}
+.news-list{list-style:none;margin:0;padding:0}
+.news-list li + li{border-top:1px solid var(--rule)}
 .news-list a{display:grid;grid-template-columns:minmax(0,1fr) 84px;gap:var(--s4);
-  align-items:start;padding-block:var(--s5);text-decoration:none;color:#fff}
+  align-items:start;padding-block:var(--s5);text-decoration:none;color:var(--ink)}
 .news-list li:first-child a{padding-top:0}
 .news-list li:last-child a{padding-bottom:0}
-.news-list h3{margin:.4rem 0 0;color:#fff;font-family:var(--font-ui);
+.news-list h3{margin:.4rem 0 0;color:var(--ink);font-family:var(--font-ui);
   font-size:var(--t-base);font-weight:650;line-height:1.45;
   display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
 .news-list .news-sum{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
-  margin-top:.4rem;font-size:var(--t-xs);line-height:1.65;color:rgba(255,255,255,.62)}
+  margin-top:.4rem;font-size:var(--t-xs);line-height:1.65;color:var(--muted)}
 .news-thumb{grid-row:1 / span 4;grid-column:2;align-self:start;
   width:84px;height:84px;overflow:hidden;border-radius:var(--r)}
 .news-thumb img{width:100%;height:100%;object-fit:cover;
   transition:transform .8s cubic-bezier(.2,.8,.2,1)}
 .news-list a:hover .news-thumb img{transform:scale(1.06)}
 
-/* one link treatment everywhere: the rule under the words draws itself */
+/* one link treatment: the rule under the words draws itself */
 .news-go{display:inline-block;position:relative;margin-top:var(--s4);
-  font-family:var(--font-ui);font-size:var(--t-sm);font-weight:700;
-  color:color-mix(in srgb,var(--brand) 30%,white)}
+  font-family:var(--font-ui);font-size:var(--t-sm);font-weight:700;color:var(--brand)}
 .news-go::after{content:'';position:absolute;inset-inline-start:0;bottom:-3px;width:100%;height:1.5px;
   background:currentColor;transform:scaleX(0);transform-origin:center;
   transition:transform .35s var(--ease)}
 .news-lead:hover .news-go::after{transform:scaleX(1)}
 .news-list a h3,.news-lead h3{transition:color .25s var(--ease)}
-.news-list a:hover h3,.news-lead:hover h3{color:color-mix(in srgb,var(--brand) 34%,white)}
-.news-lead:focus-visible,.news-list a:focus-visible{outline:2px solid #fff;outline-offset:4px;border-radius:4px}
+.news-list a:hover h3,.news-lead:hover h3{color:var(--brand)}
+.news-lead:focus-visible,.news-list a:focus-visible{outline:2px solid var(--brand);outline-offset:4px;border-radius:4px}
 
 @media (max-width:991.98px){
   .news-grid{grid-template-columns:minmax(0,1fr);gap:var(--s6)}
-  .news-list{border-top:1px solid rgba(255,255,255,.16);padding-top:var(--s2)}
+  .news-list{border-top:1px solid var(--rule);padding-top:var(--s2)}
   .news-list li:first-child a{padding-top:var(--s5)}
 }
 @media (max-width:575.98px){
-  .news-dark .sec-head{padding-bottom:var(--s4);margin-bottom:var(--s5)}
+  .news-block .sec-head{padding-bottom:var(--s4);margin-bottom:var(--s5)}
   .news-list a{grid-template-columns:minmax(0,1fr) 64px;gap:var(--s3);padding-block:var(--s4)}
   .news-thumb{width:64px;height:64px}
   .news-lead .news-sum{max-width:none}
@@ -1389,13 +1395,12 @@ html[dir="rtl"] .news-lead h3{font-weight:700;line-height:1.5;letter-spacing:0}
 .ptile:hover{transform:translateY(var(--lift));color:var(--tile-ink);
   box-shadow:0 2px 4px rgba(12,7,22,.08),0 34px 60px -32px rgba(12,7,22,.8)}
 .ptile:focus-visible{outline:3px solid var(--brand);outline-offset:3px}
-.ptile.tone-navy{--tile-bg:radial-gradient(120% 85% at 88% 6%,#2f5494,transparent 60%),linear-gradient(160deg,#1c3463,#0b1733)}
-.ptile.tone-orange{--tile-bg:radial-gradient(120% 85% at 88% 6%,#ef7540,transparent 60%),linear-gradient(160deg,#d4551f,#90360f)}
-.ptile.tone-green{--tile-bg:radial-gradient(120% 85% at 88% 6%,#45b87a,transparent 60%),linear-gradient(160deg,#2d8f5c,#175634)}
+.ptile.tone-navy{--tile-bg:var(--tone-navy)}
+.ptile.tone-orange{--tile-bg:var(--tone-signal)}
+.ptile.tone-green{--tile-bg:var(--tone-hope)}
 .ptile.tone-sand{--tile-ink:#241d33;--tile-soft:rgba(36,29,51,.66);--tile-line:rgba(36,29,51,.12);
-  --tile-bg:radial-gradient(120% 85% at 88% 6%,#fdfaf4,transparent 60%),linear-gradient(160deg,#f3ecdf,#ddceb5)}
-.ptile.tone-brand{--tile-bg:radial-gradient(120% 85% at 88% 6%,color-mix(in srgb,var(--brand) 62%,white),transparent 60%),
-  linear-gradient(160deg,var(--brand),color-mix(in srgb,var(--brand) 55%,black))}
+  --tile-bg:var(--tone-sand)}
+.ptile.tone-brand{--tile-bg:var(--tone-brand)}
 /* top row: status tag + corner arrow */
 .ptile-top{display:flex;align-items:center;justify-content:space-between;gap:var(--s3)}
 .ptile-tag{display:inline-flex;align-items:center;gap:.45rem;padding:.4rem .9rem;border-radius:var(--r-pill);
@@ -1479,39 +1484,29 @@ html[dir="rtl"] .ptile-go svg{transform:scaleX(-1)}
   .ptile.is-open .ptile-tag::before{animation:none}
 }
 
-/* ===== Floating header over the hero =====
-   On a page that opens with a full-bleed photograph the bar sits on the picture
-   with nothing behind it. A few pixels of scroll turn it into the solid bar that
-   every other page uses, so the controls never lose their background. */
-.float-head:not(.no-float) .masthead{z-index:62;background:transparent;border-bottom-color:transparent;
-  -webkit-backdrop-filter:none;backdrop-filter:none;
-  /* pull the hero up so the photograph runs behind the whole top block */
-  margin-bottom:calc(-1 * var(--masthead-h, 92px));
-  transition:background-color .3s var(--ease),border-color .3s var(--ease)}
-/* give the banner back the space the bar now covers */
-.float-head:not(.no-float) .hero .shell{padding-top:calc(var(--s7) + var(--masthead-h, 80px))}
-.float-head:not(.no-float) .pagehead{padding-top:calc(var(--s8) + var(--masthead-h, 80px))}
+/* ===== Floating header over a dark banner =====
+   Where a page opens on the cover photograph the bar can sit on the picture with
+   nothing behind it. The SOLID bar is the resting state and the script clears it
+   while the page is at the top: if the script never runs, the page keeps the
+   ordinary header and nothing overlaps. */
+.float-head:not(.no-float) .masthead{z-index:62;
+  transition:background-color .3s var(--ease),border-color .3s var(--ease);
+  /* only once the script has measured the bar does the banner slide up behind it */
+  margin-bottom:calc(-1 * var(--masthead-h, 0px))}
+.float-head:not(.no-float) .hero .shell{padding-top:calc(var(--s7) + var(--masthead-h, 0px))}
+.float-head:not(.no-float) .pagehead{padding-top:calc(var(--s8) + var(--masthead-h, 0px))}
 
-.float-head:not(.no-float) .masthead .logo .wm b{color:#fff}
-.float-head:not(.no-float) .masthead .logo .wm span{color:rgba(255,255,255,.82)}
+/* at the top of the page: nothing behind the bar */
+.float-head:not(.no-float) .masthead.is-clear{background:transparent;border-bottom-color:transparent;
+  -webkit-backdrop-filter:none;backdrop-filter:none}
+.float-head:not(.no-float) .masthead.is-clear .logo .wm b{color:#fff}
+.float-head:not(.no-float) .masthead.is-clear .logo .wm span{color:rgba(255,255,255,.82)}
 /* Only the links sitting ON the photo turn white. The panel that opens below has
    its own light surface, so everything inside it keeps the normal colours. */
-.float-head:not(.no-float) nav.main > ul > li > a,
-.float-head:not(.no-float) nav.main > ul > li > .dropdown-caret{color:#fff}
-.float-head:not(.no-float) nav.main > ul > li > a:hover,
-.float-head:not(.no-float) nav.main > ul > li > a.here,
-.float-head:not(.no-float) nav.main > ul > li > a.active{color:#fff;border-bottom-color:#fff}
-.float-head:not(.no-float) .navbar-toggler{color:#fff}
-
-/* scrolled: back to the familiar solid bar */
-.float-head:not(.no-float) .masthead.is-solid{background:rgba(255,255,255,.92);border-bottom-color:var(--rule);
-  -webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}
-.float-head:not(.no-float) .masthead.is-solid .logo .wm b{color:var(--ink)}
-.float-head:not(.no-float) .masthead.is-solid .logo .wm span{color:var(--brand)}
-.float-head:not(.no-float) .masthead.is-solid nav.main > ul > li > a,
-.float-head:not(.no-float) .masthead.is-solid nav.main > ul > li > .dropdown-caret{color:var(--ink)}
-.float-head:not(.no-float) .masthead.is-solid nav.main > ul > li > a:hover,
-.float-head:not(.no-float) .masthead.is-solid nav.main > ul > li > a.here,
-.float-head:not(.no-float) .masthead.is-solid nav.main > ul > li > a.active{color:var(--brand);border-bottom-color:var(--glow)}
-.float-head:not(.no-float) .masthead.is-solid .navbar-toggler{color:var(--ink)}
+.float-head:not(.no-float) .masthead.is-clear nav.main > ul > li > a,
+.float-head:not(.no-float) .masthead.is-clear nav.main > ul > li > .dropdown-caret{color:#fff}
+.float-head:not(.no-float) .masthead.is-clear nav.main > ul > li > a:hover,
+.float-head:not(.no-float) .masthead.is-clear nav.main > ul > li > a.here,
+.float-head:not(.no-float) .masthead.is-clear nav.main > ul > li > a.active{color:#fff;border-bottom-color:#fff}
+.float-head:not(.no-float) .masthead.is-clear .navbar-toggler{color:#fff}
 @media (prefers-reduced-motion:reduce){.float-head:not(.no-float) .masthead{transition:none}}

@@ -289,7 +289,7 @@
 @endif
 
 @if($page_data->blog_status == 'Show' && $posts->count())
-<section class="news-dark"><div class="shell">
+<section class="news-block"><div class="shell">
     <div class="sec-head">
         <div class="txt">
             @if(hc('news_kicker'))<span class="kicker">{{ hc('news_kicker') }}</span>@endif
