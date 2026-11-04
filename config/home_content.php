@@ -24,8 +24,6 @@ return [
                     'en' => 'Join us', 'fa' => 'عضویت در شبکه'],
                 'hero_btn2' => ['label' => 'Second button (goes to Events)', 'type' => 'text',
                     'en' => 'Upcoming events', 'fa' => 'رویدادهای پیش رو'],
-                'hero_btn3' => ['label' => 'Third button (goes to About)', 'type' => 'text',
-                    'en' => 'About us', 'fa' => 'درباره ما'],
             ],
         ],
 
@@ -71,22 +69,13 @@ return [
             ],
         ],
 
-        'next' => [
-            'title' => 'Next event strip',
-            'help' => 'The coloured strip showing the nearest event (taken automatically from Events).',
-            'toggle' => 'show_next',
-            'fields' => [
-                'next_chip' => ['label' => 'Small label', 'type' => 'text', 'en' => 'Next public action', 'fa' => 'نزدیک‌ترین اقدام عمومی'],
-                'next_btn' => ['label' => 'Button text (only when the event has no button text)', 'type' => 'text', 'en' => 'Join', 'fa' => 'پیوستن'],
-            ],
-        ],
 
         'work' => [
             'title' => 'Areas of work',
             'help' => 'The cards come from the menu (Our Work / News & Media sub-items).',
             'toggle' => 'show_work',
             'fields' => [
-                'work_kicker' => ['label' => 'Small label above the heading (optional)', 'type' => 'text', 'en' => '', 'fa' => ''],
+                'work_kicker' => ['label' => 'Small label above the heading (optional)', 'type' => 'text', 'en' => 'What we do', 'fa' => 'کار ما'],
                 'work_heading' => ['label' => 'Heading', 'type' => 'text', 'en' => 'Areas of work', 'fa' => 'حوزه‌های کاری ما'],
                 'work_desc' => ['label' => 'Short description', 'type' => 'textarea',
                     'en' => 'Each area combines documentation, public mobilisation and advocacy before international bodies.',
@@ -110,7 +99,7 @@ return [
             'title' => 'Events section',
             'help' => 'Events come from Events. The heading can also be set in Home Page → Home Page Settings (if left empty there, the heading below is used).',
             'fields' => [
-                'events_kicker' => ['label' => 'Small label above the heading (optional)', 'type' => 'text', 'en' => '', 'fa' => ''],
+                'events_kicker' => ['label' => 'Small label above the heading (optional)', 'type' => 'text', 'en' => 'Our events', 'fa' => 'رویدادهای ما'],
                 'events_heading' => ['label' => 'Heading (fallback)', 'type' => 'text', 'en' => 'Protests, conferences and meetings', 'fa' => 'اعتراضات، کنفرانس‌ها و نشست‌ها'],
                 'events_more' => ['label' => 'Link on the right', 'type' => 'text', 'en' => 'Full events calendar', 'fa' => 'تقویم کامل رویدادها'],
                 'events_details' => ['label' => 'Button on each event', 'type' => 'text', 'en' => 'Details', 'fa' => 'جزئیات', 'scope' => '*'],
@@ -162,20 +151,17 @@ return [
                 'paths_1_text' => ['label' => 'Box 1 - text', 'type' => 'textarea',
                     'en' => 'Join a country chapter and help shape which campaigns we run next.',
                     'fa' => 'به شعبهٔ کشوری بپیوندید و در تعیین کمپاین‌های بعدی سهیم شوید.'],
-                'paths_1_btn' => ['label' => 'Box 1 - button', 'type' => 'text', 'en' => 'Apply for membership', 'fa' => 'درخواست عضویت'],
-                'paths_1_link' => ['label' => 'Box 1 - button link', 'type' => 'link', 'route' => 'register'],
+                'paths_1_link' => ['label' => 'Box 1 - link', 'type' => 'link', 'route' => 'register'],
                 'paths_2_title' => ['label' => 'Box 2 - title', 'type' => 'text', 'en' => 'Volunteer or coordinate', 'fa' => 'داوطلبی یا هماهنگی'],
                 'paths_2_text' => ['label' => 'Box 2 - text', 'type' => 'textarea',
                     'en' => 'Translate, document, organise a local action, or coordinate the network in your city.',
                     'fa' => 'ترجمه کنید، مستند کنید یا شبکه را در شهر خود هماهنگ کنید.'],
-                'paths_2_btn' => ['label' => 'Box 2 - button', 'type' => 'text', 'en' => 'Volunteer with us', 'fa' => 'داوطلب شوید'],
-                'paths_2_link' => ['label' => 'Box 2 - button link', 'type' => 'link', 'route' => 'contact'],
+                'paths_2_link' => ['label' => 'Box 2 - link', 'type' => 'link', 'route' => 'contact'],
                 'paths_3_title' => ['label' => 'Box 3 - title', 'type' => 'text', 'en' => 'Support our work', 'fa' => 'حمایت از کار ما'],
                 'paths_3_text' => ['label' => 'Box 3 - text', 'type' => 'textarea',
                     'en' => 'Funds go to campaigns, delegate travel and independent documentation.',
                     'fa' => 'کمک‌ها صرف کمپاین‌ها، سفر نمایندگان و مستندسازی مستقل می‌شود.'],
-                'paths_3_btn' => ['label' => 'Box 3 - button', 'type' => 'text', 'en' => 'Support our work', 'fa' => 'حمایت مالی'],
-                'paths_3_link' => ['label' => 'Box 3 - button link', 'type' => 'link', 'route' => 'donate'],
+                'paths_3_link' => ['label' => 'Box 3 - link', 'type' => 'link', 'route' => 'donate'],
             ],
         ],
 

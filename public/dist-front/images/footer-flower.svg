@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 420" fill="none" stroke="#d9c9ff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+  <!-- stems -->
+  <path d="M220 190C214 255 196 330 160 420"/>
+  <path d="M330 268C322 320 306 372 286 420"/>
+  <path d="M204 300C172 270 140 246 112 222"/>
+  <!-- leaves -->
+  <path d="M208 282C160 248 118 262 92 300C140 314 182 306 208 282Z" fill="#d9c9ff" fill-opacity=".14"/>
+  <path d="M206 282C164 282 128 290 96 299"/>
+  <path d="M190 352C238 316 282 322 312 352C268 368 226 368 190 352Z" fill="#d9c9ff" fill-opacity=".14"/>
+  <path d="M192 352C232 344 272 346 310 352"/>
+  <path d="M316 330C352 312 380 322 396 346C366 356 338 352 316 330Z" fill="#d9c9ff" fill-opacity=".14"/>
+  <!-- main bloom -->
+  <g transform="translate(222 140)" fill="#d9c9ff" fill-opacity=".16">
+    <ellipse cx="0" cy="-50" rx="21" ry="46"/>
+    <ellipse cx="0" cy="-50" rx="21" ry="46" transform="rotate(45)"/>
+    <ellipse cx="0" cy="-50" rx="21" ry="46" transform="rotate(90)"/>
+    <ellipse cx="0" cy="-50" rx="21" ry="46" transform="rotate(135)"/>
+    <ellipse cx="0" cy="-50" rx="21" ry="46" transform="rotate(180)"/>
+    <ellipse cx="0" cy="-50" rx="21" ry="46" transform="rotate(225)"/>
+    <ellipse cx="0" cy="-50" rx="21" ry="46" transform="rotate(270)"/>
+    <ellipse cx="0" cy="-50" rx="21" ry="46" transform="rotate(315)"/>
+    <circle r="20" fill-opacity=".35"/>
+    <circle r="3" cx="-7" cy="-5" fill="#d9c9ff" fill-opacity="1" stroke="none"/>
+    <circle r="3" cx="7" cy="-4" fill="#d9c9ff" fill-opacity="1" stroke="none"/>
+    <circle r="3" cx="0" cy="7" fill="#d9c9ff" fill-opacity="1" stroke="none"/>
+  </g>
+  <!-- second bloom -->
+  <g transform="translate(332 246)" fill="#d9c9ff" fill-opacity=".16">
+    <ellipse cx="0" cy="-27" rx="12" ry="25"/>
+    <ellipse cx="0" cy="-27" rx="12" ry="25" transform="rotate(60)"/>
+    <ellipse cx="0" cy="-27" rx="12" ry="25" transform="rotate(120)"/>
+    <ellipse cx="0" cy="-27" rx="12" ry="25" transform="rotate(180)"/>
+    <ellipse cx="0" cy="-27" rx="12" ry="25" transform="rotate(240)"/>
+    <ellipse cx="0" cy="-27" rx="12" ry="25" transform="rotate(300)"/>
+    <circle r="10" fill-opacity=".35"/>
+  </g>
+  <!-- bud -->
+  <g transform="translate(106 214) rotate(-35)" fill="#d9c9ff" fill-opacity=".18">
+    <path d="M0 0C-16-14-16-40 0-56C16-40 16-14 0 0Z"/>
+    <path d="M0 0C-22-6-30-26-24-42"/>
+    <path d="M0 0C22-6 30-26 24-42"/>
+  </g>
+</svg>

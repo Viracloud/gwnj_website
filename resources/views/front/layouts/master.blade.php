@@ -65,16 +65,11 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Vazirmatn:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@500;600;700&family=Vazirmatn:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
     @include('front.layouts.styles')
 
-    @php
-        $page_cover = $global_setting->banner && file_exists(public_path('uploads/'.$global_setting->banner));
-        // The header floats over a dark banner. Pages that open on a light surface
-        // (sign-in and the like) switch it off with @section('body_class', 'no-float').
-        $float_head = $page_cover;
-    @endphp
+    @php $page_cover = $global_setting->banner && file_exists(public_path('uploads/'.$global_setting->banner)); @endphp
 
     <style>
         :root{
@@ -89,7 +84,7 @@
 </head>
 @php
         $body_classes = array_unique(array_filter(array_merge(
-            ['gwjn', $page_cover ? 'has-page-cover' : '', $float_head ? 'float-head' : ''],
+            ['gwjn', $page_cover ? 'has-page-cover' : ''],
             preg_split('/\s+/', trim($__env->yieldContent('body_class')))
         )));
     @endphp

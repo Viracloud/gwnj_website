@@ -93,24 +93,24 @@
 <div class="statbar statbar-inline"><div class="shell"><div class="statbar-grid">
     <div class="stat">
         <div class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.6 3 2.6 15 0 18M12 3c-2.6 3-2.6 15 0 18"/></svg></div>
-        <b>{{ hc('stats_1_num') }}</b>        <span class="lb">{{ hc('stats_1_label') }}</span>
+        <b>{{ local_digits(hc('stats_1_num')) }}</b>        <span class="lb">{{ hc('stats_1_label') }}</span>
         <span class="cp">{{ hc('stats_1_caption') }}</span>
     </div>
     <div class="stat">
         <div class="ic"><svg viewBox="0 0 24 24"><path d="M12 21s-7-4.4-7-10a7 7 0 0114 0c0 5.6-7 10-7 10z"/><circle cx="12" cy="11" r="2.5"/></svg></div>
-        <b>{{ hc('stats_2_num') }}</b>
+        <b>{{ local_digits(hc('stats_2_num')) }}</b>
         <span class="lb">{{ hc('stats_2_label') }}</span>
         <span class="cp">{{ hc('stats_2_caption') }}</span>
     </div>
     <div class="stat">
         <div class="ic"><svg viewBox="0 0 24 24"><path d="M3 11v3l11 5V6L3 11z"/><path d="M14 8.5a3.5 3.5 0 010 8"/><path d="M6 15v4h3"/></svg></div>
-        <b>{{ hc('stats_3_num') }}</b>
+        <b>{{ local_digits(hc('stats_3_num')) }}</b>
         <span class="lb">{{ hc('stats_3_label') }}</span>
         <span class="cp">{{ hc('stats_3_caption') }}</span>
     </div>
     <div class="stat">
         <div class="ic"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><circle cx="17" cy="10" r="2.3"/><path d="M3 20c0-3.3 2.7-5 6-5s6 1.7 6 5M15.5 20c0-2.3 1.4-3.6 3.5-3.6s2.5 1 2.5 3.6"/></svg></div>
-        <b>{{ hc('stats_4_num') }}</b>
+        <b>{{ local_digits(hc('stats_4_num')) }}</b>
         <span class="lb">{{ hc('stats_4_label') }}</span>
         <span class="cp">{{ hc('stats_4_caption') }}</span>
     </div>
@@ -137,24 +137,5 @@
 </div></section>
 @endif
 
-<section class="shell">
-    <div class="sec-head"><div class="txt">
-        <span class="kicker">{{ hc('paths_kicker') }}</span>
-        <h2>{{ hc('paths_heading') }}</h2>
-    </div></div>
-    <div class="paths">
-        <div class="path">
-            <h3>{{ hc('paths_1_title') }}</h3>
-            <p>{{ hc('paths_1_text') }}</p>
-            <a class="btn" href="{{ hc_link('paths_1_link') }}">{{ hc('paths_1_btn') }}</a></div>
-        <div class="path">
-            <h3>{{ hc('paths_2_title') }}</h3>
-            <p>{{ hc('paths_2_text') }}</p>
-            <a class="btn" href="{{ hc_link('paths_2_link') }}">{{ hc('paths_2_btn') }}</a></div>
-        <div class="path">
-            <h3>{{ hc('paths_3_title') }}</h3>
-            <p>{{ hc('paths_3_text') }}</p>
-            <a class="btn" href="{{ hc_link('paths_3_link') }}">{{ hc('paths_3_btn') }}</a></div>
-    </div>
-</section>
+@include('front.partials.paths-band')
 @endsection

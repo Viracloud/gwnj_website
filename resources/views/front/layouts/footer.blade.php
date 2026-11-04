@@ -1,4 +1,5 @@
 <footer class="site">
+    <img class="ft-deco" src="{{ asset('dist-front/images/footer-flower.svg') }}" alt="" aria-hidden="true">
     <div class="shell">
         <div class="cols">
             <div class="about">
@@ -67,6 +68,10 @@
             <span>&copy; {{ date('Y') }} GWJN. {{ tf($global_setting,'footer_copyright') }}</span>
             <a href="{{ route('privacy') }}">{{ __('Privacy policy') }}</a>
             <a href="{{ route('terms') }}">{{ __('Terms') }}</a>
+            <form class="ft-search" action="{{ route('search') }}" method="get" role="search">
+                <input type="search" name="search_text" placeholder="{{ __('Search our site…') }}" aria-label="{{ __('Search') }}" required>
+                <button type="submit" aria-label="{{ __('Search') }}"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg></button>
+            </form>
         </div>
     </div>
 </footer>

@@ -45,6 +45,16 @@
                 @endforeach
             </ul>
 
+            <div class="nav-search">
+                <button type="button" class="nav-search-btn" aria-expanded="false" aria-controls="nav-search-panel" aria-label="{{ __('Search') }}">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+                </button>
+                <form id="nav-search-panel" class="nav-search-panel" action="{{ route('search') }}" method="get" role="search" hidden>
+                    <input type="search" name="search_text" placeholder="{{ __('Search our site…') }}" aria-label="{{ __('Search') }}" required>
+                    <button type="submit">{{ __('Search') }}</button>
+                </form>
+            </div>
+
             @foreach($global_nav as $item)
                 @if($item->is_button)
                 <a class="btn btn-brand" href="{{ $item->resolvedUrl() }}" @if($item->open_new_tab) target="_blank" rel="noopener" @endif>{{ $item->label() }}</a>

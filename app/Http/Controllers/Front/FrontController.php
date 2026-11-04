@@ -68,7 +68,7 @@ class FrontController extends Controller
         $events = Event::where('show_on_home','Yes')->orderBy('event_date','asc')->get();
         $members = Member::with('category')->where('show_on_home','Yes')->get()
             ->sortBy(fn($m) => [optional($m->category)->sort_order ?? 9999, $m->sort_order, $m->id])->values();
-        $posts = Post::where('show_on_home','Yes')->orderBy('id','desc')->take(3)->get();
+        $posts = Post::where('show_on_home','Yes')->orderBy('id','desc')->take(4)->get();
         $photos = Photo::orderBy('id','desc')->take(4)->get();
         $publications = Publication::where('status','Show')->orderBy('published_date','desc')->take(3)->get();
         $page_data = PageHomeItem::where('id',1)->first();

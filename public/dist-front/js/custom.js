@@ -319,24 +319,65 @@ function fallbackCopy(text, done) {
     });
 })();
 
-/* Header over a dark banner: cleared while the page is at the top, solid once scrolled.
-   The banner is pulled up under the bar, so the bar's height has to be measured. */
+/* Header search: the magnifier opens a small search field; Escape or a click elsewhere closes it. */
 (function () {
-    var body = document.body;
-    if (!body.classList.contains('float-head') || body.classList.contains('no-float')) return;
-    var head = document.querySelector('.masthead');
-    if (!head) return;
-
-    function measure() {
-        document.documentElement.style.setProperty('--masthead-h', head.offsetHeight + 'px');
+    var btn = document.querySelector('.nav-search-btn');
+    var panel = document.getElementById('nav-search-panel');
+    if (!btn || !panel) return;
+    function set(open) {
+        panel.hidden = !open;
+        btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+        if (open) panel.querySelector('input').focus();
     }
-    function onScroll() {
-        head.classList.toggle('is-clear', window.scrollY <= 20);
-    }
+    btn.addEventListener('click', function () { set(panel.hidden); });
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && !panel.hidden) { set(false); btn.focus(); }
+    });
+    document.addEventListener('click', function (e) {
+        if (!panel.hidden && !panel.contains(e.target) && !btn.contains(e.target)) set(false);
+    });
+})();
 
-    measure();
-    onScroll();
-    window.addEventListener('scroll', onScroll, { passive: true });
-    window.addEventListener('resize', measure);
-    if (document.fonts && document.fonts.ready) { document.fonts.ready.then(measure); }
+/* Hero slider: cross-fades the slides every 6 seconds; arrows, dots and swipe move it by hand.
+   It pauses while the pointer or keyboard focus is inside it. */
+(function () {
+    var hero = document.querySelector('[data-hero-slider]');
+    if (!hero) return;
+    var slides = hero.querySelectorAll('.hero-slide');
+    var dots = hero.querySelectorAll('.hero-dots button');
+    var rtl = document.documentElement.getAttribute('dir') === 'rtl';
+    var i = 0, timer = null, paused = false;
+    function show(n) {
+        slides[i].classList.remove('is-active');
+        slides[i].setAttribute('aria-hidden', 'true');
+        slides[i].inert = true;
+        if (dots[i]) dots[i].classList.remove('is-active');
+        i = (n + slides.length) % slides.length;
+        slides[i].classList.add('is-active');
+        slides[i].removeAttribute('aria-hidden');
+        slides[i].inert = false;
+        if (dots[i]) dots[i].classList.add('is-active');
+    }
+    function start() {
+        stop();
+        timer = setInterval(function () { if (!paused && !document.hidden) show(i + 1); }, 6000);
+    }
+    function stop() { if (timer) clearInterval(timer); }
+    for (var k = 1; k < slides.length; k++) slides[k].inert = true;
+    hero.querySelector('.hero-arrow.prev').addEventListener('click', function () { show(i - 1); start(); });
+    hero.querySelector('.hero-arrow.next').addEventListener('click', function () { show(i + 1); start(); });
+    dots.forEach(function (d, n) { d.addEventListener('click', function () { show(n); start(); }); });
+    hero.addEventListener('mouseenter', function () { paused = true; });
+    hero.addEventListener('mouseleave', function () { paused = false; });
+    hero.addEventListener('focusin', function () { paused = true; });
+    hero.addEventListener('focusout', function () { paused = false; });
+    var x0 = null;
+    hero.addEventListener('touchstart', function (e) { x0 = e.touches[0].clientX; }, { passive: true });
+    hero.addEventListener('touchend', function (e) {
+        if (x0 === null) return;
+        var dx = e.changedTouches[0].clientX - x0; x0 = null;
+        if (Math.abs(dx) < 40) return;
+        show(i + ((dx < 0) !== rtl ? 1 : -1)); start();
+    });
+    if (!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches)) start();
 })();
