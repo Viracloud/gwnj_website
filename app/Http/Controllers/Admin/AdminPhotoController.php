@@ -17,7 +17,7 @@ class AdminPhotoController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'image' => 'required|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'image' => 'required|mimes:jpeg,png,jpg,gif,webp|max:2048',
             'caption' => 'nullable|string|max:255',
         ]);
 
@@ -43,7 +43,7 @@ class AdminPhotoController extends Controller
         $photo = Photo::findOrFail($id);
         if($request->hasFile('image')) {
             $request->validate([
-                'image' => 'mimes:jpeg,png,jpg,gif,svg|max:2048',
+                'image' => 'mimes:jpeg,png,jpg,gif,webp|max:2048',
             ]);
             $final_name = 'photo_'.time().'.'.$request->image->extension();
             if($photo->image && file_exists(public_path('uploads/'.$photo->image))) {

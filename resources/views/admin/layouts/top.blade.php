@@ -21,9 +21,12 @@
                 <a href="{{ route('admin_profile') }}" class="text-dark-custom">
                     <i class="fa-regular fa-user"></i>Profile
                 </a>
-                <a href="{{ route('admin_logout') }}" class="text-danger-custom">
-                    <i class="fa-solid fa-right-from-bracket"></i>Logout
-                </a>
+                <form action="{{ route('admin_logout') }}" method="post" class="m-0">
+                    @csrf
+                    <button type="submit" class="text-danger-custom" style="display:flex;align-items:center;width:100%;border:0;background:none;font:inherit;text-align:start;cursor:pointer">
+                        <i class="fa-solid fa-right-from-bracket"></i>Logout
+                    </button>
+                </form>
             </div>
         </div>
     </div>

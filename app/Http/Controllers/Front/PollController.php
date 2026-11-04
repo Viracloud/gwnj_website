@@ -96,21 +96,40 @@ class PollController extends Controller
             return $back->with('error', __('Please answer at least one question.'));
         }
 
-        DB::transaction(function () use ($poll, $token, $ip_hash, $answers) {
-            $resp = PollResponse::create(['poll_id' => $poll->id, 'voter_token' => $token, 'ip_hash' => $ip_hash]);
-            foreach ($answers as $a) {
-                PollAnswer::create([
-                    'poll_response_id' => $resp->id,
-                    'poll_question_id' => $a['q'],
-                    'poll_option_id' => $a['option'] ?? null,
-                    'rating' => $a['rating'] ?? null,
-                    'text' => $a['text'] ?? null,
-                ]);
-            }
-        });
+        // The checks above are repeated inside the transaction with the poll's rows locked, so two
+        // submits at the same moment can't both pass; the unique (poll, voter) index is the last guard.
+        try {
+            $limit_reached = DB::transaction(function () use ($poll, $token, $ip_hash, $answers) {
+                $from_ip = PollResponse::where('poll_id', $poll->id)->where('ip_hash', $ip_hash)->lockForUpdate()->count();
+                if ($from_ip >= self::MAX_VOTES_PER_IP) {
+                    return true;
+                }
+                $this->storeResponse($poll, $token, $ip_hash, $answers);
+                return false;
+            });
+        } catch (\Illuminate\Database\UniqueConstraintViolationException $e) {
+            return $back->with('error', __('You have already taken part in this poll.'));
+        }
+        if ($limit_reached) {
+            return $back->with('error', __('The vote limit for this internet connection has been reached.'));
+        }
 
         Cookie::queue(self::VOTER_COOKIE, $token, 60 * 24 * 365 * 2); // two years
 
         return $back->with('success', __('Thank you! Your vote has been recorded.'));
+    }
+
+    private function storeResponse(Poll $poll, string $token, string $ip_hash, array $answers): void
+    {
+        $resp = PollResponse::create(['poll_id' => $poll->id, 'voter_token' => $token, 'ip_hash' => $ip_hash]);
+        foreach ($answers as $a) {
+            PollAnswer::create([
+                'poll_response_id' => $resp->id,
+                'poll_question_id' => $a['q'],
+                'poll_option_id' => $a['option'] ?? null,
+                'rating' => $a['rating'] ?? null,
+                'text' => $a['text'] ?? null,
+            ]);
+        }
     }
 }

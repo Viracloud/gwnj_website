@@ -26,7 +26,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body modal-body-custom">
-                <form action="{{ route('admin_menu_store') }}" method="post">
+                <form action="{{ route('admin_menu_store') }}" method="post" enctype="multipart/form-data">
                     @csrf
                     @include('admin.menu.form', ['item' => null, 'prefix' => 'add'])
                     <div class="mb-3">

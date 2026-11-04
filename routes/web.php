@@ -52,7 +52,7 @@ Route::get('/lang/{locale}', [FrontController::class, 'switch_lang'])->name('swi
 
 /*
 | Every public page lives under its language: /en/..., /fa/... (later /fr/..., /de/...).
-| Only switched-on languages (SITE_LOCALES in .env) match; the SetLocale middleware
+| Only published languages (Settings → Languages) match; the SetLocale middleware
 | applies the language and removes {locale} before the controller is called.
 */
 Route::prefix('{locale}')
@@ -63,7 +63,7 @@ Route::prefix('{locale}')
 Route::get('/', [FrontController::class, 'home'])->name('home');
 Route::get('/about', [FrontController::class, 'about'])->name('about');
 Route::get('/login', [FrontController::class, 'login'])->name('login');
-Route::post('/login',[FrontController::class,'login_submit'])->name('login_submit')->middleware('throttle:forms5');
+Route::post('/login',[FrontController::class,'login_submit'])->name('login_submit')->middleware('throttle:login');
 Route::get('/register', [FrontController::class, 'register'])->name('register');
 Route::post('/register_submit',[FrontController::class,'register_submit'])->name('register_submit')->middleware('throttle:forms5');
 Route::get('/register_verify/{token}/{email}',[FrontController::class,'register_verify'])->name('register_verify');
@@ -89,7 +89,7 @@ Route::get('/post/{slug}', [FrontController::class, 'post'])->name('post');
 Route::get('/category/{slug}', [FrontController::class, 'category'])->name('category');
 Route::get('/archive/{month}', [FrontController::class, 'archive'])->name('archive');
 Route::get('/tag/{tag}', [FrontController::class, 'tag'])->name('tag');
-Route::get('/search', [FrontController::class, 'search'])->name('search');
+Route::get('/search', [FrontController::class, 'search'])->name('search')->middleware('throttle:30,1');
 
 Route::post('/comment/store',[FrontController::class,'comment_store'])->name('comment_store')->middleware('throttle:forms5');
 Route::post('/reply/store',[FrontController::class,'reply_store'])->name('reply_store')->middleware('throttle:forms5');
@@ -121,7 +121,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/dashboard',[UserController::class,'dashboard'])->name('dashboard');
     Route::get('/profile',[UserController::class,'profile'])->name('profile');
     Route::post('/profile',[UserController::class,'profile_update'])->name('profile_update');
-    Route::get('/logout',[UserController::class,'logout'])->name('logout');
+    Route::post('/logout',[UserController::class,'logout'])->name('logout');
     Route::post('/membership/card/request', [MembershipController::class, 'card_request'])->name('membership_card_request');
     Route::get('/membership/card', [MembershipController::class, 'card'])->name('membership_card');
     Route::get('/membership/dues/pay', [MembershipController::class, 'dues_pay'])->name('membership_dues_pay');
@@ -141,8 +141,8 @@ Route::fallback(function (\Illuminate\Http\Request $request) {
 Route::prefix('admin')->group(function () {
     Route::get('/', function () {return redirect('/admin/login');});
     Route::get('/login',[AdminController::class,'login'])->name('admin_login');
-    Route::post('/login',[AdminController::class,'login_submit'])->name('admin_login_submit')->middleware('throttle:forms5');
-    Route::get('/logout',[AdminController::class,'logout'])->name('admin_logout');
+    Route::post('/login',[AdminController::class,'login_submit'])->name('admin_login_submit')->middleware('throttle:login');
+    Route::post('/logout',[AdminController::class,'logout'])->name('admin_logout');
     Route::get('/forget-password',[AdminController::class,'forget_password'])->name('admin_forget_password');
     Route::post('/forget_password_submit',[AdminController::class,'forget_password_submit'])->name('admin_forget_password_submit')->middleware('throttle:forms3');
     Route::get('/reset-password/{token}/{email}',[AdminController::class,'reset_password'])->name('admin_reset_password');
@@ -263,7 +263,6 @@ Route::middleware('admin')->prefix('admin')->group(function () {
         Route::post('/poll/{id}/google/url',[\App\Http\Controllers\Admin\AdminPollController::class,'google_save_url'])->name('admin_poll_google_url');
         Route::post('/poll/{id}/google/columns',[\App\Http\Controllers\Admin\AdminPollController::class,'google_save_columns'])->name('admin_poll_google_columns');
         Route::post('/poll/{id}/google/refresh',[\App\Http\Controllers\Admin\AdminPollController::class,'google_refresh'])->name('admin_poll_google_refresh');
-        Route::get('/poll/{id}/export',[\App\Http\Controllers\Admin\AdminPollController::class,'export'])->name('admin_poll_export');
 
         Route::post('/publication-category/store',[AdminPublicationCategoryController::class,'store'])->name('admin_publication_category_store');
         Route::post('/publication-category/update/{id}',[AdminPublicationCategoryController::class,'update'])->name('admin_publication_category_update');
@@ -312,18 +311,14 @@ Route::middleware('admin')->prefix('admin')->group(function () {
     // ===== Site-wide, financial and personal-data areas — super_admin only =====
     Route::middleware('role:super_admin')->group(function () {
         Route::get('/admin-user/index',[AdminAccountController::class,'index'])->name('admin_account_index');
-        Route::get('/setting/languages', function () {
-            $languages = [];
-            foreach (config('locales.supported') as $code => $meta) {
-                $languages[$code] = $meta + [
-                    'enabled' => in_array($code, enabled_locales(), true),
-                    'prepared' => in_array($code, config('locales.prepare', []), true),
-                    'progress' => $code === base_locale() ? null : \App\Support\LocaleColumns::completeness($code),
-                ];
-            }
-            return view('admin.setting.languages', compact('languages'));
-        })->name('admin_setting_languages');
+        Route::get('/setting/languages',[\App\Http\Controllers\Admin\AdminLanguageController::class,'index'])->name('admin_setting_languages');
+        Route::post('/setting/languages/store',[\App\Http\Controllers\Admin\AdminLanguageController::class,'store'])->name('admin_language_store');
+        Route::post('/setting/languages/update/{id}',[\App\Http\Controllers\Admin\AdminLanguageController::class,'update'])->name('admin_language_update');
+        Route::post('/setting/languages/default/{id}',[\App\Http\Controllers\Admin\AdminLanguageController::class,'make_default'])->name('admin_language_default');
+        Route::post('/setting/languages/delete/{id}',[\App\Http\Controllers\Admin\AdminLanguageController::class,'delete'])->name('admin_language_delete');
         Route::post('/poll/{id}/delete',[\App\Http\Controllers\Admin\AdminPollController::class,'delete'])->name('admin_poll_delete');
+        // full answers can identify respondents: super admin only
+        Route::get('/poll/{id}/export',[\App\Http\Controllers\Admin\AdminPollController::class,'export'])->name('admin_poll_export');
         Route::post('/admin-user/store',[AdminAccountController::class,'store'])->name('admin_account_store');
         Route::post('/admin-user/update/{id}',[AdminAccountController::class,'update'])->name('admin_account_update');
         Route::post('/admin-user/delete/{id}',[AdminAccountController::class,'delete'])->name('admin_account_delete');

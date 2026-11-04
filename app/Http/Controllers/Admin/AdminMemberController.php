@@ -20,7 +20,7 @@ class AdminMemberController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'image' => 'required|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'image' => 'required|mimes:jpeg,png,jpg,gif,webp|max:2048',
             'name' => 'required|string|max:255',
             'member_category_id' => 'required|exists:member_categories,id',
             'sort_order' => 'nullable|integer|min:0',
@@ -77,7 +77,7 @@ class AdminMemberController extends Controller
         $obj = Member::findOrFail($id);
         if($request->hasFile('image')) {
             $request->validate([
-                'image' => 'mimes:jpeg,png,jpg,gif,svg|max:2048',
+                'image' => 'mimes:jpeg,png,jpg,gif,webp|max:2048',
             ]);
             $final_name = 'member_image_'.time().'.'.$request->image->extension();
             if($obj->image && file_exists(public_path('uploads/'.$obj->image))) {
@@ -143,7 +143,7 @@ class AdminMemberController extends Controller
     {
         $request->validate([
             'name' => 'required|string',
-            'photo' => 'required|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'photo' => 'required|mimes:jpeg,png,jpg,gif,webp|max:2048',
         ]);
 
         $obj = new MemberAward();
@@ -172,7 +172,7 @@ class AdminMemberController extends Controller
 
         if($request->hasFile('photo')) {
             $request->validate([
-                'photo' => 'mimes:jpeg,png,jpg,gif,svg|max:2048',
+                'photo' => 'mimes:jpeg,png,jpg,gif,webp|max:2048',
             ]);
             $final_name = 'member_award_photo_'.time().'.'.$request->photo->extension();
             if($obj->photo && file_exists(public_path('uploads/'.$obj->photo))) {

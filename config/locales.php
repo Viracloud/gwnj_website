@@ -5,17 +5,16 @@
 | Website languages
 |--------------------------------------------------------------------------
 |
-| Every language the site *can* use is listed under "supported".
-| Which ones are switched on is controlled by SITE_LOCALES in .env, e.g.
-|
-|     SITE_LOCALES=en,fa          (current)
-|     SITE_LOCALES=en,fa,fr,de    (after French and German are approved)
+| Languages are managed in the admin panel (Settings → Languages, table
+| site_languages): AppServiceProvider replaces the values below with the table's.
+| The values here (and SITE_LOCALES / SITE_LOCALES_PREPARE / SITE_DEFAULT_LOCALE
+| in .env) only apply before that table exists, and fill it when it is created.
 |
 | English ("en") is the base language: its text lives in the plain columns
 | (title, content ...). Other languages use <column>_<code> (title_fa, title_fr ...),
 | and fall back to English when a translation is empty.
 |
-| After changing SITE_LOCALES on a server run:  php artisan config:clear
+| Hreflang, Open Graph and date settings of the built-in languages are kept from here.
 */
 
 $enabled = array_values(array_filter(array_map('trim', explode(',', (string) env('SITE_LOCALES', 'en,fa')))));

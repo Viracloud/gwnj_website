@@ -18,7 +18,7 @@ class AdminPartnerController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'logo' => 'required|mimes:jpeg,png,jpg,gif,svg,webp|max:2048',
+            'logo' => 'required|mimes:jpeg,png,jpg,gif,webp|max:2048',
             'website' => 'nullable|url|max:2048',
             'sort_order' => 'nullable|integer|min:0',
             'status' => 'required|in:Show,Hide',
@@ -58,7 +58,7 @@ class AdminPartnerController extends Controller
         $partner->status = $request->status;
 
         if ($request->hasFile('logo')) {
-            $request->validate(['logo' => 'mimes:jpeg,png,jpg,gif,svg,webp|max:2048']);
+            $request->validate(['logo' => 'mimes:jpeg,png,jpg,gif,webp|max:2048']);
             if ($partner->logo && file_exists(public_path('uploads/' . $partner->logo))) {
                 unlink(public_path('uploads/' . $partner->logo));
             }

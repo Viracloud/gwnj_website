@@ -70,6 +70,11 @@
                             <label class="form-label">{{ __('Confirm password') }}</label>
                             <input type="password" name="confirm_password" class="form-control">
                         </div>
+                        <div class="col-lg-6 mb-4">
+                            <label class="form-label">{{ __('Current password') }}</label>
+                            <input type="password" name="current_password" class="form-control" autocomplete="current-password">
+                            <small class="text-muted">{{ __('Needed only to change your e-mail or password.') }}</small>
+                        </div>
                     </div>
                     <button type="submit" class="btn btn-brand btn-lg">{{ __('Save changes') }}</button>
                 </form>

@@ -34,7 +34,7 @@ class AdminDonationController extends Controller
         $i = 0;
         foreach ($donations as $row) {
             $i++;
-            fputcsv($output, [
+            fputcsv($output, csv_safe([
                 $i,
                 $row->donor_name,
                 $row->donor_email,
@@ -44,7 +44,7 @@ class AdminDonationController extends Controller
                 $row->transaction_id,
                 $row->status,
                 $row->created_at,
-            ]);
+            ]));
         }
 
         fclose($output);

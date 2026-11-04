@@ -34,7 +34,7 @@
             @if(in_array($def['type'], ['shared', 'link']))
                 <input type="text" name="val[{{ $key }}]" class="form-control-custom"
                        value="{{ $row->value ?? '' }}"
-                       placeholder="{{ $def['type'] === 'shared' ? $def['en'] : 'Default: ' . $def['route'] . ' page (or type a full link)' }}">
+                       placeholder="{{ $def['type'] === 'shared' ? $def['en'] : 'Default: ' . ($def['route'] ?? ($def['menu'] ?? '')) . ' page (or type a full link)' }}">
                 @if($def['type'] === 'shared')<small class="text-muted">Same number in both languages.</small>@endif
             @else
             <div class="row g-2">

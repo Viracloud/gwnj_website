@@ -105,6 +105,14 @@ class AdminSettingController extends Controller
 
     public function top_bar_update(Request $request)
     {
+        // social links are web addresses only (no javascript: and the like)
+        $request->validate([
+            'top_bar_facebook' => ['nullable', 'string', 'max:255', 'not_regex:/^\s*(javascript|data|vbscript|file):/i'],
+            'top_bar_twitter' => ['nullable', 'string', 'max:255', 'not_regex:/^\s*(javascript|data|vbscript|file):/i'],
+            'top_bar_linkedin' => ['nullable', 'string', 'max:255', 'not_regex:/^\s*(javascript|data|vbscript|file):/i'],
+            'top_bar_instagram' => ['nullable', 'string', 'max:255', 'not_regex:/^\s*(javascript|data|vbscript|file):/i'],
+            'top_bar_email' => 'nullable|email|max:255',
+        ]);
         $setting = Setting::where('id',1)->first();
 
         $setting->top_bar_email = $request->top_bar_email;
@@ -128,6 +136,15 @@ class AdminSettingController extends Controller
 
     public function footer_update(Request $request)
     {
+        // social and website links are web addresses only (no javascript: and the like)
+        $request->validate([
+            'footer_facebook' => ['nullable', 'string', 'max:255', 'not_regex:/^\s*(javascript|data|vbscript|file):/i'],
+            'footer_twitter' => ['nullable', 'string', 'max:255', 'not_regex:/^\s*(javascript|data|vbscript|file):/i'],
+            'footer_linkedin' => ['nullable', 'string', 'max:255', 'not_regex:/^\s*(javascript|data|vbscript|file):/i'],
+            'footer_instagram' => ['nullable', 'string', 'max:255', 'not_regex:/^\s*(javascript|data|vbscript|file):/i'],
+            'footer_website' => ['nullable', 'string', 'max:255', 'not_regex:/^\s*(javascript|data|vbscript|file):/i'],
+            'footer_email' => 'nullable|email|max:255',
+        ]);
         $setting = Setting::where('id',1)->first();
 
         $setting->footer_facebook = $request->footer_facebook;
@@ -198,7 +215,10 @@ class AdminSettingController extends Controller
 
         $setting->paypal_mode = $request->paypal_mode;
         $setting->paypal_client_id = $request->paypal_client_id;
-        $setting->paypal_client_secret = $request->paypal_client_secret;
+        // The secret is never shown again in the form; an empty field keeps the saved one.
+        if ($request->filled('paypal_client_secret')) {
+            $setting->paypal_client_secret = $request->paypal_client_secret;
+        }
         $setting->paypal_currency = strtoupper($request->paypal_currency);
         $setting->membership_dues_amount = $request->membership_dues_amount !== '' ? $request->membership_dues_amount : null;
 

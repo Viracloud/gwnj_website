@@ -210,9 +210,12 @@
         @php
             $area_img = null;
             if ($i < 4) {
-                // An area's own image first; otherwise the next pool image no other card has used yet.
-                $area_img = $area_route_img[$area->route_name ?? ''] ?? null;
-                if (!$area_img || in_array($area_img, $area_used ?? [], true)) {
+                // The photo chosen for the card in the admin panel; else one from the area's own content
+                // (its page's gallery, or its latest event / post / campaign); else an unused pool image.
+                $area_img = $area->card_image
+                    ?: $area->customPage?->images()->first()?->image
+                    ?: ($area_route_img[$area->route_name ?? ''] ?? null);
+                if (!$area->card_image && (!$area_img || in_array($area_img, $area_used ?? [], true))) {
                     $area_img = $area_pool->first(fn($p) => !in_array($p, $area_used ?? [], true) && !in_array($p, $area_route_img, true))
                         ?? $area_pool->first(fn($p) => !in_array($p, $area_used ?? [], true));
                 }
@@ -408,9 +411,9 @@
 <section class="shell" data-ptrack>
     <div class="sec-head">
         <div class="txt">
-            <h2>{{ __('Polls & surveys') }}</h2>
+            <h2>{{ hc('polls_heading') }}</h2>
         </div>
-        <a class="more" href="{{ route('polls') }}">{{ __('All polls') }}</a>
+        <a class="more" href="{{ route('polls') }}">{{ hc('polls_more') }}</a>
         <div class="ptrack-nav">
             <button type="button" class="ptrack-btn" data-ptrack-prev aria-label="{{ __('Previous') }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="{{ $rtl ? 'M9 6l6 6-6 6' : 'M15 6l-6 6 6 6' }}"/></svg></button>
             <button type="button" class="ptrack-btn" data-ptrack-next aria-label="{{ __('Next') }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="{{ $rtl ? 'M15 6l-6 6 6 6' : 'M9 6l6 6-6 6' }}"/></svg></button>

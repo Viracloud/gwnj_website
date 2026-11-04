@@ -29,7 +29,11 @@ trait SavesExtraLocales
                 }
                 foreach ($fields as $field => $value) {
                     $column = $field.'_'.$locale;
-                    if (is_string($field) && preg_match('/^[a-z0-9_]+$/', $field) && self::hasLocaleColumn($model->getTable(), $column)) {
+                    // Only real translation fields (those that have a Dari "_fa" column), so a posted
+                    // name can never reach another column that happens to end in "_<code>" (e.g. "_id").
+                    if (is_string($field) && preg_match('/^[a-z0-9_]+$/', $field)
+                        && self::hasLocaleColumn($model->getTable(), $field.'_fa')
+                        && self::hasLocaleColumn($model->getTable(), $column)) {
                         $model->{$column} = is_string($value) ? $value : null;
                     }
                 }

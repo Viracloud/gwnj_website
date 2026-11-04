@@ -80,6 +80,20 @@
         </div>
     </div>
 
+    <div class="col-lg-12 mb-3">
+        <label class="label-custom">Card image <small>- photo on this item's card in the home page "Areas of work" section (items under "Our Work" and "News &amp; Media"; the first four cards show a photo). JPG, PNG or WebP, up to 4 MB, landscape.</small></label>
+        @if($item && $item->card_image)
+        <div class="d-flex align-items-center gap-3 mb-2">
+            <img src="{{ asset('uploads/'.$item->card_image) }}" alt="" style="width:160px;height:70px;object-fit:cover;border-radius:8px">
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="remove_card_image" id="{{ $prefix }}_remove_card_image">
+                <label class="form-check-label" for="{{ $prefix }}_remove_card_image">Remove this image</label>
+            </div>
+        </div>
+        @endif
+        <input type="file" name="card_image" accept="image/jpeg,image/png,image/webp" class="form-control-custom">
+    </div>
+
     <div class="col-lg-6 mb-3 d-flex align-items-end">
         <div class="form-check">
             <input class="form-check-input" type="checkbox" name="show_in_footer" id="{{ $prefix }}_show_in_footer" {{ $val('show_in_footer', true) ? 'checked' : '' }}>
@@ -91,6 +105,8 @@
         <select name="footer_column" class="form-control-custom">
             <option value="about" {{ $val('footer_column','about') == 'about' ? 'selected' : '' }}>About</option>
             <option value="work" {{ $val('footer_column') == 'work' ? 'selected' : '' }}>Our work</option>
+            <option value="involved" {{ $val('footer_column') == 'involved' ? 'selected' : '' }}>Get involved</option>
+            <option value="accountability" {{ $val('footer_column') == 'accountability' ? 'selected' : '' }}>Accountability</option>
         </select>
     </div>
 </div>

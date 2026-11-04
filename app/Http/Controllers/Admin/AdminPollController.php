@@ -265,7 +265,10 @@ class AdminPollController extends Controller
     {
         $poll = Poll::findOrFail($id);
         $results = $poll->results();
-        $text_answers = $poll->isGoogle() ? collect() : PollQuestion::where('poll_id', $poll->id)->where('type', 'text')
+        // Every role sees the totals; free-text answers can identify the person who wrote them,
+        // so only a super admin reads them (and downloads the full answers).
+        $can_see_answers = \Illuminate\Support\Facades\Auth::guard('admin')->user()->isSuperAdmin();
+        $text_answers = ($poll->isGoogle() || !$can_see_answers) ? collect() : PollQuestion::where('poll_id', $poll->id)->where('type', 'text')
             ->with(['answers' => fn ($q) => $q->whereNotNull('text')->where('text', '!=', '')->latest('id')])->get();
 
         return view('admin.poll.results', compact('poll', 'results', 'text_answers'));
@@ -284,7 +287,7 @@ class AdminPollController extends Controller
         return response()->streamDownload(function () use ($poll, $questions, $options) {
             $out = fopen('php://output', 'w');
             fwrite($out, "\xEF\xBB\xBF"); // so Excel opens Dari text correctly
-            fputcsv($out, array_merge(['Response #', 'Date'], $questions->pluck('question')->all()));
+            fputcsv($out, csv_safe(array_merge(['Response #', 'Date'], $questions->pluck('question')->all())));
             $poll->responses()->with('answers')->orderBy('id')->chunk(500, function ($chunk) use ($out, $questions, $options) {
                 foreach ($chunk as $resp) {
                     $byQ = $resp->answers->groupBy('poll_question_id');
@@ -297,7 +300,7 @@ class AdminPollController extends Controller
                             default => $ans->map(fn ($a) => optional($options->get($a->poll_option_id))->label)->filter()->implode(' | '),
                         };
                     }
-                    fputcsv($out, $row);
+                    fputcsv($out, csv_safe($row));
                 }
             });
             fclose($out);

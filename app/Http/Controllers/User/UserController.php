@@ -21,10 +21,11 @@ class UserController extends Controller
     {
         Auth::guard('web')->logout();
 
-        // Destroy all session data
-        session()->flush();
+        // End the session completely (new id, new CSRF token), so nothing is left on a shared device.
+        request()->session()->invalidate();
+        request()->session()->regenerateToken();
 
-        return redirect()->route('login')->with('success','Logout is successful!');
+        return redirect()->route('login')->with('success', __('Logout is successful!'));
     }
 
     public function profile()
@@ -49,9 +50,16 @@ class UserController extends Controller
 
         $user = User::where('id', Auth::guard('web')->user()->id)->first();
 
+        // Changing the e-mail or password needs the current password, so a session left open
+        // on a shared or seized device can't be used to take the account over.
+        $email_changed = strcasecmp((string) $request->email, (string) $user->email) !== 0;
+        if ($email_changed || $request->password != null) {
+            $request->validate(['current_password' => ['required', 'current_password:web']]);
+        }
+
         if($request->password != null) {
             $request->validate([
-                'password' => ['required','min:8'],
+                'password' => ['required','min:8','max:200'],
                 'confirm_password' => ['required','same:password'],
             ]);
             $user->password = Hash::make($request->password);
@@ -62,7 +70,8 @@ class UserController extends Controller
             if ($user->photo && file_exists(public_path('uploads/'.$user->photo))) {
                 unlink(public_path('uploads/'.$user->photo));
             }
-            $final_name = 'member_photo_'.time().'.'.$request->photo->extension();
+            // A random name: a time-based one could be guessed to collect members' photos.
+            $final_name = 'member_photo_'.bin2hex(random_bytes(16)).'.'.$request->photo->extension();
             $request->photo->move(public_path('uploads'), $final_name);
             $user->photo = $final_name;
         }
@@ -78,6 +87,10 @@ class UserController extends Controller
         $user->zip = $request->zip;
         $user->update();
 
-        return redirect()->back()->with('success','Profile update is successful!');
+        if ($request->password != null) {
+            Auth::guard('web')->logoutOtherDevices($request->password);
+        }
+
+        return redirect()->back()->with('success', __('Profile update is successful!'));
     }
 }

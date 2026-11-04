@@ -41,16 +41,19 @@ class AdminMenuController extends Controller
             'label_fa' => 'nullable|string|max:255',
             'parent_id' => 'nullable|exists:menu_items,id',
             'link_type' => 'required|in:route,custom_page,url',
-            'route_name' => 'nullable|string',
+            'route_name' => ['nullable', \Illuminate\Validation\Rule::in(array_keys(MenuItem::availableRoutes()))],
             'custom_page_id' => 'nullable|exists:custom_pages,id',
-            'url' => 'nullable|string|max:2048',
+            // web, site-relative, mail and phone links only (no javascript: and the like)
+            'url' => ['nullable', 'string', 'max:2048', 'regex:#^(https?://|/|\#|mailto:|tel:)#i'],
             'open_new_tab' => 'nullable',
             'is_button' => 'nullable',
             'show_in_footer' => 'nullable',
-            'footer_column' => 'required|in:about,work',
+            'footer_column' => 'required|in:about,work,involved,accountability',
             'order' => 'nullable|integer',
             'status' => 'required|in:Show,Hide',
+            'card_image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:4096',
         ]);
+        unset($data['card_image']); // stored by saveCardImage()
 
         $data['open_new_tab'] = $request->has('open_new_tab');
         $data['is_button'] = $request->has('is_button');
@@ -82,7 +85,8 @@ class AdminMenuController extends Controller
 
     public function store(Request $request)
     {
-        MenuItem::create($this->validated($request));
+        $item = MenuItem::create($this->validated($request));
+        $this->saveCardImage($request, $item);
 
         return redirect()->back()->with('success', 'Menu item created successfully.');
     }
@@ -99,14 +103,40 @@ class AdminMenuController extends Controller
         }
 
         $item->update($data);
+        $this->saveCardImage($request, $item);
 
         return redirect()->back()->with('success', 'Menu item updated successfully.');
     }
 
     public function delete($id)
     {
-        MenuItem::where('id', $id)->delete();
+        $item = MenuItem::findOrFail($id);
+        $this->removeCardImage($item);
+        $item->delete();
 
         return redirect()->back()->with('success', 'Menu item deleted successfully.');
+    }
+
+    /** Photo on the item's card in the home page "Areas of work" section: upload, replace or remove. */
+    private function saveCardImage(Request $request, MenuItem $item): void
+    {
+        if ($request->hasFile('card_image')) {
+            $this->removeCardImage($item);
+            $name = 'area_'.$item->id.'_'.time().'.'.$request->card_image->extension();
+            $request->card_image->move(public_path('uploads'), $name);
+            $item->card_image = $name;
+            $item->save();
+        } elseif ($request->has('remove_card_image') && $item->card_image) {
+            $this->removeCardImage($item);
+            $item->card_image = null;
+            $item->save();
+        }
+    }
+
+    private function removeCardImage(MenuItem $item): void
+    {
+        if ($item->card_image && is_file(public_path('uploads/'.$item->card_image))) {
+            unlink(public_path('uploads/'.$item->card_image));
+        }
     }
 }

@@ -17,7 +17,7 @@ class AdminSliderController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'image' => 'required|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'image' => 'required|mimes:jpeg,png,jpg,gif,webp|max:2048',
             'heading' => 'required|string|max:255',
             'text' => 'required|string',
         ]);
@@ -50,7 +50,7 @@ class AdminSliderController extends Controller
         $slider = Slider::findOrFail($id);
         if($request->hasFile('image')) {
             $request->validate([
-                'image' => 'mimes:jpeg,png,jpg,gif,svg|max:2048',
+                'image' => 'mimes:jpeg,png,jpg,gif,webp|max:2048',
             ]);
             $final_name = 'slider_'.time().'.'.$request->image->extension();
             if($slider->image && file_exists(public_path('uploads/'.$slider->image))) {

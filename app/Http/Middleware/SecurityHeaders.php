@@ -28,9 +28,16 @@ class SecurityHeaders
             $headers->set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
         }
 
-        // Admin and member pages hold personal data: never let browsers or proxies cache them.
-        if ($request->is('admin', 'admin/*', 'dashboard', 'profile', 'membership/*')) {
+        // Admin and member pages hold personal data: never let browsers or proxies cache them,
+        // so nothing can be recovered from a shared or seized device after logout or Quick exit.
+        // Public pages live under /{locale}/..., hence the "*/" patterns.
+        if ($request->is('admin', 'admin/*', '*/dashboard', '*/profile', '*/membership/*', '*/invite/*',
+            '*/reset-password/*', '*/verify/*', '*/register_verify/*', '*/subscriber/verify/*', '*/login', '*/register')) {
             $headers->set('Cache-Control', 'no-store, private');
+        }
+        // Personal pages and one-time links stay out of search engines.
+        if ($request->is('*/membership/*', '*/invite/*', '*/reset-password/*', '*/verify/*', '*/register_verify/*', '*/subscriber/verify/*', '*/dashboard', '*/profile')) {
+            $headers->set('X-Robots-Tag', 'noindex, nofollow');
         }
 
         $headers->remove('X-Powered-By');

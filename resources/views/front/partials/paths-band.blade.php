@@ -11,7 +11,7 @@
         <div class="paths-intro">
             @if(hc('paths_kicker'))<span class="kicker">{{ hc('paths_kicker') }}</span>@endif
             <h2>{{ hc('paths_heading') }}</h2>
-            <p>{{ __("Join our network and help us defend women's rights.") }}</p>
+            <p>{{ hc('paths_text') }}</p>
         </div>
         <div class="paths">
             @foreach([1, 2, 3] as $n)

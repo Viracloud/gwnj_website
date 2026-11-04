@@ -23,7 +23,7 @@ class AdminPostController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'image' => 'required|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'image' => 'required|mimes:jpeg,png,jpg,gif,webp|max:2048',
             'title' => 'required|string|max:255',
             'slug' => 'nullable|alpha_dash|max:255',
             'description' => 'required|string',
@@ -74,7 +74,7 @@ class AdminPostController extends Controller
         $obj = Post::findOrFail($id);
         if($request->hasFile('image')) {
             $request->validate([
-                'image' => 'mimes:jpeg,png,jpg,gif,svg|max:2048',
+                'image' => 'mimes:jpeg,png,jpg,gif,webp|max:2048',
             ]);
             $final_name = 'post_'.time().'.'.$request->image->extension();
             if($obj->image && file_exists(public_path('uploads/'.$obj->image))) {

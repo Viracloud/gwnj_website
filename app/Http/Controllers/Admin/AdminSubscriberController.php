@@ -33,7 +33,7 @@ class AdminSubscriberController extends Controller
         $i = 0;
         foreach ($subscribers as $row) {
             $i++;
-            fputcsv($output, [$i, $row->email]);
+            fputcsv($output, csv_safe([$i, $row->email]));
         }
         
         fclose($output);

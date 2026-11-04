@@ -3,8 +3,8 @@
         <a class="logo" href="{{ route('home') }}">
             <img src="{{ asset('uploads/'.$global_setting->logo_1) }}" alt="{{ config('app.name') }}">
             <span class="wm">
-                <b>{{ __("Global Women's Justice Network") }}</b>
-                <span>{{ __('EDUCATION · WORK · FREEDOM') }}</span>
+                <b>{{ hc('site_name') }}</b>
+                <span>{{ hc('site_tagline') }}</span>
             </span>
         </a>
 
@@ -57,7 +57,7 @@
 
             @foreach($global_nav as $item)
                 @if($item->is_button)
-                <a class="btn btn-brand" href="{{ $item->resolvedUrl() }}" @if($item->open_new_tab) target="_blank" rel="noopener" @endif>{{ $item->label() }}</a>
+                <a class="btn btn-brand nav-cta" href="{{ $item->resolvedUrl() }}" @if($item->open_new_tab) target="_blank" rel="noopener" @endif><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.5s-7.5-4.6-9.2-9.4C1.6 7.6 3.9 4.5 7.2 4.5c2 0 3.6 1.1 4.8 2.8 1.2-1.7 2.8-2.8 4.8-2.8 3.3 0 5.6 3.1 4.4 6.6-1.7 4.8-9.2 9.4-9.2 9.4z"/></svg>{{ $item->label() }}</a>
                 @endif
             @endforeach
         </nav>

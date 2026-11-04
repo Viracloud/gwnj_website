@@ -97,6 +97,8 @@ class AdminController extends Controller
     public function logout()
     {
         Auth::guard('admin')->logout();
+        request()->session()->invalidate();
+        request()->session()->regenerateToken();
         return redirect()->route('admin_login')->with('success','Logout is successful!');
     }
 
@@ -174,12 +176,17 @@ class AdminController extends Controller
 
         $admin = Admin::where('id', Auth::guard('admin')->user()->id)->first();
 
+        // Changing the e-mail or password needs the current password (an open session alone is not enough).
+        if (strcasecmp((string) $request->email, (string) $admin->email) !== 0 || $request->password != null) {
+            $request->validate(['current_password' => ['required', 'current_password:admin']]);
+        }
+
         if($request->hasFile('photo')) {
             $request->validate([
                 'photo' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
             ]);
 
-            $final_name = 'admin_'.time().'.'.$request->photo->extension();
+            $final_name = 'admin_'.bin2hex(random_bytes(8)).'.'.$request->photo->extension();
 
             if($admin->photo != null && file_exists(public_path('uploads/'.$admin->photo))) {
                 unlink(public_path('uploads/'.$admin->photo));

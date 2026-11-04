@@ -13,27 +13,18 @@
     <div class="verify-result verify-expired">
         <div class="verify-icon"><i class="fa-solid fa-circle-exclamation"></i></div>
         <h2>{{ __('This card has expired') }}</h2>
-        @if($user->photo)
-        <img class="verify-photo" src="{{ asset('uploads/'.$user->photo) }}" alt="{{ $user->fullName() }}">
-        @endif
-        <p class="mb-1"><b>{{ $user->fullName() }}</b></p>
-        <p class="text-muted">{{ __('Membership ID') }}: {{ $user->membership_id }}</p>
+        <p class="text-muted">{{ __('Membership ID') }}: <b dir="ltr">{{ $user->membership_id }}</b></p>
         <p class="text-muted">{{ __('Expired on') }}: {{ fdate($user->card_expires_at, 'j F Y') }}</p>
     </div>
     @elseif($user)
     <div class="verify-result verify-ok">
         <div class="verify-icon"><i class="fa-solid fa-circle-check"></i></div>
         <h2>{{ __('Valid membership') }}</h2>
-        @if($user->photo)
-        <img class="verify-photo" src="{{ asset('uploads/'.$user->photo) }}" alt="{{ $user->fullName() }}">
-        <p class="verify-hint">{{ __('Compare the card holder’s face with this photo.') }}</p>
-        @endif
-        <p class="mb-1"><b>{{ $user->fullName() }}</b></p>
-        <p class="text-muted">{{ __('Membership ID') }}: {{ $user->membership_id }}</p>
-        <p class="text-muted">{{ __('Active member since') }} {{ optional($user->membership_approved_at)->format('Y') }}</p>
+        <p class="text-muted">{{ __('Membership ID') }}: <b dir="ltr">{{ $user->membership_id }}</b></p>
         @if($user->card_expires_at)
         <p class="text-muted">{{ __('Card valid until') }}: {{ fdate($user->card_expires_at, 'j F Y') }}</p>
         @endif
+        <p class="verify-hint">{{ __('Check that this ID matches the one printed on the card.') }}</p>
     </div>
     @else
     <div class="verify-result verify-fail">

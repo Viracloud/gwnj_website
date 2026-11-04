@@ -41,7 +41,7 @@ class AdminMembershipController extends Controller
         $user->save();
 
         $subject = 'Your GWJN membership application has been approved';
-        $message = "Congratulations, {$user->name}!<br>Your GWJN membership application has been approved. Your membership ID is <b>{$membership_id}</b>.<br>You can now log in and request your digital membership card from your dashboard.";
+        $message = "Congratulations, ".e($user->name)."!<br>Your GWJN membership application has been approved. Your membership ID is <b>{$membership_id}</b>.<br>You can now log in and request your digital membership card from your dashboard.";
         \safe_mail($user->email, $subject, $message);
 
         return redirect()->back()->with('success', 'Application approved.');
@@ -55,7 +55,7 @@ class AdminMembershipController extends Controller
         $user->save();
 
         $subject = 'Your GWJN membership application';
-        $message = "Dear {$user->name},<br>Thank you for your interest in GWJN. After review, we are unable to approve your membership application at this time.";
+        $message = "Dear ".e($user->name).",<br>Thank you for your interest in GWJN. After review, we are unable to approve your membership application at this time.";
         if ($request->reason) {
             $message .= "<br><br>Reason: " . e($request->reason);
         }
@@ -118,7 +118,7 @@ class AdminMembershipController extends Controller
         $user->save();
 
         $subject = 'Your GWJN digital membership card is ready';
-        $message = "Dear {$user->name},<br>Your digital membership card has been issued. You can view and print it from your dashboard: <a href=\"" . route('membership_card') . "\">" . route('membership_card') . "</a>";
+        $message = "Dear ".e($user->name).",<br>Your digital membership card has been issued. You can view and print it from your dashboard: <a href=\"" . route('membership_card') . "\">" . route('membership_card') . "</a>";
         \safe_mail($user->email, $subject, $message);
 
         return redirect()->back()->with('success', 'Card issued.');
@@ -153,7 +153,7 @@ class AdminMembershipController extends Controller
         $user->save();
 
         $subject = 'Your GWJN digital membership card is ready';
-        $message = "Dear {$user->name},<br>Your digital membership card has been issued. You can view and print it from your dashboard: <a href=\"" . route('membership_card') . "\">" . route('membership_card') . "</a>";
+        $message = "Dear ".e($user->name).",<br>Your digital membership card has been issued. You can view and print it from your dashboard: <a href=\"" . route('membership_card') . "\">" . route('membership_card') . "</a>";
         \safe_mail($user->email, $subject, $message);
 
         return redirect()->back()->with('success', 'Card issued.');
@@ -190,7 +190,7 @@ class AdminMembershipController extends Controller
 
         $link = url('/invite/' . $invitation->token);
         $subject = 'You are invited to join GWJN';
-        $message = "Dear {$invitation->name},<br>The Global Women's Justice Network invites you to become a member.<br>Please follow this link to accept and complete your registration: <a href=\"{$link}\">{$link}</a>";
+        $message = "Dear ".e($invitation->name).",<br>The Global Women's Justice Network invites you to become a member.<br>Please follow this link to accept and complete your registration (valid for ".MembershipInvitation::VALID_DAYS." days): <a href=\"{$link}\">{$link}</a>";
         \safe_mail($invitation->email, $subject, $message);
 
         return redirect()->back()->with('success', 'Invitation sent.');

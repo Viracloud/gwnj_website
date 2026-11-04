@@ -11,7 +11,7 @@
         @if(Auth::guard('admin')->user()->canEditContent())
             @if($poll->isGoogle())
             <form action="{{ route('admin_poll_google_refresh', $poll->id) }}" method="post">@csrf<button class="btn btn-light"><i class="fa-solid fa-rotate me-1"></i>Refresh from Google</button></form>
-            @else
+            @elseif(Auth::guard('admin')->user()->isSuperAdmin())
             <a href="{{ route('admin_poll_export', $poll->id) }}" class="btn btn-light"><i class="fa-solid fa-file-csv me-1"></i>Download all answers (CSV)</a>
             @endif
         @endif

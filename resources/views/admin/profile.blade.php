@@ -51,6 +51,10 @@
                 <label class="label-custom">Confirm Password</label>
                 <input type="password" name="confirm_password" class="form-control-custom">
             </div>
+            <div class="mb-3">
+                <label class="label-custom">Current Password <small>- needed only to change the e-mail or password</small></label>
+                <input type="password" name="current_password" class="form-control-custom" autocomplete="current-password">
+            </div>
             <div>
                 <button type="submit" class="btn-admin-primary">Save Changes</button>
             </div>

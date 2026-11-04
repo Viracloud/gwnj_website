@@ -4,8 +4,8 @@ use App\Models\Setting;
 
 /* =====================================================================
    LANGUAGES
-   Languages are configured in config/locales.php and switched on with
-   SITE_LOCALES in .env. Every public page lives under /{locale}/...
+   Languages are managed in Settings → Languages (see config/locales.php).
+   Every public page lives under /{locale}/...
    ===================================================================== */
 
 if (!function_exists('enabled_locales')) {
@@ -490,7 +490,15 @@ if (!function_exists('hc_link')) {
         if ($v !== '') {
             return preg_match('#^(https?:)?//#i', $v) ? $v : url($v);
         }
-        $route = home_content_fields()[$key]['route'] ?? null;
+        $def = home_content_fields()[$key] ?? [];
+        // Default: a menu item (found by its English label), or a named route.
+        if (!empty($def['menu'])) {
+            $item = \App\Models\MenuItem::where('label', $def['menu'])->first();
+            if ($item) {
+                return $item->resolvedUrl();
+            }
+        }
+        $route = $def['route'] ?? null;
         return $route && \Illuminate\Support\Facades\Route::has($route) ? route($route) : '#';
     }
 }
@@ -672,13 +680,33 @@ if (!function_exists('safe_mail')) {
             \Mail::to($to)->send(new \App\Mail\Websitemail($subject, $body));
             return true;
         } catch (\Throwable $e) {
+            // No address or subject in the log: next to each other they would turn the log
+            // into a list of members. A hash still lets a developer match a known address.
+            $address = is_string($to) ? $to : (is_object($to) && isset($to->email) ? $to->email : '');
             \Illuminate\Support\Facades\Log::warning('safe_mail: send failed', [
-                'to' => is_string($to) ? $to : (is_object($to) && isset($to->email) ? $to->email : 'unknown'),
-                'subject' => $subject,
-                'error' => $e->getMessage(),
+                'to_hash' => substr(hash('sha256', strtolower((string) $address)), 0, 16),
+                'error' => get_class($e).': '.\Illuminate\Support\Str::limit($e->getMessage(), 200),
             ]);
             return false;
         }
+    }
+}
+
+if (!function_exists('csv_safe')) {
+    /**
+     * A CSV row safe to open in Excel / Google Sheets: text that starts like a formula
+     * (=, +, -, @, tab, CR) gets a leading apostrophe, so text typed on the public site
+     * (poll answers, donor names) can't run as a formula on staff computers.
+     */
+    function csv_safe(array $row): array
+    {
+        return array_map(function ($v) {
+            if (is_int($v) || is_float($v) || $v === null) {
+                return $v;
+            }
+            $v = (string) $v;
+            return preg_match('/^[=+\-@\t\r]/', $v) ? "'".$v : $v;
+        }, $row);
     }
 }
 

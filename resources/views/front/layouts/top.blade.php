@@ -1,8 +1,11 @@
 <div class="topbar">
     <div class="shell">
-        <a class="tb-link" href="{{ route('blog') }}">{{ __('Media centre') }}</a>
-        <a class="tb-link" href="{{ route('donate') }}">{{ __('Transparency') }}</a>
-        <a class="tb-link" href="{{ route('contact') }}">{{ __('Contact') }}</a>
+        @foreach([1, 2, 3] as $n)
+            @php $tb_text = trim(hc('topbar_'.$n.'_text')); @endphp
+            @if($tb_text !== '' && $tb_text !== '-')
+        <a class="tb-link" href="{{ hc_link('topbar_'.$n.'_link') }}">{{ $tb_text }}</a>
+            @endif
+        @endforeach
         <span class="sp"></span>
         <div class="lang-switch dropdown">
             <button type="button" class="lang-switch-toggle" data-bs-toggle="dropdown" aria-expanded="false">
@@ -24,6 +27,6 @@
             <a href="{{ route('login') }}">{{ tf($global_menu, 'menu_login_name') }}</a>
             @endif
         @endif
-        <button type="button" class="exit" onclick="window.location.replace('https://www.google.com')">{{ __('Quick exit') }}</button>
+        <button type="button" class="exit" onclick="window.location.replace('https://www.google.com')"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 4h3a2 2 0 012 2v12a2 2 0 01-2 2h-3M10 17l-5-5 5-5M5 12h11"/></svg>{{ __('Quick exit') }}</button>
     </div>
 </div>

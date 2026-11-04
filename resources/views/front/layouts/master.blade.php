@@ -24,7 +24,7 @@
     @endif
 
     <meta property="og:type" content="website">
-    <meta property="og:site_name" content="Global Women's Justice Network">
+    <meta property="og:site_name" content="{{ hc('site_name') }}">
     <meta property="og:title" content="{{ $seo['title'] }}">
     <meta property="og:description" content="{{ $seo['description'] }}">
     <meta property="og:url" content="{{ $seo['canonical'] }}">
@@ -48,7 +48,7 @@
             $global_setting->footer_linkedin ?? null,
             $global_setting->footer_instagram ?? null,
         ])),
-    ], JSON_UNESCAPED_SLASHES) !!}
+    ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP) !!}
     </script>
 
     @if($global_setting->seo_analytics_id)

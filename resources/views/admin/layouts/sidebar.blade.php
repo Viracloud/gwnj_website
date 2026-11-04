@@ -215,7 +215,6 @@
                 <a href="{{ route('admin_setting_banner') }}" class="nav-link nav-sub-link {{ Request::is('admin/setting/banner*') ? 'active' : '' }}">Inner Page Cover Image</a>
                 <a href="{{ route('admin_setting_top_bar') }}" class="nav-link nav-sub-link {{ Request::is('admin/setting/top-bar*') ? 'active' : '' }}">Top Bar</a>
                 <a href="{{ route('admin_setting_footer') }}" class="nav-link nav-sub-link {{ Request::is('admin/setting/footer*') ? 'active' : '' }}">Footer</a>
-                <a href="{{ route('admin_setting_layout_direction') }}" class="nav-link nav-sub-link {{ Request::is('admin/setting/layout-direction*') ? 'active' : '' }}">Default Language</a>
             </div>
         </div>
 

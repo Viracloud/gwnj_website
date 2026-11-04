@@ -18,7 +18,7 @@ class MembershipController extends Controller
 {
     public function invite_show($token)
     {
-        $invitation = MembershipInvitation::where('token', $token)->where('status', 'pending')->first();
+        $invitation = MembershipInvitation::where('token', $token)->usable()->first();
         if (!$invitation) {
             abort(404);
         }
@@ -27,9 +27,15 @@ class MembershipController extends Controller
 
     public function invite_submit(Request $request, $token)
     {
-        $invitation = MembershipInvitation::where('token', $token)->where('status', 'pending')->first();
+        $invitation = MembershipInvitation::where('token', $token)->usable()->first();
         if (!$invitation) {
             abort(404);
+        }
+
+        // An invitation never replaces the password of an existing account: that person signs in
+        // (or uses "Forgot password"), so an old invitation e-mail can't be used to take it over.
+        if (User::where('email', $invitation->email)->whereNotNull('password')->where('password', '!=', '')->exists()) {
+            return redirect()->route('login')->with('error', __('An account with this e-mail address already exists. Please log in, or use "Forgot password".'));
         }
 
         $request->validate([
@@ -40,24 +46,31 @@ class MembershipController extends Controller
             'agree_bylaws' => 'required',
         ]);
 
-        $user = User::where('email', $invitation->email)->first();
-        if (!$user) {
-            $user = new User();
-            $user->email = $invitation->email;
+        // Claim the invitation first, in one statement: of two submits at the same moment only one wins.
+        $claimed = \Illuminate\Support\Facades\DB::transaction(function () use ($invitation, $request) {
+            if (!MembershipInvitation::where('id', $invitation->id)->usable()->update(['status' => 'used'])) {
+                return false;
+            }
+            $user = User::where('email', $invitation->email)->first();
+            if (!$user) {
+                $user = new User();
+                $user->email = $invitation->email;
+            }
+            $user->name = $request->name;
+            $user->password = Hash::make($request->password);
+            $user->email_verified_at = $user->email_verified_at ?? now();
+            $user->membership_type = $request->membership_type;
+            if ($user->membership_status === 'none' || !$user->membership_status) {
+                $user->membership_status = 'pending';
+                $user->membership_source = 'invited';
+                $user->membership_applied_at = now();
+            }
+            $user->save();
+            return true;
+        });
+        if (!$claimed) {
+            abort(404);
         }
-        $user->name = $request->name;
-        $user->password = Hash::make($request->password);
-        $user->email_verified_at = $user->email_verified_at ?? now();
-        $user->membership_type = $request->membership_type;
-        if ($user->membership_status === 'none' || !$user->membership_status) {
-            $user->membership_status = 'pending';
-            $user->membership_source = 'invited';
-            $user->membership_applied_at = now();
-        }
-        $user->save();
-
-        $invitation->status = 'used';
-        $invitation->save();
 
         return redirect()->route('login')->with('success', __('Your account has been created. You can log in now.'));
     }
@@ -101,7 +114,11 @@ class MembershipController extends Controller
 
     public function verify($token)
     {
-        $user = User::where('verification_token', $token)->where('card_status', 'issued')->first();
+        // Only an issued card of an approved member counts. The page says no more than whether the card
+        // is valid, and shows the membership ID to compare with the card: no name or photo, so a
+        // scanned or photographed card doesn't reveal who the member is.
+        $user = User::where('verification_token', $token)->where('card_status', 'issued')
+            ->where('membership_status', 'approved')->first();
         return view('front.verify', compact('user'));
     }
 

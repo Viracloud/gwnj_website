@@ -127,7 +127,7 @@ class FrontController extends Controller
         // Check if email and password are correct
         $user = User::where('email',$request->email)->where('email_verified_at','!=',null)->first();
         if(!$user) {
-            return redirect()->route('login')->with('error','The information you entered is incorrect! Please try again!');
+            return redirect()->route('login')->with('error', __('The information you entered is incorrect! Please try again!'));
         }
 
         $check = $request->all();
@@ -137,9 +137,9 @@ class FrontController extends Controller
         ];
 
         if(Auth::guard('web')->attempt($data)) {
-            return redirect()->route('dashboard')->with('success','You are logged in successfully!');
+            return redirect()->route('dashboard')->with('success', __('You are logged in successfully!'));
         } else {
-            return redirect()->route('login')->with('error','The information you entered is incorrect! Please try again!');
+            return redirect()->route('login')->with('error', __('The information you entered is incorrect! Please try again!'));
         }
     }
 
@@ -156,12 +156,22 @@ class FrontController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:100',
-            'email' => 'required|email|max:150|unique:users',
+            'email' => 'required|email|max:150',
             'password' => 'required|min:8|max:200',
             'confirm_password' => 'required|same:password',
             'membership_type' => 'required|in:regular,founding,honorary,affiliate,organizational',
             'agree_bylaws' => 'required',
         ]);
+
+        $done_message = __('Your registration is completed. Please check your email for verification. If you do not find the email in your inbox, please check your spam folder.');
+
+        // Same answer whether or not the address already has an account, so the form can't be used
+        // to find out who is a member; the owner of the address is told instead.
+        if (User::where('email', $request->email)->exists()) {
+            \safe_mail($request->email, __('Registration attempt'),
+                e(__('Someone tried to register a GWJN account with this e-mail address, which already has an account. If it was you, sign in or use "Forgot password". If it was not you, you can ignore this e-mail.')));
+            return redirect()->back()->with('success', $done_message);
+        }
 
         $user = new User();
         $user->name = $request->name;
@@ -173,26 +183,21 @@ class FrontController extends Controller
         $user->save();
 
         $verification_link = url('register_verify/'.$token.'/'.$request->email);
-        $subject = "Registration Verification";
-        $message = "To complete registration, please click on the link below:<br>";
+        $subject = __('Registration Verification');
+        $message = e(__('To complete registration, please click on the link below:'))."<br>";
         $message .= "<a href='".$verification_link."'>".$verification_link."</a>";
 
         $mail_sent = \safe_mail($request->email, $subject, $message);
 
         if (!$mail_sent) {
-            // Mail delivery is down - don't leave the applicant permanently stuck
-            // unable to log in just because the confirmation email couldn't go out.
-            $user->email_verified_at = now();
-            $user->remember_token = '';
-            $user->membership_status = 'pending';
-            $user->membership_source = 'self';
-            $user->membership_applied_at = now();
-            $user->save();
-
-            return redirect()->route('login')->with('success', __('Your membership application has been submitted. You can log in now.'));
+            // Never verify an address nobody has confirmed: anyone could then register in a real
+            // activist's name. Remove the unconfirmed account so the person can simply try again.
+            $user->delete();
+            return redirect()->back()->withInput($request->except('password', 'confirm_password'))
+                ->with('error', __('We could not send the confirmation e-mail right now. Please try again later.'));
         }
 
-        return redirect()->back()->with('success','Your registration is completed. Please check your email for verification. If you do not find the email in your inbox, please check your spam folder.');
+        return redirect()->back()->with('success', $done_message);
     }
 
     public function register_verify($token,$email)
@@ -210,7 +215,7 @@ class FrontController extends Controller
         }
         $user->save();
 
-        return redirect()->route('login')->with('success', 'Your email is verified. You can login now.');
+        return redirect()->route('login')->with('success', __('Your email is verified. You can login now.'));
     }
 
     public function forget_password()
@@ -228,7 +233,7 @@ class FrontController extends Controller
             'email' => 'required|email|max:150',
         ]);
 
-        $sent_message = 'If an account exists for this email, we have sent a password reset link to it. Please check your inbox and your spam folder.';
+        $sent_message = __('If an account exists for this email, we have sent a password reset link to it. Please check your inbox and your spam folder.');
 
         // Same answer whether or not the account exists, so the form can't be used to discover members' emails.
         $user = User::where('email',$request->email)->first();
@@ -241,8 +246,8 @@ class FrontController extends Controller
         $user->update();
 
         $reset_link = url('reset-password/'.$token.'/'.$request->email);
-        $subject = "Password Reset";
-        $message = "To reset password, please click on the link below:<br>";
+        $subject = __('Password Reset');
+        $message = e(__('To reset password, please click on the link below:'))."<br>";
         $message .= "<a href='".$reset_link."'>".$reset_link."</a>";
 
         \safe_mail($request->email, $subject, $message);
@@ -254,7 +259,7 @@ class FrontController extends Controller
     {
         $user = User::where('email',$email)->where('remember_token',$token)->first();
         if(!$user || token_expired($token)) {
-            return redirect()->route('login')->with('error','This password reset link is invalid or has expired. Please request a new one.');
+            return redirect()->route('login')->with('error', __('This password reset link is invalid or has expired. Please request a new one.'));
         }
         $page_data = PageLoginItem::where('id',1)->first();
         return view('front.reset-password', compact('token','email','page_data'));
@@ -269,13 +274,13 @@ class FrontController extends Controller
 
         $user = User::where('email',$email)->where('remember_token',$token)->first();
         if(!$user || token_expired($token)) {
-            return redirect()->route('login')->with('error','This password reset link is invalid or has expired. Please request a new one.');
+            return redirect()->route('login')->with('error', __('This password reset link is invalid or has expired. Please request a new one.'));
         }
         $user->password = Hash::make($request->password);
         $user->remember_token = "";
         $user->update();
 
-        return redirect()->route('login')->with('success','Password reset is successful. You can login now.');
+        return redirect()->route('login')->with('success', __('Password reset is successful. You can login now.'));
     }
 
     public function gallery()
@@ -439,7 +444,7 @@ class FrontController extends Controller
 
     public function search(Request $request)
     {
-        $search_text = $request->search_text;
+        $search_text = (string) ($request->validate(['search_text' => 'nullable|string|max:100'])['search_text'] ?? '');
         $posts = Post::where('title', 'LIKE', '%' . $search_text . '%')
                         ->orWhere('description', 'LIKE', '%' . $search_text . '%')
                         ->orderBy('id','desc')
@@ -479,14 +484,15 @@ class FrontController extends Controller
             \safe_mail($admin_email, $subject, $message);
         }
 
-        return redirect()->back()->with('success', 'Comment submitted successfully and is pending for the admin approval.');
+        return redirect()->back()->with('success', __('Comment submitted successfully and is pending for the admin approval.'));
     }
 
     public function reply_store(Request $request)
     {
         $validated = $request->validate([
             'post_id' => 'required|integer|exists:posts,id',
-            'comment_id' => 'required|integer|exists:comments,id',
+            // only an approved comment of this same post can be replied to
+            'comment_id' => ['required', 'integer', \Illuminate\Validation\Rule::exists('comments', 'id')->where('post_id', (int) $request->post_id)->where('status', 'Approved')],
             'name' => 'required|string|max:100',
             'email' => 'required|email|max:150',
             'reply' => 'required|string|max:3000',
@@ -517,7 +523,7 @@ class FrontController extends Controller
             \safe_mail($admin_email, $subject, $message);
         }
 
-        return redirect()->back()->with('success', 'Reply submitted successfully and is pending for the admin approval.');
+        return redirect()->back()->with('success', __('Reply submitted successfully and is pending for the admin approval.'));
     }
 
     public function terms()
@@ -555,7 +561,7 @@ class FrontController extends Controller
             \safe_mail($admin_email, $subject, $message);
         }
 
-        return redirect()->back()->with('success','Your message is sent successfully. We will contact you soon.');
+        return redirect()->back()->with('success', __('Your message is sent successfully. We will contact you soon.'));
     }
 
     public function donate()
@@ -571,13 +577,14 @@ class FrontController extends Controller
             'name' => 'required|string|max:100',
             'email' => 'required|email|max:150',
             'amount' => 'required|numeric|min:1|max:1000000',
+            'message' => 'nullable|string|max:1000',
         ]);
 
         $setting = Setting::where('id',1)->first();
         $currency = $setting->paypal_currency ?: 'USD';
 
         if(!$setting->paypal_client_id || !$setting->paypal_client_secret) {
-            return redirect()->back()->with('error','Online donation is not available right now. Please try again later.');
+            return redirect()->back()->with('error', __('Online donation is not available right now. Please try again later.'));
         }
 
         $this->configure_paypal($setting);
@@ -605,7 +612,7 @@ class FrontController extends Controller
                 ],
             ]);
         } catch (\Throwable $e) {
-            return redirect()->back()->with('error','We could not reach PayPal. Please try again later.');
+            return redirect()->back()->with('error', __('We could not reach PayPal. Please try again later.'));
         }
 
         if(isset($response['id']) && $response['id'] != null) {
@@ -671,7 +678,7 @@ class FrontController extends Controller
 
             session()->forget(['donate_name','donate_email','donate_message']);
 
-            return redirect()->route('donate')->with('success','Thank you! Your donation was received successfully.');
+            return redirect()->route('donate')->with('success', __('Thank you! Your donation was received successfully.'));
         }
 
         return redirect()->route('donate_cancel');
@@ -680,7 +687,7 @@ class FrontController extends Controller
     public function donate_cancel()
     {
         session()->forget(['donate_name','donate_email','donate_message']);
-        return redirect()->route('donate')->with('error','Your donation was not completed.');
+        return redirect()->route('donate')->with('error', __('Your donation was not completed.'));
     }
 
     private function configure_paypal($setting)
@@ -698,17 +705,22 @@ class FrontController extends Controller
     public function subscriber_send_email(Request $request)
     {
         $validator = Validator::make($request->all(),[
-            'email' => 'required|email|max:150|unique:subscribers,email'
+            'email' => 'required|email|max:150'
         ]);
 
         if(!$validator->passes()) {
             return response()->json(['code'=>0,'error_message'=>$validator->errors()->toArray()]);
         } else {
 
-            $token = secure_token();
-
-            $obj = new Subscriber();
+            // Same answer whether or not the address is already subscribed, so the form can't reveal
+            // who reads the newsletter. Confirmed subscribers get no new e-mail.
+            $obj = Subscriber::where('email', $request->email)->first() ?? new Subscriber();
             $obj->email = $request->email;
+            if ($obj->exists && (int) $obj->status === 1) {
+                return response()->json(['code'=>1,'success_message'=>__('Please check your email to confirm subscription')]);
+            }
+
+            $token = secure_token();
             $obj->token = $token;
             $obj->status = 0;
             $obj->save();
@@ -716,15 +728,15 @@ class FrontController extends Controller
             $verification_link = url('subscriber/verify/'.$request->email.'/'.$token);
 
             // Send email
-            $subject = 'Subscriber Verification';
-            $message = 'Please click on the link below to confirm subscription:<br>';
+            $subject = __('Subscriber Verification');
+            $message = e(__('Please click on the link below to confirm subscription:')).'<br>';
             $message .= '<a href="'.$verification_link.'">';
             $message .= $verification_link;
             $message .= '</a>';
 
             \safe_mail($request->email, $subject, $message);
 
-            return response()->json(['code'=>1,'success_message'=>'Please check your email to confirm subscription']);
+            return response()->json(['code'=>1,'success_message'=>__('Please check your email to confirm subscription')]);
         }
     }
 

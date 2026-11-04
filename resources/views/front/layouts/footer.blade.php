@@ -4,7 +4,7 @@
         <div class="cols">
             <div class="about">
                 <img src="{{ asset('uploads/'.$global_setting->logo_2) }}" alt="{{ config('app.name') }}">
-                <p>{{ __('An international network campaigning for justice, equality and freedom for women.') }}</p>
+                <p>{{ tf($global_setting, 'footer_about_text') ?: __('An international network campaigning for justice, equality and freedom for women.') }}</p>
                 <div class="social">
                     @if($global_setting->footer_facebook != '')<a href="{{ $global_setting->footer_facebook }}" target="_blank" rel="noopener"><i class="fab fa-facebook-f"></i></a>@endif
                     @if($global_setting->footer_twitter != '')<a href="{{ $global_setting->footer_twitter }}" target="_blank" rel="noopener"><i class="fab fa-twitter"></i></a>@endif
@@ -15,7 +15,7 @@
 
             @php($donate_item = $global_nav->firstWhere('route_name', 'donate'))
             <div>
-                <h4>{{ __('About') }}</h4>
+                <h4>{{ hc('footer_col_about') }}</h4>
                 <ul>
                     @foreach($global_footer_items->where('footer_column', 'about') as $item)
                     <li><a href="{{ $item->resolvedUrl() }}" @if($item->open_new_tab) target="_blank" rel="noopener" @endif>{{ $item->label() }}</a></li>
@@ -24,7 +24,7 @@
             </div>
 
             <div>
-                <h4>{{ __('Our work') }}</h4>
+                <h4>{{ hc('footer_col_work') }}</h4>
                 <ul>
                     @foreach($global_footer_items->where('footer_column', 'work') as $item)
                     <li><a href="{{ $item->resolvedUrl() }}" @if($item->open_new_tab) target="_blank" rel="noopener" @endif>{{ $item->label() }}</a></li>
@@ -32,22 +32,33 @@
                 </ul>
             </div>
 
+            {{-- Columns 3 and 4: the menu items assigned to them (Menu → Footer column), else the standard links. --}}
+            @php($involved_items = $global_footer_items->where('footer_column', 'involved'))
             <div>
-                <h4>{{ __('Get involved') }}</h4>
+                <h4>{{ hc('footer_col_involved') }}</h4>
                 <ul>
+                    @forelse($involved_items as $item)
+                    <li><a href="{{ $item->resolvedUrl() }}" @if($item->open_new_tab) target="_blank" rel="noopener" @endif>{{ $item->label() }}</a></li>
+                    @empty
                     @if($global_menu->menu_login_status == 'Show')<li><a href="{{ route('register') }}">{{ __('Become a member') }}</a></li>@endif
                     @if($donate_item)<li><a href="{{ $donate_item->resolvedUrl() }}">{{ $donate_item->label() }}</a></li>@endif
                     <li><a href="{{ route('contact') }}">{{ __('Volunteer or coordinate') }}</a></li>
+                    @endforelse
                 </ul>
             </div>
 
-            @php($transparency_item = \App\Models\MenuItem::where('label', 'Transparency & Accountability')->first())
+            @php($accountability_items = $global_footer_items->where('footer_column', 'accountability'))
+            @php($transparency_item = $accountability_items->isEmpty() ? \App\Models\MenuItem::where('label', 'Transparency & Accountability')->first() : null)
             <div>
-                <h4>{{ __('Accountability') }}</h4>
+                <h4>{{ hc('footer_col_accountability') }}</h4>
                 <ul>
+                    @forelse($accountability_items as $item)
+                    <li><a href="{{ $item->resolvedUrl() }}" @if($item->open_new_tab) target="_blank" rel="noopener" @endif>{{ $item->label() }}</a></li>
+                    @empty
                     @if($transparency_item)<li><a href="{{ $transparency_item->resolvedUrl() }}">{{ $transparency_item->label() }}</a></li>@endif
                     <li><a href="{{ route('terms') }}">{{ __('Terms') }}</a></li>
                     <li><a href="{{ route('privacy') }}">{{ __('Privacy policy') }}</a></li>
+                    @endforelse
                     @if($global_setting->footer_phone != '')<li><a href="tel:{{ $global_setting->footer_phone }}" dir="ltr" style="unicode-bidi:isolate">{{ $global_setting->footer_phone }}</a></li>@endif
                     @if($global_setting->footer_email != '')<li><a href="mailto:{{ $global_setting->footer_email }}" dir="ltr" style="unicode-bidi:isolate">{{ $global_setting->footer_email }}</a></li>@endif
                 </ul>

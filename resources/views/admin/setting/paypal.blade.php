@@ -23,8 +23,8 @@
                     <input type="text" name="paypal_client_id" value="{{ $setting->paypal_client_id }}" class="form-control-custom" autocomplete="off">
                 </div>
                 <div class="mb-3">
-                    <label class="label-custom">Client Secret</label>
-                    <input type="text" name="paypal_client_secret" value="{{ $setting->paypal_client_secret }}" class="form-control-custom" autocomplete="off">
+                    <label class="label-custom">Client Secret @if($setting->paypal_client_secret)<small>- saved; leave empty to keep it, type a new one to replace it</small>@endif</label>
+                    <input type="password" name="paypal_client_secret" value="" class="form-control-custom" autocomplete="new-password" placeholder="{{ $setting->paypal_client_secret ? '••••••••••••' : '' }}">
                 </div>
                 <div class="mb-3">
                     <label class="label-custom">Currency</label>

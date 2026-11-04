@@ -24,6 +24,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        $this->applySiteLanguages();
+
         $setting = Setting::where('id', 1)->first();
         view()->share('global_setting', $setting);
         // Menu::id(1) is kept only for the auth-aware Login/Dashboard button (see nav.blade.php),
@@ -52,10 +54,66 @@ class AppServiceProvider extends ServiceProvider
                     ->by(($request->route()?->getName() ?? $request->path()).'|'.$request->ip()));
         }
 
+        // Sign-in: per IP, and per account so password guessing spread over many IPs is stopped too.
+        \Illuminate\Support\Facades\RateLimiter::for('login', fn (\Illuminate\Http\Request $request) => [
+            \Illuminate\Cache\RateLimiting\Limit::perMinute(5)
+                ->by('ip|'.($request->route()?->getName() ?? '').'|'.$request->ip()),
+            \Illuminate\Cache\RateLimiting\Limit::perHour(10)
+                ->by('acct|'.($request->route()?->getName() ?? '').'|'.strtolower(trim((string) $request->input('email')))),
+        ]);
+
         // Links to public pages built outside a /{locale}/ request (admin panel, e-mails)
         // use the default language; the SetLocale middleware overrides this per request.
         \Illuminate\Support\Facades\URL::defaults(['locale' => default_locale()]);
 
         Paginator::useBootstrapFive();
+    }
+
+    /**
+     * Languages from Settings → Languages (the site_languages table) replace the .env ones
+     * in config('locales.*'). Routes are registered after this, so their {locale} pattern
+     * follows the table too. Without the table (before migrating) .env stays in charge.
+     */
+    private function applySiteLanguages(): void
+    {
+        try {
+            $rows = \App\Models\SiteLanguage::orderBy('sort_order')->orderBy('id')->get();
+        } catch (\Throwable $e) {
+            return;
+        }
+        if ($rows->isEmpty()) {
+            return;
+        }
+
+        $base = config('locales.base', 'en');
+        $known = config('locales.supported', []);
+        $supported = [];
+        foreach ($rows as $row) {
+            $supported[$row->code] = [
+                'name' => $row->name,
+                'native' => $row->native,
+                'dir' => $row->dir === 'rtl' ? 'rtl' : 'ltr',
+                // Technical codes are not edited in the panel: kept for the built-in languages.
+                'hreflang' => $known[$row->code]['hreflang'] ?? $row->code,
+                'og' => $known[$row->code]['og'] ?? $row->code,
+                'date' => $known[$row->code]['date'] ?? $row->code,
+            ];
+        }
+        if (!isset($supported[$base]) && isset($known[$base])) {
+            $supported = [$base => $known[$base]] + $supported;
+        }
+
+        $enabled = $rows->where('status', 'published')->pluck('code')->all();
+        if (!in_array($base, $enabled, true)) {
+            array_unshift($enabled, $base);
+        }
+        $default = optional($rows->first(fn ($r) => $r->is_default && in_array($r->code, $enabled, true)))->code;
+
+        config([
+            'locales.supported' => $supported,
+            'locales.enabled' => array_values($enabled),
+            'locales.prepare' => $rows->where('status', 'prepare')->pluck('code')->values()->all(),
+            'locales.default' => $default ?: '',
+        ]);
     }
 }
