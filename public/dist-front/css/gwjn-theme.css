@@ -1878,3 +1878,80 @@ html[dir="rtl"] .areas.wrap .area p{font-size:.84rem;line-height:1.9}
 html{scroll-behavior:smooth}
 #get-to-know{scroll-margin-top:110px}
 @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+
+/* ===== Footer: a little more compact ===== */
+footer.site{padding-block:var(--s7) var(--s4)}
+footer.site .about img{height:54px;margin-bottom:var(--s3)}
+footer.site h4{margin-bottom:var(--s3)}
+footer.site li{margin-bottom:.45rem}
+footer.site .legal{margin-top:var(--s5);padding-top:var(--s3)}
+footer.site .social{margin-top:var(--s3)}
+@media (max-width:767.98px){footer.site{padding-block:var(--s6) var(--s4)}}
+
+/* ===== Header: organisation name in the hero's typeface ===== */
+.logo .wm b{font-family:var(--font-serif);font-weight:700;font-size:1.12rem;letter-spacing:-.005em;line-height:1.2}
+html[dir="rtl"] .logo .wm b{font-weight:800;font-size:1.1rem;letter-spacing:0}
+@media (max-width:1399.98px){html:not([dir="rtl"]) .logo .wm b{font-size:1.04rem}}
+
+/* ===== Main menu: soft highlight on hover, a short bar under the current page,
+   a chevron that turns when its submenu opens, rounded submenus that fade in ===== */
+nav.main > ul{gap:.15rem}
+nav.main > ul > li{position:relative;border-radius:10px;transition:background-color .2s var(--ease)}
+nav.main > ul > li > a{display:inline-flex;align-items:center;padding:.5rem .75rem;border-bottom:0;border-radius:10px}
+nav.main > ul > li.dropdown{padding-inline:.7rem .3rem}
+nav.main > ul > li.dropdown > a{padding-inline:0}
+nav.main > ul > li.dropdown > a.dropdown-toggle{padding-inline-end:.15rem}
+nav.main > ul > li:hover,nav.main > ul > li:focus-within{background:var(--v100)}
+nav.main > ul > li:hover > a,nav.main > ul > li:hover > .dropdown-caret{color:var(--brand)}
+nav.main a:hover,nav.main a.here,nav.main a.active{border-bottom-color:transparent}
+nav.main > ul > li:has(> a.here)::after{content:'';position:absolute;inset-inline:calc(50% - 11px);bottom:-3px;height:3px;
+  border-radius:3px;background:linear-gradient(90deg, var(--brand), var(--plum-2))}
+nav.main > ul > li:has(> a.here) > a{color:var(--brand)}
+
+nav.main .dropdown-toggle::after,nav.main .dropdown-caret::after{content:'';display:inline-block;border:0;width:.42rem;height:.42rem;
+  margin-inline-start:.4rem;border-inline-end:2px solid currentColor;border-bottom:2px solid currentColor;
+  transform:translateY(-2px) rotate(45deg);vertical-align:middle;opacity:.7;transition:transform .25s var(--ease),opacity .2s}
+nav.main [aria-expanded="true"]::after{transform:translateY(1px) rotate(-135deg);opacity:1}
+nav.main .dropdown-caret{padding:.5rem .35rem}
+
+nav.main .dropdown-menu{min-width:240px;margin-top:.55rem !important;padding:.45rem;border:1px solid var(--card-line);border-radius:14px;
+  background:#fff;box-shadow:0 22px 44px -20px color-mix(in srgb, var(--plum) 45%, transparent),0 2px 6px -2px rgba(0,0,0,.06)}
+nav.main .dropdown-menu.show{animation:navMenuIn .18s var(--ease) both}
+@keyframes navMenuIn{from{opacity:0}to{opacity:1}}
+nav.main .dropdown-item{position:relative;display:block;padding:.55rem .85rem;border-radius:9px;color:var(--ink);font-weight:600;
+  white-space:normal;line-height:1.45;transition:background-color .18s,color .18s,padding .18s var(--ease)}
+nav.main .dropdown-item::before{content:'';position:absolute;inset-inline-start:.45rem;top:50%;width:5px;height:5px;margin-top:-2.5px;
+  border-radius:50%;background:var(--brand);opacity:0;transform:scale(.4);transition:opacity .18s,transform .18s var(--ease)}
+nav.main .dropdown-item:hover,nav.main .dropdown-item:focus,nav.main .dropdown-item.active{background:var(--v100);color:var(--brand);padding-inline-start:1.25rem}
+nav.main .dropdown-item:hover::before,nav.main .dropdown-item:focus::before,nav.main .dropdown-item.active::before{opacity:1;transform:none}
+html[dir="rtl"] nav.main .dropdown-item{line-height:1.7}
+@media (prefers-reduced-motion:reduce){nav.main .dropdown-menu.show{animation:none}nav.main .dropdown-item,nav.main .dropdown-item::before{transition:none}}
+/* tighter fit so the longer English menu stays on one line */
+nav.main > ul{gap:0}
+nav.main > ul > li > a{padding:.5rem .6rem;white-space:nowrap}
+nav.main > ul > li.dropdown{padding-inline:.6rem .2rem}
+nav.main .dropdown-caret{padding:.5rem .2rem}
+nav.main .dropdown-toggle::after,nav.main .dropdown-caret::after{margin-inline-start:.3rem;
+  border-right:2px solid currentColor;border-left:0;border-inline-end:0;border-inline-start:0;border-bottom:2px solid currentColor}
+html[dir="rtl"] nav.main .dropdown-toggle::after,html[dir="rtl"] nav.main .dropdown-caret::after{border-right:2px solid currentColor;border-left:0}
+.logo .wm b{white-space:nowrap}
+html:not([dir="rtl"]) .logo .wm b{font-size:1.02rem}
+@media (max-width:1399.98px){html:not([dir="rtl"]) .logo .wm b{font-size:.94rem}
+  html:not([dir="rtl"]) nav.main > ul > li > a{padding-inline:.45rem}
+  html:not([dir="rtl"]) nav.main > ul > li.dropdown{padding-inline:.45rem .1rem}}
+/* chevron: reset every side first, then draw the two strokes (same in both directions) */
+nav.main .dropdown-toggle::after,nav.main .dropdown-caret::after,
+html[dir="rtl"] nav.main .dropdown-toggle::after,html[dir="rtl"] nav.main .dropdown-caret::after{
+  border:0;border-right:2px solid currentColor;border-bottom:2px solid currentColor}
+.logo .wm span{white-space:nowrap}
+/* Small laptops (992-1199px): the English menu needs the room, so the logo shows without its name there. */
+@media (min-width:992px) and (max-width:1199.98px){
+  html:not([dir="rtl"]) .logo .wm{display:none}
+  html:not([dir="rtl"]) nav.main > ul > li > a{padding-inline:.4rem}
+  html:not([dir="rtl"]) nav.main > ul > li.dropdown{padding-inline:.4rem .05rem}
+}
+@media (min-width:992px) and (max-width:1099.98px){
+  html[dir="rtl"] .logo .wm{display:none}
+  html[dir="rtl"] nav.main > ul > li > a{padding-inline:.4rem}
+  html[dir="rtl"] nav.main > ul > li.dropdown{padding-inline:.4rem .05rem}
+}

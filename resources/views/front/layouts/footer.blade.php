@@ -65,7 +65,7 @@
             </div>
         </div>
 
-        <div style="max-width:420px;margin-top:var(--s7)">
+        <div style="max-width:420px;margin-top:var(--s5)">
             <h4>{{ __('Subscribe') }}</h4>
             <form action="{{ route('subscriber_send_email') }}" class="footer-subscribe form_subscribe_ajax" method="post">
                 @csrf
