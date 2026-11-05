@@ -175,9 +175,10 @@
     $work_areas = collect();
     $our_work_group = \App\Models\MenuItem::where('label', 'Our Work')->whereNull('parent_id')->first();
     $news_media_group = \App\Models\MenuItem::where('label', 'News & Media')->whereNull('parent_id')->first();
-    if ($our_work_group) $work_areas = $work_areas->merge($our_work_group->visibleChildren()->get());
-    if ($news_media_group) $work_areas = $work_areas->merge($news_media_group->visibleChildren()->get());
-    $work_areas = $work_areas->reject(fn($i) => $i->children()->count() > 0)->values();
+    // children and linked page loaded with the list, not one query per card
+    if ($our_work_group) $work_areas = $work_areas->merge($our_work_group->visibleChildren()->withCount('children')->with('customPage')->get());
+    if ($news_media_group) $work_areas = $work_areas->merge($news_media_group->visibleChildren()->withCount('children')->with('customPage')->get());
+    $work_areas = $work_areas->reject(fn($i) => $i->children_count > 0)->values();
     $work_fallback_desc = [
         'campaigns' => __('Public mobilisation, legal advocacy and coordinated pressure.'),
         'events' => __('Upcoming protests, conferences and meetings.'),
@@ -403,7 +404,7 @@
 @php
     $home_polls = \Illuminate\Support\Facades\Schema::hasTable('polls')
         ? \App\Models\Poll::published()->where('show_on_home', true)
-            ->orderByRaw("CASE WHEN status = 'open' THEN 0 ELSE 1 END")->orderBy('sort_order')->orderBy('id', 'desc')->take(10)->get()
+            ->withCount('responses')->orderByRaw("CASE WHEN status = 'open' THEN 0 ELSE 1 END")->orderBy('sort_order')->orderBy('id', 'desc')->take(10)->get()
         : collect();
 @endphp
 @if($home_polls->count())

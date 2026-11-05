@@ -90,7 +90,8 @@ class Poll extends Model
         if ($this->isGoogle()) {
             return (int) ($this->googleResults()['total'] ?? 0);
         }
-        return $this->responses()->count();
+        // A list loaded with withCount('responses') already has the number: no extra query per poll.
+        return $this->responses_count ?? $this->responses()->count();
     }
 
     /**

@@ -30,3 +30,7 @@ DB/
 /public.zip
 /public/temp_w.html
 /lang.zip
+
+# Uploaded files (member photos, images) stay out of the repository; only the folder's protection file is kept.
+/public/uploads/*
+!/public/uploads/.htaccess

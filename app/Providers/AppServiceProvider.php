@@ -36,14 +36,18 @@ class AppServiceProvider extends ServiceProvider
                 ->where('status', 'Show')
                 ->linkVisible()
                 ->orderBy('order')
-                ->with(['children' => function ($q) {
-                    $q->where('status', 'Show')->linkVisible()->orderBy('order');
+                // each level comes with its linked page and visible sub-items, so building the menu
+                // doesn't query the database once per item
+                ->with(['customPage', 'children' => function ($q) {
+                    $q->where('status', 'Show')->linkVisible()->orderBy('order')
+                        ->with(['customPage', 'visibleChildren.customPage']);
                 }])
                 ->get();
             $footer_items = MenuItem::where('status', 'Show')
                 ->linkVisible()
                 ->where('show_in_footer', true)
                 ->orderBy('order')
+                ->with('customPage')
                 ->get();
         } catch (\Illuminate\Database\QueryException $e) {
             if (!$this->app->runningInConsole()) {
