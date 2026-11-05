@@ -414,7 +414,9 @@ if (!function_exists('plain_excerpt')) {
     /** Plain-text preview of possibly-HTML content: tags stripped, entities (&zwnj; &nbsp; ...) decoded. */
     function plain_excerpt(?string $html, int $limit = 120): string
     {
-        $text = html_entity_decode(strip_tags((string) $html), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        // A space where a block or line break ends, so "<h3>Title</h3><p>Text" doesn't become "TitleText".
+        $html = preg_replace('#<(br\s*/?|/(p|div|h[1-6]|li|ul|ol|tr|td|th|blockquote|section|article|figcaption))\s*>#i', '$0 ', (string) $html);
+        $text = html_entity_decode(strip_tags($html), ENT_QUOTES | ENT_HTML5, 'UTF-8');
         $text = str_replace("\u{00A0}", ' ', $text);
         $text = trim(preg_replace('/\s+/u', ' ', $text));
         return \Illuminate\Support\Str::limit($text, $limit);

@@ -1485,7 +1485,7 @@ html[dir="rtl"] .play-ic svg{transform:scaleX(-1);margin-inline-start:0;margin-i
 .feature-play:hover{transform:translate(-50%,-50%) scale(1.06);background:var(--brand)}
 .feature-play svg{width:20px;height:20px;fill:currentColor;margin-left:3px}
 .feature h2{font-size:clamp(1.8rem,2.8vw,2.4rem);margin-bottom:var(--s3)}
-.feature-body .lead{text-align:start;font-size:var(--t-base);line-height:1.8;color:var(--ink-2);margin-bottom:var(--s4)}
+.feature-body .lead{text-align:justify;text-justify:inter-word;font-size:var(--t-base);line-height:1.8;color:var(--ink-2);margin-bottom:var(--s4)}
 
 /* ---------- current campaign ---------- */
 .st-feature{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:var(--s6);
@@ -1837,3 +1837,44 @@ footer.site .legal{padding-inline-end:80px}
 @media (prefers-reduced-motion:reduce){.nav-cta,.nav-cta svg,.topbar .exit{transition:none}}
 .masthead .nav-cta{white-space:nowrap;gap:.4rem;padding:.5rem .95rem}
 @media (max-width:1599.98px){html:not([dir="rtl"]) .nav-cta svg{display:none}}
+
+/* ===== Reading text: justified in every language =====
+   Long body text (articles, pages, events, profiles, FAQ answers, page intros) is justified;
+   narrow card text stays start-aligned, where justifying would open wide gaps between words.
+   Latin languages hyphenate so justified lines stay even (Persian is never hyphenated). */
+.rich-content p,.rich-content li,.doc-main p,.doc-main li,.doc-main > div > div,.accordion-body,
+.pagehead .lede,.feature-body p,.nf-lead-sum,.m-box p{text-align:justify;text-justify:inter-word}
+html[lang="en"] :is(.rich-content p,.rich-content li,.doc-main p,.doc-main li,.accordion-body,.pagehead .lede,.feature-body p,.nf-lead-sum,.m-box p){-webkit-hyphens:auto;hyphens:auto}
+/* Short centred bits keep their own alignment (headings, buttons, table cells, captions). */
+.rich-content :is(h1,h2,h3,h4,h5,h6,figcaption,td,th),.doc-main :is(.btn,label,.form-label){text-align:start}
+
+/* ===== About page link cards (".areas.wrap"): same look as the home cards, without a photo =====
+   They have no .area-body wrapper, so the card itself carries the padding. */
+.areas.wrap{grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:var(--s4)}
+.areas.wrap .area{padding:var(--s5);gap:0}
+.areas.wrap .area .ic{display:block;margin:0 0 .6rem}
+.areas.wrap .area h3{margin:0 0 .35rem}
+.areas.wrap .area p{margin:0;-webkit-line-clamp:3}
+html[dir="rtl"] .areas.wrap .area p{line-height:1.85}
+@media (max-width:575.98px){.areas.wrap{grid-template-columns:minmax(0,1fr)}}
+
+/* About page link cards: icon and title side by side, the description underneath across the card. */
+.areas.wrap .area{display:grid;grid-template-columns:auto minmax(0,1fr);grid-template-rows:auto 1fr;
+  align-items:center;column-gap:.85rem;row-gap:.8rem;padding:var(--s5);text-align:start}
+.areas.wrap .area .ic{grid-column:1;grid-row:1;display:grid;place-items:center;width:46px;height:46px;margin:0;
+  border-radius:14px;background:var(--v100);transition:background .25s var(--ease)}
+.areas.wrap .area .ic svg{width:22px;height:22px}
+.areas.wrap .area h3{grid-column:2;grid-row:1;margin:0;font-size:1rem;line-height:1.35;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:0}
+html[dir="rtl"] .areas.wrap .area h3{line-height:1.6}
+.areas.wrap .area p{grid-column:1 / -1;grid-row:2;align-self:start;margin:0;padding-top:.8rem;
+  border-top:1px solid var(--rule-soft);font-size:var(--t-xs);line-height:1.7;-webkit-line-clamp:3}
+html[dir="rtl"] .areas.wrap .area p{font-size:.84rem;line-height:1.9}
+.areas.wrap .area:hover .ic{background:var(--brand)}
+.areas.wrap .area:hover .ic svg{stroke:#fff}
+.areas.wrap .area p:empty{display:none}
+
+/* In-page links (e.g. the About button to #get-to-know) glide down and stop clear of the sticky header. */
+html{scroll-behavior:smooth}
+#get-to-know{scroll-margin-top:110px}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}

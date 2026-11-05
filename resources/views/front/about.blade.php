@@ -31,7 +31,15 @@
             <h2>{{ tf($about_item,'heading') }}</h2>
             <p class="lead">{{ tf($about_item,'text') }}</p>
             <div class="feature-actions">
-                @if($about_item->button_link != '' && $about_item->button_text != '')
+                @php
+                    // The same button on the home page leads here; on this page a link to itself means
+                    // nothing, so it goes down to the mission / vision / values cards instead.
+                    $about_btn_path = rtrim((string) parse_url((string) $about_item->button_link, PHP_URL_PATH), '/');
+                    $about_btn_self = $about_btn_path !== '' && preg_match('#(^|/)about$#', $about_btn_path);
+                @endphp
+                @if($about_btn_self && $about_links->count())
+                <a class="btn btn-brand" href="#get-to-know">{{ __('Our mission, vision and values') }}</a>
+                @elseif(!$about_btn_self && $about_item->button_link != '' && $about_item->button_text != '')
                 <a class="btn btn-brand" href="{{ $about_item->button_link }}">{{ tf($about_item,'button_text') }}</a>
                 @endif
                 @if($about_item->phone_number != '')
@@ -65,7 +73,7 @@
     ];
 @endphp
 @if($about_links->count())
-<section class="shell">
+<section class="shell" id="get-to-know">
     <div class="sec-head">
         <div class="txt">
             <span class="kicker">{{ __('Learn more') }}</span>

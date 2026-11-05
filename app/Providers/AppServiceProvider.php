@@ -26,25 +26,39 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->applySiteLanguages();
 
-        $setting = Setting::where('id', 1)->first();
+        // On a fresh install the tables don't exist until "php artisan migrate" has run, and that
+        // command boots this provider too: share empty values then instead of failing.
+        try {
+            $setting = Setting::where('id', 1)->first();
+            $menu = Menu::where('id', 1)->first();
+            $custom_pages = CustomPage::orderBy('title')->get();
+            $nav = MenuItem::whereNull('parent_id')
+                ->where('status', 'Show')
+                ->linkVisible()
+                ->orderBy('order')
+                ->with(['children' => function ($q) {
+                    $q->where('status', 'Show')->linkVisible()->orderBy('order');
+                }])
+                ->get();
+            $footer_items = MenuItem::where('status', 'Show')
+                ->linkVisible()
+                ->where('show_in_footer', true)
+                ->orderBy('order')
+                ->get();
+        } catch (\Illuminate\Database\QueryException $e) {
+            if (!$this->app->runningInConsole()) {
+                throw $e;
+            }
+            $setting = $menu = null;
+            $custom_pages = $nav = $footer_items = collect();
+        }
         view()->share('global_setting', $setting);
         // Menu::id(1) is kept only for the auth-aware Login/Dashboard button (see nav.blade.php),
         // not for the main navigation — that now lives in menu_items (see MenuItem / AdminMenuController).
-        view()->share('global_menu', Menu::where('id', 1)->first());
-        view()->share('global_custom_pages', CustomPage::orderBy('title')->get());
-        view()->share('global_nav', MenuItem::whereNull('parent_id')
-            ->where('status', 'Show')
-            ->linkVisible()
-            ->orderBy('order')
-            ->with(['children' => function ($q) {
-                $q->where('status', 'Show')->linkVisible()->orderBy('order');
-            }])
-            ->get());
-        view()->share('global_footer_items', MenuItem::where('status', 'Show')
-            ->linkVisible()
-            ->where('show_in_footer', true)
-            ->orderBy('order')
-            ->get());
+        view()->share('global_menu', $menu);
+        view()->share('global_custom_pages', $custom_pages);
+        view()->share('global_nav', $nav);
+        view()->share('global_footer_items', $footer_items);
 
         // Form rate limits, counted separately for each form (route) and visitor IP.
         // (Plain "throttle:N,1" would share one counter across every form.)
