@@ -51,7 +51,7 @@
                         @endif
                     </label>
                 </div>
-                <p class="text-muted" style="font-size:var(--t-xs)">{{ __('Registering does not grant membership immediately - your application is reviewed after you verify your email.') }}</p>
+                <p class="text-muted" style="font-size:var(--t-xs)">{{ config('app.member_email_verification') ? __('Registering does not grant membership immediately - your application is reviewed after you verify your email.') : __('Registering does not grant membership immediately - your application is reviewed by network officers.') }}</p>
                 <button type="submit" class="btn btn-brand btn-lg">{{ __('Submit membership application') }}</button>
             </form>
         </div>

@@ -163,14 +163,20 @@ class FrontController extends Controller
             'agree_bylaws' => 'required',
         ]);
 
-        $done_message = __('Your registration is completed. Please check your email for verification. If you do not find the email in your inbox, please check your spam folder.');
+        // MEMBER_EMAIL_VERIFICATION in .env (config/app.php): with it off, accounts work at once.
+        $verify_email = config('app.member_email_verification');
+        $done_message = $verify_email
+            ? __('Your registration is completed. Please check your email for verification. If you do not find the email in your inbox, please check your spam folder.')
+            : __('Your membership application has been submitted. You can log in now.');
 
         // Same answer whether or not the address already has an account, so the form can't be used
         // to find out who is a member; the owner of the address is told instead.
         if (User::where('email', $request->email)->exists()) {
             \safe_mail($request->email, __('Registration attempt'),
                 e(__('Someone tried to register a GWJN account with this e-mail address, which already has an account. If it was you, sign in or use "Forgot password". If it was not you, you can ignore this e-mail.')));
-            return redirect()->back()->with('success', $done_message);
+            return $verify_email
+                ? redirect()->back()->with('success', $done_message)
+                : redirect()->route('login')->with('success', $done_message);
         }
 
         $user = new User();
@@ -178,6 +184,18 @@ class FrontController extends Controller
         $user->email = $request->email;
         $user->password = Hash::make($request->password);
         $user->membership_type = $request->membership_type;
+
+        if (!$verify_email) {
+            // No e-mail step: the account is usable at once and the application goes to review.
+            $user->email_verified_at = now();
+            $user->remember_token = '';
+            $user->membership_status = 'pending';
+            $user->membership_source = 'self';
+            $user->membership_applied_at = now();
+            $user->save();
+            return redirect()->route('login')->with('success', $done_message);
+        }
+
         $token = secure_token();
         $user->remember_token = $token;
         $user->save();

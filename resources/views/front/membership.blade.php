@@ -12,9 +12,10 @@
         ['icon' => 'fa-user-plus',
          't' => __('Register and choose a membership type'),
          'd' => __('Fill in the registration form, choose your membership type and accept the network’s by-laws.')],
-        ['icon' => 'fa-envelope-circle-check',
+        // the e-mail step only exists while MEMBER_EMAIL_VERIFICATION is on
+        ...(config('app.member_email_verification') ? [['icon' => 'fa-envelope-circle-check',
          't' => __('Confirm your email'),
-         'd' => __('Open the link we email you to activate your account.')],
+         'd' => __('Open the link we email you to activate your account.')]] : []),
         ['icon' => 'fa-user-check',
          't' => __('Application review'),
          'd' => __('Network officers review your application. You are told the result by email.')],

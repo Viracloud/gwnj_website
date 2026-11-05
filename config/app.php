@@ -16,6 +16,15 @@ return [
     'name' => env('APP_NAME', 'Laravel'),
 
     /*
+    | Member registration: must new members confirm their e-mail address before they can log in?
+    |   MEMBER_EMAIL_VERIFICATION=true   a confirmation link is e-mailed; registration needs working mail
+    |   MEMBER_EMAIL_VERIFICATION=false  (current) the account works at once and goes to the
+    |                                    membership review; no e-mail is needed
+    | After changing it on a server run:  php artisan config:clear
+    */
+    'member_email_verification' => (bool) env('MEMBER_EMAIL_VERIFICATION', false),
+
+    /*
     |--------------------------------------------------------------------------
     | Application Environment
     |--------------------------------------------------------------------------
