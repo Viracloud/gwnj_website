@@ -43,6 +43,7 @@ class User extends Authenticatable
         'membership_approved_at',
         'membership_rejected_reason',
         'dues_paid',
+        'dues_paid_at',
         'dues_exempt_override',
         'card_status',
         'card_requested_at',
@@ -77,6 +78,7 @@ class User extends Authenticatable
             'card_issued_at' => 'datetime',
             'card_expires_at' => 'datetime',
             'dues_paid' => 'boolean',
+            'dues_paid_at' => 'datetime',
             'dues_exempt_override' => 'boolean',
         ];
     }
@@ -130,10 +132,22 @@ class User extends Authenticatable
         if ($this->isDuesExempt() || !$amount) {
             return true;
         }
+        if ($this->dues_paid_at && (!$this->card_issued_at || $this->dues_paid_at->gt($this->card_issued_at))) {
+            return true;
+        }
         return \App\Models\Donation::where('message', 'Membership dues - '.$this->membership_id)
             ->where('status', 'Completed')
             ->when($this->card_issued_at, fn ($q) => $q->where('created_at', '>', $this->card_issued_at))
             ->exists();
+    }
+
+    /**
+     * Whether a card may be issued now: a first card needs the dues paid once (unless exempt);
+     * once a card has been issued before, a new one needs this year's dues paid again.
+     */
+    public function canIssueCard(): bool
+    {
+        return $this->card_issued_at ? $this->duesPaidForRenewal() : $this->canReceiveCard();
     }
 
     public function profileIsComplete(): bool

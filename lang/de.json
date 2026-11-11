@@ -332,5 +332,12 @@
     "Your registration is completed. Please check your email for verification. If you do not find the email in your inbox, please check your spam folder.": "Ihre Registrierung ist eingegangen. Bitte bestätigen Sie sie über die E-Mail, die wir Ihnen gesendet haben. Falls sie nicht im Posteingang ist, sehen Sie bitte im Spam-Ordner nach.",
     "Your subscription is verified successfully!": "Ihr Abonnement wurde erfolgreich bestätigt!",
     "Your vote is anonymous — no name or personal details are recorded.": "Ihre Stimme ist anonym — Name und persönliche Daten werden nicht gespeichert.",
-    "Zip": "PLZ"
+    "Zip": "PLZ",
+    "Delete account": "Konto löschen",
+    "Deleting your account permanently removes your profile, photo and membership, including your membership card. This cannot be undone.": "Wenn Sie Ihr Konto löschen, werden Ihr Profil, Ihr Foto und Ihre Mitgliedschaft einschließlich Ihres Mitgliedsausweises dauerhaft entfernt. Dies kann nicht rückgängig gemacht werden.",
+    "I understand that my account will be deleted permanently.": "Mir ist bewusst, dass mein Konto dauerhaft gelöscht wird.",
+    "Delete my account permanently": "Mein Konto dauerhaft löschen",
+    "Are you sure? Your account will be deleted permanently.": "Sind Sie sicher? Ihr Konto wird dauerhaft gelöscht.",
+    "Your account has been deleted.": "Ihr Konto wurde gelöscht.",
+    "Your membership card has expired. Please renew it from your dashboard.": "Ihr Mitgliedsausweis ist abgelaufen. Bitte verlängern Sie ihn in Ihrem Dashboard."
 }

@@ -79,6 +79,27 @@
                     <button type="submit" class="btn btn-brand btn-lg">{{ __('Save changes') }}</button>
                 </form>
             </div>
+
+            <div class="form-card" style="margin-top:var(--s5);border:1px solid color-mix(in srgb,var(--signal) 35%,transparent)">
+                <h2 style="margin-top:0;color:var(--signal)">{{ __('Delete account') }}</h2>
+                <p class="text-muted">{{ __('Deleting your account permanently removes your profile, photo and membership, including your membership card. This cannot be undone.') }}</p>
+                <form action="{{ route('account_delete') }}" method="post" onsubmit="return confirm(@js(__('Are you sure? Your account will be deleted permanently.')))">
+                    @csrf
+                    <div class="row">
+                        <div class="col-lg-6 mb-3">
+                            <label class="form-label">{{ __('Current password') }} *</label>
+                            <input type="password" name="delete_password" class="form-control" autocomplete="current-password" required>
+                        </div>
+                        <div class="col-12 mb-4">
+                            <label class="d-flex gap-2 align-items-start" style="cursor:pointer">
+                                <input type="checkbox" name="confirm_delete" value="1" required style="margin-top:.3rem">
+                                <span>{{ __('I understand that my account will be deleted permanently.') }}</span>
+                            </label>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-lg" style="background:var(--signal);color:#fff">{{ __('Delete my account permanently') }}</button>
+                </form>
+            </div>
         </div>
 
         <div>

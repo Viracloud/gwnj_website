@@ -121,6 +121,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/dashboard',[UserController::class,'dashboard'])->name('dashboard');
     Route::get('/profile',[UserController::class,'profile'])->name('profile');
     Route::post('/profile',[UserController::class,'profile_update'])->name('profile_update');
+    Route::post('/account/delete',[UserController::class,'account_delete'])->name('account_delete')->middleware('throttle:forms5');
     Route::post('/logout',[UserController::class,'logout'])->name('logout');
     Route::post('/membership/card/request', [MembershipController::class, 'card_request'])->name('membership_card_request');
     Route::get('/membership/card', [MembershipController::class, 'card'])->name('membership_card');

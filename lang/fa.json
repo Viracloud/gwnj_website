@@ -332,5 +332,12 @@
     "Your registration is completed. Please check your email for verification. If you do not find the email in your inbox, please check your spam folder.": "ثبت‌نام شما انجام شد. لطفاً برای تأیید، ایمیل خود را بررسی کنید. اگر ایمیل را در صندوق ورودی پیدا نکردید، پوشهٔ هرزنامه را هم ببینید.",
     "Your subscription is verified successfully!": "اشتراک شما با موفقیت تأیید شد!",
     "Your vote is anonymous — no name or personal details are recorded.": "رأی شما ناشناس است؛ نام یا مشخصات شما ثبت نمی‌شود.",
-    "Zip": "کد پستی"
+    "Zip": "کد پستی",
+    "Delete account": "حذف حساب کاربری",
+    "Deleting your account permanently removes your profile, photo and membership, including your membership card. This cannot be undone.": "با حذف حساب، پروفایل، عکس و عضویت شما (از جمله کارت عضویت) برای همیشه پاک می‌شود. این کار قابل بازگشت نیست.",
+    "I understand that my account will be deleted permanently.": "می‌دانم که حساب من برای همیشه حذف می‌شود.",
+    "Delete my account permanently": "حذف دائمی حساب من",
+    "Are you sure? Your account will be deleted permanently.": "آیا مطمئن هستید؟ حساب شما برای همیشه حذف می‌شود.",
+    "Your account has been deleted.": "حساب کاربری شما حذف شد.",
+    "Your membership card has expired. Please renew it from your dashboard.": "اعتبار کارت عضویت شما تمام شده است. لطفاً آن را از داشبورد خود تمدید کنید."
 }

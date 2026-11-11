@@ -1474,10 +1474,19 @@ html[dir="rtl"] .play-ic svg{transform:scaleX(-1);margin-inline-start:0;margin-i
 .feature-media::before{bottom:-16px;inset-inline-start:-16px;width:62%;height:70%;
   border-radius:var(--r-card);background:color-mix(in srgb,var(--brand) 22%,white)}
 .feature .photo{aspect-ratio:16/10;border-radius:var(--r-card);box-shadow:var(--card-shadow)}
-.feature-badge{top:16px;inset-inline-end:16px;padding:.55rem .85rem;border-radius:var(--r-lg);
-  background:var(--brand);color:#fff;text-align:center;box-shadow:0 10px 24px -12px var(--plum)}
-.feature-badge b{color:#fff;font-family:var(--font-serif);font-size:1.5rem;line-height:1}
-.feature-badge span{color:rgba(255,255,255,.88);font-size:.72rem}
+/* "Founded" badge: a pill that sits on the bottom edge of the photo, clear of the faces */
+.feature-media.has-badge{margin-bottom:30px}
+.feature-badge{top:auto;bottom:-26px;inset-inline-end:28px;display:flex;align-items:center;gap:.7rem;
+  padding-block:.5rem;padding-inline:.5rem 1.15rem;border-radius:999px;background:var(--paper);color:var(--ink);
+  border:1px solid var(--rule);text-align:start;
+  box-shadow:0 16px 32px -16px color-mix(in srgb,var(--plum) 55%,transparent)}
+.feature-badge .fb-ic{flex:none;display:grid;place-items:center;width:42px;height:42px;border-radius:50%;
+  background:var(--brand);color:#fff}
+.feature-badge .fb-ic svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.feature-badge .fb-txt{display:flex;flex-direction:column;gap:.2rem}
+.feature-badge b{display:block;color:var(--brand);font-family:var(--font-serif);font-size:1.35rem;line-height:1}
+.feature-badge .fb-txt span{color:var(--muted);font-size:.74rem;font-weight:700;line-height:1.1}
+@media (max-width:575px){.feature-badge{inset-inline-end:16px;bottom:-22px}.feature-badge .fb-ic{width:36px;height:36px}}
 .feature-play{position:absolute;z-index:3;top:50%;left:50%;transform:translate(-50%,-50%);
   display:grid;place-items:center;width:62px;height:62px;border-radius:50%;cursor:pointer;
   border:2px solid rgba(255,255,255,.85);background:color-mix(in srgb,var(--plum) 55%,transparent);color:#fff;

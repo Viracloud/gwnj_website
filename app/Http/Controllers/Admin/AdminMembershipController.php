@@ -75,6 +75,7 @@ class AdminMembershipController extends Controller
     {
         $user = User::findOrFail($id);
         $user->dues_paid = !$user->dues_paid;
+        $user->dues_paid_at = $user->dues_paid ? now() : null;
         $user->save();
 
         return redirect()->back()->with('success', 'Updated.');
@@ -107,8 +108,8 @@ class AdminMembershipController extends Controller
     {
         $user = User::where('id', $id)->where('card_status', 'requested')->firstOrFail();
 
-        if (!$user->canReceiveCard()) {
-            return redirect()->back()->with('error', 'This member has not paid their annual dues yet (not exempt) - the card cannot be issued.');
+        if (!$user->canIssueCard()) {
+            return redirect()->back()->with('error', 'This member has not paid this year\'s dues yet (not exempt) - the card cannot be issued. Use "Mark paid" if they paid another way.');
         }
 
         $user->card_status = 'issued';
@@ -141,8 +142,8 @@ class AdminMembershipController extends Controller
             ->where(fn ($q) => $q->where('card_status', '!=', 'issued')->orWhere('card_expires_at', '<', now()))
             ->firstOrFail();
 
-        if (!$user->canReceiveCard()) {
-            return redirect()->back()->with('error', 'This member has not paid their annual dues yet (not exempt) - the card cannot be issued.');
+        if (!$user->canIssueCard()) {
+            return redirect()->back()->with('error', 'This member has not paid this year\'s dues yet (not exempt) - the card cannot be issued. Use "Mark paid" if they paid another way.');
         }
 
         $user->card_status = 'issued';

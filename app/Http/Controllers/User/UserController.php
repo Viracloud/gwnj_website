@@ -93,4 +93,35 @@ class UserController extends Controller
 
         return redirect()->back()->with('success', __('Profile update is successful!'));
     }
+
+    /** The member deletes their own account, after confirming with their password. */
+    public function account_delete(Request $request)
+    {
+        $request->validate([
+            'delete_password' => ['required', 'current_password:web'],
+            'confirm_delete' => ['accepted'],
+        ]);
+
+        $user = Auth::guard('web')->user();
+
+        if ($user->photo && file_exists(public_path('uploads/'.$user->photo))) {
+            @unlink(public_path('uploads/'.$user->photo));
+        }
+
+        \Illuminate\Support\Facades\DB::transaction(function () use ($user) {
+            \Illuminate\Support\Facades\DB::table('password_reset_tokens')->where('email', $user->email)->delete();
+            if (config('session.driver') === 'database') {
+                \Illuminate\Support\Facades\DB::table(config('session.table', 'sessions'))->where('user_id', $user->id)->delete();
+            }
+            // Committee links are removed by the foreign key (cascade). Donations are kept as
+            // financial records; they hold only the name and e-mail given at payment time.
+            $user->delete();
+        });
+
+        Auth::guard('web')->logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        return redirect()->route('home')->with('success', __('Your account has been deleted.'));
+    }
 }

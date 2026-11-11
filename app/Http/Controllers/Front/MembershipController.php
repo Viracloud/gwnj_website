@@ -85,7 +85,7 @@ class MembershipController extends Controller
             return redirect()->route('dashboard')->with('error', __('A card request is not available right now.'));
         }
 
-        if ($renewal ? !$user->duesPaidForRenewal() : !$user->canReceiveCard()) {
+        if (!$user->canIssueCard()) {
             return redirect()->route('dashboard')->with('error', __('Please pay your annual membership dues before requesting a card.'));
         }
 
@@ -101,6 +101,10 @@ class MembershipController extends Controller
         $user = Auth::guard('web')->user();
         if ($user->card_status !== 'issued') {
             return redirect()->route('dashboard');
+        }
+        // A card is valid for one year: after that it can't be opened or printed until it is renewed.
+        if ($user->cardIsExpired()) {
+            return redirect()->route('dashboard')->with('error', __('Your membership card has expired. Please renew it from your dashboard.'));
         }
         return view('front.membership-card-page', compact('user'));
     }
@@ -224,6 +228,7 @@ class MembershipController extends Controller
             }
 
             $user->dues_paid = true;
+            $user->dues_paid_at = now();
             $user->save();
 
             return redirect()->route('dashboard')->with('success', __('Your membership dues were paid successfully. Thank you!'));

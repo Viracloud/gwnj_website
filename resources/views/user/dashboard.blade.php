@@ -30,7 +30,9 @@
                 <p class="chip done" style="display:inline-block">{{ __('Approved member') }}</p>
                 <p>{{ __('Membership ID') }}: <b>{{ $u->membership_id }}</b></p>
 
-                    @if($u->dues_paid)
+                    @if($u->cardIsExpired())
+                    {{-- Dues for the new year are handled with the renewal below. --}}
+                    @elseif($u->dues_paid)
                     <p class="text-muted" style="margin-bottom:var(--s5)">{{ __('Membership dues are paid. Thank you!') }}</p>
                     @elseif($u->isDuesExempt())
                     <p class="text-muted" style="margin-bottom:var(--s5)">{{ __('Members based in Iran, Afghanistan or Pakistan are exempt from membership dues.') }}</p>

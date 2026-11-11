@@ -110,10 +110,13 @@
 {{-- ===== About ===== --}}
 @if($page_data->about_status == 'Show' && $about_item)
 <section class="shell"><div class="feature">
-    <div class="feature-media">
+    <div class="feature-media{{ hc('about_badge_num') ? ' has-badge' : '' }}">
         <div class="photo">@include('front.partials.about-slides', ['alt' => ''])</div>
         @if(hc('about_badge_num'))
-        <div class="feature-badge"><b>{{ local_digits(hc('about_badge_num')) }}</b><span>{{ hc('about_badge_label') }}</span></div>
+        <div class="feature-badge">
+            <span class="fb-ic" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 21V4"/><path d="M5 4h11l-2 4 2 4H5"/></svg></span>
+            <span class="fb-txt"><b>{{ local_digits(hc('about_badge_num')) }}</b><span>{{ hc('about_badge_label') }}</span></span>
+        </div>
         @endif
         @if($about_video)
         <button type="button" class="feature-play" data-video-embed="{{ $about_video['embed'] }}" data-video-portrait="{{ $about_video['portrait'] ? '1' : '0' }}" aria-label="{{ __('Watch video') }}">
