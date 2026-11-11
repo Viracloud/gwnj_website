@@ -104,6 +104,12 @@ class UserController extends Controller
 
         $user = Auth::guard('web')->user();
 
+        // Log out first: logout() saves a new "remember me" token on the user, and doing that
+        // after the delete would insert the deleted row again.
+        Auth::guard('web')->logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
         if ($user->photo && file_exists(public_path('uploads/'.$user->photo))) {
             @unlink(public_path('uploads/'.$user->photo));
         }
@@ -117,10 +123,6 @@ class UserController extends Controller
             // financial records; they hold only the name and e-mail given at payment time.
             $user->delete();
         });
-
-        Auth::guard('web')->logout();
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
 
         return redirect()->route('home')->with('success', __('Your account has been deleted.'));
     }
