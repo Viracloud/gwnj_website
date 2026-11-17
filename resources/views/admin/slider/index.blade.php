@@ -2,19 +2,20 @@
 @section('content')
 <div class="d-flex align-items-center justify-content-between mb-4">
     <div class="page-heading mb-0">
-        <h1>Sliders</h1>
+        <h1>Home Page Slider</h1>
     </div>
     <a href="" class="btn-admin-primary" data-bs-toggle="modal" data-bs-target="#modal_add">
-        <i class="fa-solid fa-plus me-1"></i>Add Item
+        <i class="fa-solid fa-plus me-1"></i>Add Slide
     </a>
 </div>
+<p class="text-muted mb-4">The large photo banner at the top of the home page. Each row below is one slide (photo, heading, text and button, written separately for each language). With one slide the banner stays still; with two or more the slides change automatically every few seconds, with arrows and dots to move between them. Slides are shown in the order listed here.</p>
 
 <!-- Add Modal -->
 <div class="modal fade" id="modal_add" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content modal-content-custom">
             <div class="modal-header modal-header-custom">
-                <h5 class="modal-title fw-semibold">Add Item</h5>
+                <h5 class="modal-title fw-semibold">Add Slide</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body modal-body-custom">
@@ -100,7 +101,7 @@
                 <div class="modal-dialog modal-dialog-centered">
                     <div class="modal-content modal-content-custom">
                         <div class="modal-header modal-header-custom">
-                            <h5 class="modal-title fw-semibold">Edit Item</h5>
+                            <h5 class="modal-title fw-semibold">Edit Slide</h5>
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body modal-body-custom">
@@ -164,7 +165,7 @@
                 <div class="modal-dialog modal-dialog-centered">
                     <div class="modal-content modal-content-custom">
                         <div class="modal-header modal-header-custom">
-                            <h5 class="modal-title fw-semibold">Delete Item</h5>
+                            <h5 class="modal-title fw-semibold">Delete Slide</h5>
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body modal-body-custom">

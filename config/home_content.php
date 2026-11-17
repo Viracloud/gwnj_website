@@ -11,7 +11,7 @@ return [
 
         'hero' => [
             'title' => 'Top banner (slider)',
-            'help' => 'The big photo, heading, paragraph and main button are edited in Home Page → Hero Slider. The texts below are the small line above the heading and the two secondary buttons.',
+            'help' => 'The big photo, heading, paragraph and main button are edited in Home Page → Home Page Slider. The texts below are the small line above the heading and the two secondary buttons.',
             'fields' => [
                 'hero_org' => ['label' => 'Small line above the heading (optional; the logo already names the network)', 'type' => 'text',
                     'en' => '', 'fa' => ''],

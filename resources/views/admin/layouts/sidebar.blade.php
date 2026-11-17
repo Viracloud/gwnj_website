@@ -147,7 +147,7 @@
                 <i class="fa-solid fa-chevron-right nav-arrow sidebar-label"></i>
             </a>
             <div class="nav-dropdown-menu">
-                <a href="{{ route('admin_slider_index') }}" class="nav-link nav-sub-link {{ Request::is('admin/slider/*') ? 'active' : '' }}">Cover Image &amp; Headline</a>
+                <a href="{{ route('admin_slider_index') }}" class="nav-link nav-sub-link {{ Request::is('admin/slider/*') ? 'active' : '' }}">Home Page Slider</a>
                 <a href="{{ route('admin_home_text_index') }}" class="nav-link nav-sub-link {{ Request::is('admin/home-text/*') ? 'active' : '' }}">Texts &amp; Sections On/Off</a>
                 <a href="{{ route('admin_page_home_index') }}" class="nav-link nav-sub-link {{ Request::is('admin/page-item/home/*') ? 'active' : '' }}">Section Settings</a>
             </div>

@@ -142,7 +142,7 @@
 <div class="dash-panel mt-3">
     <h2 class="dash-title"><i class="fa-solid fa-life-ring"></i> Where do I…?</h2>
     <div class="dash-help">
-        <div><b>Change the home page cover photo or headline</b><span>Website Pages → Home Page → Cover Image &amp; Headline</span></div>
+        <div><b>Change the home page slides (photo, headline, button)</b><span>Website Pages → Home Page → Home Page Slider</span></div>
         <div><b>Turn a home page section on or off</b><span>Website Pages → Home Page → Texts &amp; Sections On/Off</span></div>
         <div><b>Add a new page (e.g. under “About”)</b><span>Website Pages → Pages → All Pages, then choose its menu</span></div>
         <div><b>Change the title shown on the Events / News page</b><span>Website Pages → Page Titles &amp; Texts</span></div>
